@@ -3,166 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>木人艸 | 報價系統</title>
+    <title>木人艸 | 互動式點餐報價系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fff; color: #333; }
-        .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 6px 8px; font-size: 13px; }
-        .header-bg { background-color: #fcf4d9; } /* 模仿 PDF 的淺黃色表頭 */
-        .text-alert { color: #d93025; font-size: 12px; }
-        input[type="number"] { width: 45px; text-align: center; border: 1px solid #ccc; border-radius: 4px; }
-        .no-border-input { border: none; width: 100%; background: transparent; outline: none; }
-        @media print { .no-print { display: none; } }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f9f9f9; color: #333; }
+        .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 20px; }
+        .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px; font-size: 13px; vertical-align: middle; }
+        .header-bg { background-color: #fcf4d9; font-weight: bold; } /* 仿 PDF 淺黃色表頭 */
+        .text-alert { color: #d93025; font-size: 11px; line-height: 1.4; }
+        .no-border-input { border: none; width: 100%; background: transparent; outline: none; padding: 2px; }
+        .no-border-input:focus { background-color: #fffef0; }
+        input[type="number"] { width: 50px; text-align: center; border: 1px solid #ddd; border-radius: 4px; }
+        @media print { .no-print { display: none; } .pdf-container { border: none; box-shadow: none; } }
+        /* 手機端優化：讓表格可以橫向滾動而不破壞佈局 */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-[1000px] mx-auto border-2 border-black p-4 bg-white shadow-lg">
-        <div class="flex justify-between items-start mb-4">
+    <div class="max-w-[1000px] mx-auto pdf-container shadow-2xl">
+        <div class="flex justify-between items-start mb-6 border-b-2 border-black pb-4">
             <div class="text-sm">
-                <h1 class="text-2xl font-bold tracking-tighter">木人艸</h1>
-                <p>服務專線：02-2883-2113</p>
-                <p>公司地址：台北市士林區大南路379號</p>
+                <h1 class="text-3xl font-bold tracking-tighter mb-1">木人艸</h1>
+                <p>服務專線：02-2883-2113 [cite: 2]</p>
+                <p>公司地址：台北市士林區大南路379號 [cite: 3]</p>
             </div>
             <div class="text-center">
-                <h2 class="text-xl font-bold tracking-widest">木人艸股份有限公司</h2>
-                <p class="text-sm">台灣良農食材 (會議餐點 ‧ 餐盒 ‧ 蛋糕)</p>
+                <h2 class="text-xl font-bold tracking-widest">木人艸股份有限公司 [cite: 4]</h2>
+                <p class="text-sm text-gray-600">台灣良農食材 (會議餐點 ‧ 餐盒 ‧ 蛋糕) [cite: 4]</p>
             </div>
-            <div class="text-right text-xs">
-                <p>修訂版本：2022/08</p>
+            <div class="text-right text-xs text-gray-400">
+                <p>修訂版本：2022/08 [cite: 9]</p>
             </div>
         </div>
 
-        <table class="w-full pdf-table mb-6">
-            <tr>
-                <td class="header-bg w-24">派單日期</td>
-                <td colspan="2"><input type="date" class="no-border-input" value="2025-11-04"></td>
-                <td class="header-bg w-24">訂單編號</td>
-                <td colspan="2">Y_20250909-01</td>
-                <td class="header-bg w-24">報價業務</td>
-                <td>Yvonne</td>
-            </tr>
-            <tr>
-                <td class="header-bg">送餐日期</td>
-                <td colspan="2"><input type="text" placeholder="  月  日" class="no-border-input text-center"></td>
-                <td colspan="5" class="text-alert">
-                    *早晨加成：開餐於 9:00 以前收 3,500 元<br>
-                    *夜間加成：撤場時間 16:30-19:00 加價 1,000 元
-                </td>
-            </tr>
-            <tr>
-                <td class="header-bg">進場安排</td>
-                <td>進場：<input type="time" class="no-border-input"></td>
-                <td>交餐：<input type="time" class="no-border-input"></td>
-                <td class="header-bg">停車資訊</td>
-                <td colspan="4" class="text-xs text-gray-500">(司機進場務必有大樓地下停車場)</td>
-            </tr>
-            <tr>
-                <td class="header-bg">聯絡人</td>
-                <td colspan="2"><input type="text" class="no-border-input"></td>
-                <td class="header-bg">手機號碼</td>
-                <td colspan="4"><input type="text" class="no-border-input"></td>
-            </tr>
-            <tr>
-                <td class="header-bg">送餐地址</td>
-                <td colspan="7"><input type="text" placeholder="司機不上樓，須請一樓取餐" class="no-border-input"></td>
-            </tr>
-        </table>
-
-        <h3 class="text-center font-bold mb-2">訂購餐點明細</h3>
-        <table class="w-full pdf-table mb-6">
-            <thead>
-                <tr class="header-bg text-center">
-                    <th class="w-20">產品類別</th>
-                    <th>中文餐點名稱</th>
-                    <th class="w-16">盒數</th>
-                    <th class="w-20">份數/盒</th>
-                    <th class="w-20">單價/盒</th>
-                    <th class="w-24">小計</th>
-                    <th>備註</th>
+        <div class="table-responsive mb-8">
+            <table class="w-full pdf-table">
+                <tr>
+                    <td class="header-bg w-24">派單日期</td>
+                    <td colspan="2"><input type="text" class="no-border-input" value="2025/11/4 0:00" readonly></td>
+                    <td class="header-bg w-24">訂單編號</td>
+                    <td colspan="2">Y_20250909-01 </td>
+                    <td class="header-bg w-24">報價業務</td>
+                    <td>Yvonne </td>
                 </tr>
-            </thead>
-            <tbody id="menu-body">
-                </tbody>
-        </table>
+                <tr>
+                    <td class="header-bg">送餐日期</td>
+                    <td colspan="2" class="text-center">
+                        <input type="text" placeholder="  月  日" class="no-border-input text-center font-bold">
+                    </td>
+                    <td colspan="5" class="text-alert">
+                        ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取早晨加成費用 3,500 元 <br>
+                        ● 夜間加成：若撤場時間 16:30-19:00，需隔日撤場或加價 1,000 元於 16:30-19:00 進行撤場 
+                    </td>
+                </tr>
+                <tr>
+                    <td class="header-bg">進場安排</td>
+                    <td>進場：<input type="time" class="no-border-input"></td>
+                    <td>交餐：<input type="time" class="no-border-input"></td>
+                    <td class="header-bg">停車資訊</td>
+                    <td colspan="4" class="text-xs text-gray-400 font-medium">(司機進撤場務必有大樓地下停車場) </td>
+                </tr>
+                <tr>
+                    <td class="header-bg">聯絡人</td>
+                    <td><input type="text" class="no-border-input" placeholder="請輸入姓名"></td>
+                    <td class="header-bg w-20">公司名稱</td>
+                    <td colspan="2"><input type="text" class="no-border-input" placeholder="抬頭"></td>
+                    <td class="header-bg w-20">公司統編</td>
+                    <td colspan="2"><input type="text" class="no-border-input" placeholder="8碼數字"></td>
+                </tr>
+                <tr>
+                    <td class="header-bg">活動模式</td>
+                    <td>
+                        <select class="no-border-input font-bold">
+                            <option value="派對餐盒">派對餐盒 </option>
+                            <option value="會議餐飲">會議餐飲</option>
+                        </select>
+                    </td>
+                    <td class="header-bg w-20">用餐人數</td>
+                    <td class="text-center"><input type="number" class="no-border-input text-center" value="100"> 人 </td>
+                    <td class="header-bg w-20">手機號碼</td>
+                    <td colspan="3"><input type="text" class="no-border-input" placeholder="09XX-XXX-XXX"></td>
+                </tr>
+                <tr>
+                    <td class="header-bg">送餐地址</td>
+                    <td colspan="7"><input type="text" placeholder="請輸入完整地址" class="no-border-input"></td>
+                </tr>
+                <tr>
+                    <td class="header-bg">備註</td>
+                    <td colspan="7">
+                        <textarea class="no-border-input text-xs text-orange-700 font-bold leading-relaxed" rows="2" placeholder="司機不上樓，須請一樓取餐。建議勿於室溫下放置超過2小時，夏天時(室溫超過32℃)勿放置超過1小時。並食用完畢。"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-        <div class="flex flex-col md:flex-row justify-between gap-4">
-            <div class="flex-1 text-xs space-y-2 border p-3 border-gray-300">
-                <p class="font-bold">【注意事項】</p>
-                <p>1. 建議勿於室溫下放置超過 2 小時，夏天(室溫 > 32℃)勿超過 1 小時。</p>
-                <p>2. 需於餐會前兩週支付七成定金款項，尾款需於結束後一週內匯款。</p>
-                <p>3. 刷卡需支付手續費 5% [cite: 34]。</p>
+        <h3 class="text-center font-bold mb-3 tracking-widest border-b border-black pb-1">訂購餐點明細 [cite: 10]</h3>
+        <div class="table-responsive mb-8">
+            <table class="w-full pdf-table">
+                <thead>
+                    <tr class="header-bg text-center">
+                        <th class="w-20">產品類別</th>
+                        <th>中文餐點名稱</th>
+                        <th class="w-16">盒數</th>
+                        <th class="w-20">份數/盒</th>
+                        <th class="w-24">單價/盒</th>
+                        <th class="w-24">小計</th>
+                        <th class="w-32">備註</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between gap-6">
+            <div class="flex-1 text-xs space-y-3 border p-4 border-black">
+                <p class="font-bold underline">【訂購條款與注意事項】</p>
+                <p>1. 需於餐會前兩週支付七成定金款項，以保留檔期。 [cite: 29]</p>
+                <p>2. 尾款需於餐飲日期結束後一週內匯款。 [cite: 29]</p>
+                <p>3. 刷卡需支付 5% 手續費。 [cite: 34]</p>
+                <p>4. 取消規範依消基會「外燴辦桌服務定型化契約」辦理。 [cite: 30]</p>
             </div>
             <div class="w-full md:w-80">
                 <table class="w-full pdf-table">
                     <tr>
                         <td class="header-bg">餐點小計</td>
-                        <td class="text-right" id="food-subtotal">$0</td>
+                        <td class="text-right font-bold" id="food-subtotal">$0</td>
                     </tr>
                     <tr>
-                        <td class="header-bg">台北市交通費</td>
-                        <td class="text-right">$1,500</td>
+                        <td class="header-bg">台北市區交通費 [cite: 25]</td>
+                        <td class="text-right font-bold">$1,500</td>
                     </tr>
                     <tr>
-                        <td class="header-bg">營業稅 (5%)</td>
-                        <td class="text-right" id="tax-amount">$0</td>
+                        <td class="header-bg">營業稅 (5%) [cite: 25]</td>
+                        <td class="text-right font-bold" id="tax-amount">$0</td>
                     </tr>
-                    <tr class="font-bold text-lg">
-                        <td class="header-bg">總計</td>
-                        <td class="text-right text-red-600" id="grand-total">$0</td>
+                    <tr class="text-lg">
+                        <td class="header-bg">總計 [cite: 25]</td>
+                        <td class="text-right font-bold text-red-600" id="grand-total">$0</td>
                     </tr>
                 </table>
             </div>
         </div>
 
-        <div class="mt-8 flex gap-4 no-print">
-            <button onclick="submitToMake()" class="bg-black text-white px-6 py-2 rounded font-bold hover:bg-gray-800">
-                提交訂單 (JSON)
+        <div class="mt-10 flex flex-wrap gap-4 no-print justify-center">
+            <button onclick="submitOrder()" class="bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition flex items-center">
+                <span>確認並提交訂單 (JSON)</span>
             </button>
-            <button onclick="window.print()" class="bg-gray-200 text-black px-6 py-2 rounded font-bold hover:bg-gray-300">
-                列印 / 存成 PDF
+            <button onclick="window.print()" class="bg-gray-200 text-black px-8 py-3 rounded-full font-bold hover:bg-gray-300 transition">
+                儲存為 PDF / 列印
             </button>
         </div>
     </div>
 
     <script>
-        // 從 PDF 提取的完整數據清單
+        // 從資料來源提取的完整產品清單 [cite: 11, 17, 18, 20]
         const products = [
             { id: 'A0100204', cat: '小食', name: '照燒風味迷你漢堡(牛肉)', unit: 15, price: 1350, note: '中盒' },
-            { id: 'A0100202', cat: '小食', name: '鹽麴雞肉墨西哥捲餅', unit: 22, price: 1650, note: '中盒' },
-            { id: '302001003', cat: '小食', name: '綜合花壽司', unit: 48, price: 960, note: '可葷素/中盒' },
+            { id: 'A0100202', cat: '小食', name: '照燒風味迷你漢堡(雞肉)', unit: 15, price: 1275, note: '中盒' },
+            { id: 'A05010020', cat: '小食', name: '鹽麴雞肉墨西哥捲餅', unit: 22, price: 1650, note: '中盒' },
+            { id: '303001018', cat: '小食', name: '迷你花生時蔬三明治(蛋奶素)', unit: 14, price: 560, note: '中盒' },
+            { id: '303001003', cat: '小食', name: '綜合花壽司', unit: 48, price: 960, note: '可葷素/中盒' },
             { id: '301001005', cat: '甜點', name: '迷你棉花糖酸甜檸檬塔(蛋奶素)', unit: 24, price: 1440, note: '中盒' },
             { id: 'A05018010', cat: '甜點', name: '放牧雞蛋肉桂布丁麵包', unit: 28, price: 1400, note: '中盒' },
-            { id: '301003004', cat: '甜點', name: '繽紛馬卡龍(蛋奶素)', unit: 28, price: 840, note: '中盒' },
-            { id: 'A09001003', cat: '飲品', name: '有機蜜香紅茶(冰)', unit: 1, price: 1000, note: '8公升/桶' }
+            { id: 'A09001003', cat: '飲料', name: '有機蜜香紅茶(冰)', unit: 1, price: 1000, note: '8L/桶(40杯)' }
         ];
 
-        const menuBody = document.getElementById('menu-body');
         let cart = {};
 
         function initMenu() {
+            const menuBody = document.getElementById('menu-body');
             products.forEach(p => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="text-center text-xs">${p.cat}</td>
-                    <td>${p.name}</td>
-                    <td class="text-center"><input type="number" value="0" min="0" onchange="updateQty('${p.id}', this.value)"></td>
+                    <td class="text-center font-medium">${p.cat}</td>
+                    <td class="font-medium">${p.name}</td>
+                    <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-center">${p.unit}</td>
-                    <td class="text-right">${p.price.toLocaleString()}</td>
-                    <td class="text-right" id="sub-${p.id}">0</td>
-                    <td class="text-xs text-gray-500">${p.note}</td>
+                    <td class="text-right">$${p.price.toLocaleString()}</td>
+                    <td class="text-right font-bold" id="sub-${p.id}">$0</td>
+                    <td class="text-xs text-gray-400">${p.note}</td>
                 `;
                 menuBody.appendChild(tr);
             });
         }
 
         function updateQty(id, qty) {
-            qty = parseInt(qty) || 0;
+            qty = Math.max(0, parseInt(qty) || 0);
             const product = products.find(p => p.id === id);
             const subtotal = qty * product.price;
-            document.getElementById(`sub-${id}`).innerText = subtotal.toLocaleString();
-            cart[id] = { qty, subtotal, name: product.name };
+            document.getElementById(`sub-${id}`).innerText = `$${subtotal.toLocaleString()}`;
+            
+            if (qty > 0) {
+                cart[id] = { name: product.name, qty, subtotal };
+            } else {
+                delete cart[id];
+            }
             calculateTotal();
         }
 
@@ -170,27 +208,41 @@
             let foodTotal = 0;
             Object.values(cart).forEach(item => foodTotal += item.subtotal);
             
-            const transFee = foodTotal > 0 ? 1500 : 0;
-            const tax = Math.round((foodTotal + transFee) * 0.05);
-            const grandTotal = foodTotal + transFee + tax;
+            const transport = foodTotal > 0 ? 1500 : 0; // 台北市區交通費 [cite: 25]
+            const totalBeforeTax = foodTotal + transport;
+            const tax = Math.round(totalBeforeTax * 0.05); // 5% 營業稅 [cite: 25]
+            const grandTotal = totalBeforeTax + tax;
 
             document.getElementById('food-subtotal').innerText = `$${foodTotal.toLocaleString()}`;
             document.getElementById('tax-amount').innerText = `$${tax.toLocaleString()}`;
             document.getElementById('grand-total').innerText = `$${grandTotal.toLocaleString()}`;
         }
 
-        function submitToMake() {
-            const data = {
-                order_id: "Y_20250909-01",
-                customer_info: {
-                    delivery_date: document.querySelector('input[type="date"]').value,
-                    address: document.querySelector('input[placeholder*="司機不上樓"]').value
+        function submitOrder() {
+            const orderData = {
+                metadata: {
+                    order_no: "Y_20250909-01",
+                    export_time: new Date().toISOString()
                 },
-                items: Object.entries(cart).map(([id, val]) => ({ id, ...val })),
-                total_amount: document.getElementById('grand-total').innerText
+                customer: {
+                    company: document.querySelector('input[placeholder="抬頭"]').value,
+                    tax_id: document.querySelector('input[placeholder="8碼數字"]').value,
+                    contact: document.querySelector('input[placeholder="請輸入姓名"]').value,
+                    phone: document.querySelector('input[placeholder="09XX-XXX-XXX"]').value,
+                    event_mode: document.querySelector('select').value,
+                    diner_count: document.querySelector('input[value="100"]').value,
+                    address: document.querySelector('input[placeholder="請輸入完整地址"]').value,
+                    remarks: document.querySelector('textarea').value
+                },
+                items: cart,
+                totals: {
+                    food: document.getElementById('food-subtotal').innerText,
+                    grand_total: document.getElementById('grand-total').innerText
+                }
             };
-            console.log("導出 JSON 資料給 Make.com:", data);
-            alert("資料已生成於 Console，可進行自動化串接！");
+            
+            console.log("導出 JSON 資料:", orderData);
+            alert("訂單資料已成功導出為 JSON (請見 Console)！\n接下來可將此 JSON 發送至 Make.com Webhook。");
         }
 
         initMenu();

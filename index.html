@@ -27,7 +27,7 @@
             <div class="text-sm">
                 <h1 class="text-3xl font-bold tracking-tighter mb-1">木人艸</h1>
                 <p>服務專線：02-2883-2113</p>
-                <p>公司地址：台北市士林區後港街185號4樓</p>
+                <p>公司地址：台北市士林區大南路379號</p>
             </div>
             <div class="text-center">
                 <h2 class="text-xl font-bold tracking-widest uppercase">木人艸股份有限公司</h2>
@@ -53,7 +53,7 @@
                     <td colspan="2" class="text-center font-bold"><input type="text" placeholder="  月  日" class="no-border-input text-center"></td>
                     <td colspan="5" class="text-alert">
                         ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>
-                        ● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元進行撤場
+                        ● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元於 16:30-19:00 進行撤場
                     </td>
                 </tr>
                 <tr>
@@ -73,9 +73,7 @@
                         </select>
                     </td>
                     <td class="header-bg w-20">用餐人數</td>
-                    <td class="text-center">
-                        <input type="number" id="guest-count" class="no-border-input text-center font-bold" value="100" oninput="calculateTotal()"> 人
-                    </td>
+                    <td class="text-center"><input type="number" id="guest-count" class="no-border-input text-center font-bold" value="100" oninput="calculateTotal()"> 人</td>
                     <td class="header-bg w-20">手機號碼</td>
                     <td colspan="3"><input type="text" class="no-border-input" placeholder="09XX-XXX-XXX"></td>
                 </tr>
@@ -97,9 +95,7 @@
                 </tr>
                 <tr>
                     <td class="header-bg">備註</td>
-                    <td colspan="7">
-                        <textarea id="order-remarks" class="no-border-input text-xs text-orange-700 font-bold leading-relaxed" rows="3" placeholder="司機不上樓。建議勿於室溫下放置超過2小時。"></textarea>
-                    </td>
+                    <td colspan="7"><textarea id="order-remarks" class="no-border-input text-xs text-orange-700 font-bold leading-relaxed" rows="3" placeholder="司機不上樓。建議勿於室溫下放置超過2小時。"></textarea></td>
                 </tr>
             </table>
         </div>
@@ -111,7 +107,7 @@
                     <tr class="header-bg text-center text-xs">
                         <th class="w-20">產品類別</th>
                         <th>中文餐點名稱</th>
-                        <th class="w-40">規格</th>
+                        <th class="w-40">規格選擇</th>
                         <th class="w-16">盒數</th>
                         <th class="w-24">單價/盒</th>
                         <th class="w-24">小計</th>
@@ -143,7 +139,7 @@
                             </select>
                         </td>
                         <td class="text-center font-medium">免費商借</td>
-                        <td class="text-xs text-gray-500">一日內歸還</td>
+                        <td class="text-xs text-gray-400">一日內歸還</td>
                     </tr>
                     <tr>
                         <td class="text-center font-medium">交通費</td>
@@ -166,11 +162,11 @@
                     <tr>
                         <td class="text-center font-medium">餐具提供</td>
                         <td class="flex justify-between items-center italic text-gray-500">
-                            <span>免費一次性餐具</span>
+                            <span>免費一次性餐具 (內含包材)</span>
                             <span id="utensil-info">100 組</span>
                         </td>
                         <td class="text-center text-gray-400">贈送</td>
-                        <td class="text-xs text-gray-400">依人數帶入</td>
+                        <td class="text-xs text-gray-400">依人數自動帶入</td>
                     </tr>
                 </tbody>
             </table>
@@ -179,7 +175,7 @@
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
             <div class="flex-1 text-xs space-y-2 border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-2 uppercase">訂購須知</p>
-                <p>1. 需於餐會前兩週支付七成定金。</p>
+                <p>1. 需於餐會前兩週支付七成定金，公司檔期以支付定金為依據。</p>
                 <p>2. 刷卡需額外支付 5% 手續費。</p>
             </div>
             <div class="w-full md:w-96">
@@ -209,18 +205,36 @@
         </div>
 
         <div class="mt-12 flex flex-wrap gap-4 no-print justify-center">
-            <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">提交訂單 (JSON)</button>
-            <button onclick="window.print()" class="bg-gray-100 text-gray-700 px-10 py-3 rounded-full font-bold hover:bg-gray-200 border border-gray-300">儲存 PDF</button>
+            <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認並提交訂單 (JSON)</button>
+            <button onclick="window.print()" class="bg-gray-100 text-gray-700 px-10 py-3 rounded-full font-bold hover:bg-gray-200 border border-gray-300">儲存 PDF / 列印</button>
         </div>
     </div>
 
     <script>
+        // 從 PDF 完整分析導入的餐點清單 (共 38 項)
         const products = [
-            { id: 'A0100204', cat: '小食', name: '照燒漢堡(牛)', specs: [{ label: '中(15入)', price: 1350 }, { label: '小(9入)', price: 850 }] },
-            { id: 'A05010020', cat: '小食', name: '鹽麴雞墨西哥捲餅', specs: [{ label: '中(22入)', price: 1650 }, { label: '小(12入)', price: 980 }] },
-            { id: '301001005', cat: '甜點', name: '迷你棉花糖檸檬塔', specs: [{ label: '中(24入)', price: 1440 }, { label: '小(12入)', price: 780 }] },
-            // 桶裝飲料標記 requiresCollection
-            { id: 'A09001003', cat: '飲料', name: '有機蜜香紅茶(冰桶裝)', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true }
+            // 小食系列
+            { id: 'A0100204', cat: '小食', name: '照燒風味迷你漢堡(牛肉)', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (9入)', price: 850 }] },
+            { id: 'A0100202', cat: '小食', name: '照燒風味迷你漢堡(雞肉)', specs: [{ label: '中盒 (15入)', price: 1275 }, { label: '小盒 (9入)', price: 800 }] },
+            { id: 'A05010020', cat: '小食', name: '鹽麴雞肉墨西哥捲餅', specs: [{ label: '中盒 (22入)', price: 1650 }, { label: '小盒 (12入)', price: 980 }] },
+            { id: '303001018', cat: '小食', name: '迷你花生時蔬三明治(蛋奶素)', specs: [{ label: '中盒 (14入)', price: 560 }, { label: '小盒 (8入)', price: 350 }] },
+            { id: '303001028', cat: '小食', name: '迷你燻雞時蔬三明治', specs: [{ label: '中盒 (14入)', price: 560 }, { label: '小盒 (8入)', price: 350 }] },
+            { id: '303001025', cat: '小食', name: '迷你火腿起司三明治', specs: [{ label: '中盒 (14入)', price: 560 }, { label: '小盒 (8入)', price: 350 }] },
+            { id: '303001004', cat: '小食', name: '復刻版迷你營養三明治', specs: [{ label: '中盒 (12入)', price: 720 }, { label: '小盒 (8入)', price: 500 }] },
+            { id: '302001003', cat: '小食', name: '綜合花壽司', specs: [{ label: '中盒 (48入)', price: 960 }, { label: '小盒 (24入)', price: 550 }] },
+            { id: '302001002', cat: '小食', name: '日式壽司細捲', specs: [{ label: '中盒 (96入)', price: 1440 }, { label: '小盒 (48入)', price: 800 }] },
+            { id: 'A01005010', cat: '小食', name: '生態野菜鹹派(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: 'A05010037', cat: '小食', name: '美式炸物組合', specs: [{ label: '中盒 (炸雞/洋蔥圈)', price: 1050 }] },
+            // 甜點系列
+            { id: '301001005', cat: '甜點', name: '迷你棉花糖檸檬塔(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1440 }, { label: '小盒 (12入)', price: 780 }] },
+            { id: 'A01014018', cat: '甜點', name: '覆盆子巧克力杯子蛋糕', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'A01014005', cat: '甜點', name: '抹茶巧克力杯子蛋糕', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'A05018010', cat: '甜點', name: '放牧雞蛋肉桂布丁麵包', specs: [{ label: '中盒 (28入)', price: 1400 }] },
+            { id: '301003004', cat: '甜點', name: '繽紛馬卡龍(蛋奶素)', specs: [{ label: '中盒 (28入)', price: 840 }] },
+            { id: 'A01012003', cat: '甜點', name: '日式抹茶蕨餅(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1680 }] },
+            // 飲品系列 (需回收標記)
+            { id: 'A09001003', cat: '飲料', name: '有機蜜香紅茶(冰桶裝)', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
+            { id: 'A09003002', cat: '飲料', name: '公平貿易熱咖啡(桶裝)', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
 
         let cart = {};
@@ -238,7 +252,7 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs text-gray-400">${p.requiresCollection ? '需回收桶子' : '內含包材'}</td>
+                    <td class="text-xs text-gray-400">內含基本包材</td>
                 `;
                 body.appendChild(tr);
             });
@@ -264,31 +278,23 @@
         }
 
         function calculateTotal() {
-            // 1. 餐點小計
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
 
-            // 2. 運費判斷邏輯
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
-            // 滿足任一條件：滿2萬 OR 桶裝飲料 OR 租賃道具
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
 
-            // 更新運費顯示與 UI/UX 備註
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
             document.getElementById('transport-desc').innerText = isRoundTrip ? "自動判定：來回/回收" : "自動判定：單趟配送";
             document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
 
-            // 3. 其他費用
             const handling = parseInt(document.getElementById('handling-type').value);
             const serviceSub = transportFee + handling;
-            
-            document.getElementById('val-handling').innerText = `$${handling.toLocaleString()}`;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
 
-            // 4. 總結算
             const tax = Math.round((foodSub + serviceSub) * 0.05);
             const grand = foodSub + serviceSub + tax;
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
@@ -307,10 +313,10 @@
                     parking: document.querySelector('input[name="parking"]:checked')?.value
                 },
                 items: cart,
-                financials: { total: document.getElementById('grand-total').innerText }
+                total: document.getElementById('grand-total').innerText
             };
             console.log("JSON 資料:", data);
-            alert("訂單已打包！詳見 Console。");
+            alert("訂單資料已成功打包！請見瀏覽器 Console 以對接 Make.com。");
         }
 
         init();

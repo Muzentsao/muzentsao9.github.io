@@ -11,7 +11,7 @@
         .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 25px; position: relative; }
         .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px; font-size: 13px; vertical-align: middle; }
         .header-bg { background-color: #fcf4d9; font-weight: bold; }
-        .category-header { background-color: #f3f4f6; font-weight: bold; text-align: left; padding-left: 15px; border: 1px solid #000; font-size: 14px; }
+        .category-header { background-color: #f3f4f6; font-weight: bold; text-align: left; padding-left: 15px; border: 1px solid #000; font-size: 14px; color: #444; }
         .text-alert { color: #d93025; font-size: 11px; line-height: 1.5; font-weight: 500; }
         .no-border-input { border: none; width: 100%; background: transparent; outline: none; padding: 4px; }
         .no-border-input:focus { background-color: #fffef0; }
@@ -20,22 +20,22 @@
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
         /* 圖片預覽樣式 */
-        .img-preview { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; cursor: zoom-in; transition: transform 0.2s; }
+        .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; cursor: zoom-in; transition: transform 0.2s; }
         .img-preview:hover { transform: scale(1.1); border-color: #556b2f; }
         
         /* Lightbox 燈箱效果 */
-        #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
-        #lightbox img { max-width: 90%; max-height: 80%; border: 5px solid white; border-radius: 8px; }
+        #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div id="lightbox" onclick="this.style.display='none'" class="no-print">
-        <img id="lightbox-img" src="" alt="大圖預覽">
-        <p class="absolute bottom-10 text-white text-sm font-light">點擊任何地方關閉</p>
+        <img id="lightbox-img" src="" alt="餐點大圖">
+        <p class="absolute bottom-10 text-white text-sm font-light">點擊任何地方關閉預覽</p>
     </div>
 
-    <div class="max-w-[1050px] mx-auto pdf-container shadow-2xl mb-10">
+    <div class="max-w-[1100px] mx-auto pdf-container shadow-2xl mb-10">
         <div class="flex justify-between items-start mb-6 border-b-2 border-black pb-4">
             <div class="text-sm">
                 <h1 class="text-3xl font-bold tracking-tighter mb-1">木人艸</h1>
@@ -81,7 +81,7 @@
                         <div class="flex items-center gap-6 px-2 py-1">
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
-                            <span class="text-xs text-gray-400 font-normal">(判斷依據)</span>
+                            <span class="text-xs text-gray-400 font-normal">(大樓本身是否有地下停車場，作為物流判斷依據)</span>
                         </div>
                     </td>
                 </tr>
@@ -99,7 +99,7 @@
                         <th class="w-16">盒數</th>
                         <th class="w-24">單價/盒</th>
                         <th class="w-24">小計</th>
-                        <th>備註</th>
+                        <th class="w-32">備註</th>
                     </tr>
                 </thead>
                 <tbody id="menu-appetizer"><tr><td colspan="7" class="category-header">● 小食系列 (Appetizers) - 20項</td></tr></tbody>
@@ -113,17 +113,24 @@
             <table class="w-full pdf-table">
                 <thead><tr class="header-bg text-center text-xs"><th>服務名稱</th><th>規格說明</th><th>小計</th><th>備註</th></tr></thead>
                 <tbody>
-                    <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600" id="transport-logic">判斷中...</td></tr>
-                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td>依人數帶入</td></tr>
+                    <tr><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (需回收/運費$1,500)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
+                    <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">判斷中...</td></tr>
+                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具 (內含包材)</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數帶入</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
-            <div class="flex-1 text-xs border p-4 border-black bg-gray-50"><p class="font-bold underline text-sm mb-2 uppercase">訂購須知</p><p>需於餐會前兩週支付七成定金。刷卡另加 5% 手續費。</p></div>
+            <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
+                <p class="font-bold underline text-sm mb-2 uppercase">訂購條款</p>
+                <p>1. 需於餐會前兩週支付七成定金。</p>
+                <p>2. 刷卡需支付 5% 手續費。</p>
+                <p>3. 建議勿於室溫下放置超過 2 小時。</p>
+            </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
                     <tr><td class="header-bg w-32">餐點小計</td><td class="text-right font-bold" id="food-total">$0</td></tr>
+                    <tr><td class="header-bg">服務小計</td><td class="text-right font-bold" id="service-total">$500</td></tr>
                     <tr><td class="header-bg">營業稅 (5%)</td><td class="text-right font-bold" id="tax-total">$0</td></tr>
                     <tr class="text-xl"><td class="header-bg text-red-700">總計</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
                     <tr class="text-sm"><td class="header-bg">應付定金 (70%)</td><td class="text-right font-bold text-gray-700" id="deposit-total">$0</td></tr>
@@ -137,18 +144,50 @@
     </div>
 
     <script>
-        // 更新後的資料結構：加入 img 預覽網址 (請填入實際圖床連結)
         const products = [
-            // 小食系列
-            { id: 'A0100204', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=100', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
-            { id: 'A0100202', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', img: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?q=80&w=100', specs: [{ label: '中盒 (15入)', price: 1275 }] },
-            { id: 'A05010020', cat: 'appetizer', name: '鹽麴雞肉墨西哥捲餅', img: 'https://images.unsplash.com/photo-1533930027392-66d628c4392b?q=80&w=100', specs: [{ label: '中盒 (22入)', price: 1650 }] },
-            { id: '303001018', cat: 'appetizer', name: '迷你花生時蔬三明治', img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=100', specs: [{ label: '中盒 (14入)', price: 560 }] },
-            { id: '303001028', cat: 'appetizer', name: '迷你燻雞時蔬三明治', img: 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?q=80&w=100', specs: [{ label: '中盒 (14入)', price: 560 }] },
-            { id: '303001025', cat: 'appetizer', name: '迷你火腿起司三明治', img: 'https://images.unsplash.com/photo-1559813634-19a773b746b7?q=80&w=100', specs: [{ label: '中盒 (14入)', price: 560 }] },
-            // ... 其他 14 項小食、16 項甜點、2 項飲品比照辦理
-            { id: 'D01', cat: 'dessert', name: '冰心葡式蛋塔', img: 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?q=80&w=100', specs: [{ label: '中盒 (24入)', price: 1200 }] },
-            { id: 'A09001003', cat: 'beverage', name: '有機蜜香紅茶(冰)', img: 'https://images.unsplash.com/photo-1544787210-2211d64336cc?q=80&w=100', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true }
+            // 小食系列 (20項) 
+            { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
+            { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', img: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=200', specs: [{ label: '中盒 (15入)', price: 1275 }] },
+            { id: 'S03', cat: 'appetizer', name: '鹽麴雞肉墨西哥捲餅', img: 'https://images.unsplash.com/photo-1533930027392-66d628c4392b?w=200', specs: [{ label: '中盒 (22入)', price: 1650 }] },
+            { id: 'S04', cat: 'appetizer', name: '迷你花生時蔬三明治(蛋奶素)', img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=200', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: 'S05', cat: 'appetizer', name: '迷你燻雞時蔬三明治', img: 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=200', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: 'S06', cat: 'appetizer', name: '迷你火腿起司三明治', img: 'https://images.unsplash.com/photo-1559813634-19a773b746b7?w=200', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: 'S07', cat: 'appetizer', name: '復刻版迷你營養三明治', img: 'https://images.unsplash.com/photo-1512152272829-e3139592d56f?w=200', specs: [{ label: '中盒 (12入)', price: 720 }] },
+            { id: 'S08', cat: 'appetizer', name: '復刻版迷你營養三明治(素)', img: 'https://images.unsplash.com/photo-1509722747041-619f383b8326?w=200', specs: [{ label: '中盒 (12入)', price: 720 }] },
+            { id: 'S09', cat: 'appetizer', name: '綜合花壽司', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=200', specs: [{ label: '中盒 (48入)', price: 960 }] },
+            { id: 'S10', cat: 'appetizer', name: '綜合花壽司(全素)', img: 'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?w=200', specs: [{ label: '中盒 (48入)', price: 960 }] },
+            { id: 'S11', cat: 'appetizer', name: '豆皮壽司(素)', img: 'https://images.unsplash.com/photo-1553621042-f6e147245754?w=200', specs: [{ label: '中盒 (40入)', price: 800 }] },
+            { id: 'S12', cat: 'appetizer', name: '日式壽司細捲', img: 'https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?w=200', specs: [{ label: '中盒 (96入)', price: 1440 }] },
+            { id: 'S13', cat: 'appetizer', name: '日式壽司細捲(全素)', img: 'https://images.unsplash.com/photo-1534083227135-430932227d81?w=200', specs: [{ label: '中盒 (96入)', price: 1440 }] },
+            { id: 'S14', cat: 'appetizer', name: '咖哩椰香瑪德蓮(餐盒)', img: 'https://images.unsplash.com/photo-1582110271731-972173516597?w=200', specs: [{ label: '中盒 (40入)', price: 1800 }] },
+            { id: 'S15', cat: 'appetizer', name: '生態野菜鹹派(蛋奶素)', img: 'https://images.unsplash.com/photo-1551404973-7bb6ced1029c?w=200', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: 'S16', cat: 'appetizer', name: '法式千層波菜蚌', img: 'https://images.unsplash.com/photo-1541014741259-df549dc46175?w=200', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'S17', cat: 'appetizer', name: '迷你番茄披薩卷', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'S18', cat: 'appetizer', name: '番茄莎莎玉米脆片', img: 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=200', specs: [{ label: '中盒', price: 1000 }] },
+            { id: 'S19', cat: 'appetizer', name: '美式炸物組合', img: 'https://images.unsplash.com/photo-1562967914-6c82c6ca2d4d?w=200', specs: [{ label: '中盒', price: 1050 }] },
+            { id: 'S20', cat: 'appetizer', name: '檸檬酸辣翅小腿', img: 'https://images.unsplash.com/photo-1567622622725-c12805814045?w=200', specs: [{ label: '中盒', price: 1600 }] },
+
+            // 甜點系列 (16項) 
+            { id: 'D01', cat: 'dessert', name: '冰心葡式蛋塔', img: 'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=200', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'D02', cat: 'dessert', name: '迷你棉花糖檸檬塔', img: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=200', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: 'D03', cat: 'dessert', name: '小倉月燒(紅豆)', img: 'https://images.unsplash.com/photo-1627596143655-2bc80831620c?w=200', specs: [{ label: '中盒 (24入)', price: 720 }] },
+            { id: 'D04', cat: 'dessert', name: '覆盆子巧克力杯子蛋糕', img: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=200', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'D05', cat: 'dessert', name: '抹茶巧克力杯子蛋糕', img: 'https://images.unsplash.com/photo-1614707267537-b85af00c4b81?w=200', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'D06', cat: 'dessert', name: '迷你烏龍茶蛋糕捲', img: 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=200', specs: [{ label: '中盒 (30入)', price: 1500 }] },
+            { id: 'D07', cat: 'dessert', name: '迷你小甜球(覆盆子)', img: 'https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=200', specs: [{ label: '中盒 (40入)', price: 1200 }] },
+            { id: 'D08', cat: 'dessert', name: '放牧雞蛋肉桂布丁麵包', img: 'https://images.unsplash.com/photo-1541773292833-936697bc5880?w=200', specs: [{ label: '中盒 (28入)', price: 1400 }] },
+            { id: 'D09', cat: 'dessert', name: '烏龍茶瑪德蓮', img: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=200', specs: [{ label: '中盒 (32入)', price: 2400 }] },
+            { id: 'D10', cat: 'dessert', name: '台東洛神花瑪德蓮', img: 'https://images.unsplash.com/photo-1505976378723-9726b54e9bb9?w=200', specs: [{ label: '中盒 (32入)', price: 2400 }] },
+            { id: 'D11', cat: 'dessert', name: '焦糖海鹽磅蛋糕', img: 'https://images.unsplash.com/photo-1558326567-98ae2405596b?w=200', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: 'D12', cat: 'dessert', name: '椰絲鳳梨磅蛋糕', img: 'https://images.unsplash.com/photo-1535254973040-607b474cb80d?w=200', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: 'D13', cat: 'dessert', name: '繽紛馬卡龍', img: 'https://images.unsplash.com/photo-1569864358642-9d16197022c3?w=200', specs: [{ label: '中盒 (28入)', price: 840 }] },
+            { id: 'D14', cat: 'dessert', name: '茶拉米蘇', img: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200', specs: [{ label: '中盒 (24入)', price: 2040 }] },
+            { id: 'D15', cat: 'dessert', name: '日式抹茶蕨餅', img: 'https://images.unsplash.com/photo-1582715714399-239784df3265?w=200', specs: [{ label: '中盒 (24入)', price: 1680 }] },
+            { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', img: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=200', specs: [{ label: '中盒 (24入)', price: 1920 }] },
+
+            // 飲品系列 (2項) 
+            { id: 'B01', cat: 'beverage', name: '有機蜜香紅茶(冰桶)', img: 'https://images.unsplash.com/photo-1544787210-2211d64336cc?w=200', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
+            { id: 'B02', cat: 'beverage', name: '公平貿易熱咖啡(桶)', img: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
 
         let cart = {};
@@ -173,7 +212,6 @@
             calculateTotal();
         }
 
-        // 燈箱控制邏輯
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';
@@ -202,16 +240,20 @@
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
 
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
-            const isRoundTrip = foodSub >= 20000 || hasBucket;
+            const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
+            const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
 
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿2萬/桶裝" : "未滿2萬且無回收";
+            document.getElementById('transport-desc').innerText = isRoundTrip ? "自動判定：來回/回收" : "自動判定：單趟配送";
+            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
 
+            const serviceSub = transportFee;
+            document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
 
-            const tax = Math.round((foodSub + transportFee) * 0.05);
-            const grand = foodSub + transportFee + tax;
+            const tax = Math.round((foodSub + serviceSub) * 0.05);
+            const grand = foodSub + serviceSub + tax;
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
             document.getElementById('grand-total').innerText = `$${grand.toLocaleString()}`;
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
@@ -219,8 +261,8 @@
 
         function submitToMake() {
             const data = { items: cart, total: document.getElementById('grand-total').innerText };
-            console.log("JSON:", data);
-            alert("訂單已成功打包！");
+            console.log("JSON 資料:", data);
+            alert("訂單已成功打包！請見 Console。");
         }
 
         init();

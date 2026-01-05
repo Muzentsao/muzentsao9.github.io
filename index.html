@@ -11,7 +11,7 @@
         .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 25px; }
         .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px; font-size: 13px; vertical-align: middle; }
         .header-bg { background-color: #fcf4d9; font-weight: bold; }
-        .category-header { background-color: #f3f4f6; font-weight: bold; text-align: left; padding-left: 15px; border: 1px solid #000; }
+        .category-header { background-color: #f3f4f6; font-weight: bold; text-align: left; padding-left: 15px; border: 1px solid #000; font-size: 14px; }
         .text-alert { color: #d93025; font-size: 11px; line-height: 1.5; font-weight: 500; }
         .no-border-input { border: none; width: 100%; background: transparent; outline: none; padding: 4px; }
         .no-border-input:focus { background-color: #fffef0; }
@@ -80,7 +80,7 @@
                 </tr>
                 <tr>
                     <td class="header-bg">送餐地址</td>
-                    <td colspan="5"><input type="text" placeholder="請輸入完整路名/門牌" class="no-border-input"></td>
+                    <td colspan="5"><input type="text" placeholder="路名/門牌" class="no-border-input"></td>
                     <td class="header-bg w-20">樓層</td>
                     <td><input type="text" class="no-border-input text-center" placeholder="F"></td>
                 </tr>
@@ -102,7 +102,7 @@
             <table class="w-full pdf-table">
                 <thead>
                     <tr class="header-bg text-center text-xs">
-                        <th class="w-20">產品類別</th>
+                        <th class="w-20">類別</th>
                         <th>中文餐點名稱</th>
                         <th class="w-40">規格選擇</th>
                         <th class="w-16">盒數</th>
@@ -111,15 +111,9 @@
                         <th>備註</th>
                     </tr>
                 </thead>
-                <tbody id="menu-appetizer">
-                    <tr><td colspan="7" class="category-header">● 小食系列 (Appetizers)</td></tr>
-                </tbody>
-                <tbody id="menu-dessert">
-                    <tr><td colspan="7" class="category-header">● 精緻甜點 (Desserts)</td></tr>
-                </tbody>
-                <tbody id="menu-beverage">
-                    <tr><td colspan="7" class="category-header">● 飲品 (Beverages)</td></tr>
-                </tbody>
+                <tbody id="menu-appetizer"><tr><td colspan="7" class="category-header">● 小食系列 (Appetizers)</td></tr></tbody>
+                <tbody id="menu-dessert"><tr><td colspan="7" class="category-header">● 精緻甜點 (Desserts)</td></tr></tbody>
+                <tbody id="menu-beverage"><tr><td colspan="7" class="category-header">● 飲品 (Beverages)</td></tr></tbody>
             </table>
         </div>
 
@@ -136,13 +130,8 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="text-center font-medium">人造花租賃陳列</td>
-                        <td>
-                            <select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()">
-                                <option value="no">無租賃需求</option>
-                                <option value="yes">租賃道具 (需回收/運費$1,500)</option>
-                            </select>
-                        </td>
+                        <td class="text-center">人造花租賃陳列</td>
+                        <td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (需回收/運費$1,500)</option></select></td>
                         <td class="text-center">免費商借</td>
                         <td class="text-xs text-gray-500">一日內歸還</td>
                     </tr>
@@ -150,26 +139,17 @@
                         <td class="text-center font-medium">交通費</td>
                         <td id="transport-desc">自動判定：單趟配送</td>
                         <td class="text-right font-bold" id="val-transport">$500</td>
-                        <td class="text-xs text-blue-600" id="transport-logic">金額未滿2萬且無回收項目</td>
+                        <td class="text-xs text-blue-600" id="transport-logic">金額未滿2萬且無回收</td>
                     </tr>
                     <tr>
                         <td class="text-center font-medium">人員搬運</td>
-                        <td>
-                            <select id="handling-type" class="no-border-input font-bold text-blue-700" onchange="calculateTotal()">
-                                <option value="0">不需要 (一樓接貨)</option>
-                                <option value="2000">電梯：B1-3 樓 (+$2,000)</option>
-                                <option value="3500">電梯：4-6 樓 (+$3,500)</option>
-                            </select>
-                        </td>
+                        <td><select id="handling-type" class="no-border-input font-bold text-blue-700" onchange="calculateTotal()"><option value="0">不需要 (一樓接貨)</option><option value="2000">電梯：B1-3 樓 (+$2,000)</option><option value="3500">電梯：4-6 樓 (+$3,500)</option></select></td>
                         <td class="text-right font-bold" id="val-handling">$0</td>
-                        <td class="text-xs text-gray-400">*需有地下停車場</td>
+                        <td class="text-xs text-gray-400">*需有停車場</td>
                     </tr>
                     <tr>
                         <td class="text-center font-medium">餐具提供</td>
-                        <td class="flex justify-between items-center italic text-gray-500">
-                            <span>免費一次性餐具 (內含包材)</span>
-                            <span id="utensil-info">100 組</span>
-                        </td>
+                        <td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具 (含包材)</span><span id="utensil-info">100 組</span></td>
                         <td class="text-center text-gray-400">贈送</td>
                         <td class="text-xs text-gray-400">依人數自動帶入</td>
                     </tr>
@@ -182,7 +162,6 @@
                 <p class="font-bold underline text-sm mb-2 uppercase">訂購須知</p>
                 <p>1. 建議勿於室溫下放置超過 2 小時。</p>
                 <p>2. 需於餐會前兩週支付七成定金，公司檔期以支付定金為依據。</p>
-                <p>3. 刷卡需額外支付 5% 手續費。</p>
             </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
@@ -203,21 +182,47 @@
 
     <script>
         const products = [
-            // 小食 (cat: 'appetizer')
+            // 小食系列 (20項)
             { id: 'A0100204', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (9入)', price: 850 }] },
-            { id: 'A0100202', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', specs: [{ label: '中盒 (15入)', price: 1275 }, { label: '小盒 (9入)', price: 800 }] },
+            { id: 'A0100202', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', specs: [{ label: '中盒 (15入)', price: 1275 }, { label: '小盒 (800)', price: 800 }] },
             { id: 'A05010020', cat: 'appetizer', name: '鹽麴雞肉墨西哥捲餅', specs: [{ label: '中盒 (22入)', price: 1650 }, { label: '小盒 (12入)', price: 980 }] },
-            { id: '303001018', cat: 'appetizer', name: '迷你花生時蔬三明治(蛋奶素)', specs: [{ label: '中盒 (14入)', price: 560 }, { label: '小盒 (8入)', price: 350 }] },
-            { id: '303001004', cat: 'appetizer', name: '復刻版迷你營養三明治', specs: [{ label: '中盒 (12入)', price: 720 }, { label: '小盒 (8入)', price: 500 }] },
-            { id: '302001003', cat: 'appetizer', name: '綜合花壽司', specs: [{ label: '中盒 (48入)', price: 960 }, { label: '小盒 (24入)', price: 550 }] },
-            
-            // 甜點 (cat: 'dessert')
-            { id: '301001005', cat: 'dessert', name: '迷你棉花糖檸檬塔(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1440 }, { label: '小盒 (12入)', price: 780 }] },
+            { id: '303001018', cat: 'appetizer', name: '迷你花生時蔬三明治(蛋奶素)', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: '303001028', cat: 'appetizer', name: '迷你燻雞時蔬三明治', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: '303001025', cat: 'appetizer', name: '迷你火腿起司三明治', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: '303001004', cat: 'appetizer', name: '復刻版迷你營養三明治', specs: [{ label: '中盒 (12入)', price: 720 }] },
+            { id: '303001006', cat: 'appetizer', name: '復刻版迷你營養三明治(蛋奶素)', specs: [{ label: '中盒 (12入)', price: 720 }] },
+            { id: '302001003', cat: 'appetizer', name: '綜合花壽司', specs: [{ label: '中盒 (48入)', price: 960 }] },
+            { id: '302001004', cat: 'appetizer', name: '綜合花壽司(全素)', specs: [{ label: '中盒 (48入)', price: 960 }] },
+            { id: '302001003b', cat: 'appetizer', name: '豆皮壽司(素)', specs: [{ label: '中盒 (40入)', price: 800 }] },
+            { id: '302001002', cat: 'appetizer', name: '日式壽司細捲', specs: [{ label: '中盒 (96入)', price: 1440 }] },
+            { id: '302001009', cat: 'appetizer', name: '日式壽司細捲(全素)', specs: [{ label: '中盒 (96入)', price: 1440 }] },
+            { id: 'A01005010b', cat: 'appetizer', name: '咖哩椰香瑪德蓮(餐盒)', specs: [{ label: '中盒 (40入)', price: 1800 }] },
+            { id: 'A01005010', cat: 'appetizer', name: '生態野菜鹹派(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: '01009003', cat: 'appetizer', name: '法式千層波菜蚌', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'A0100921', cat: 'appetizer', name: '迷你番茄披薩卷', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'A0501012', cat: 'appetizer', name: '番茄莎莎玉米脆片', specs: [{ label: '中盒', price: 1000 }] },
+            { id: 'A05010037', cat: 'appetizer', name: '美式炸物組合', specs: [{ label: '中盒', price: 1050 }] },
+            { id: 'A0501033', cat: 'appetizer', name: '檸檬酸辣翅小腿', specs: [{ label: '中盒', price: 1600 }] },
+
+            // 甜點系列 (16項)
+            { id: 'D01', cat: 'dessert', name: '冰心葡式蛋塔', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: '301001005', cat: 'dessert', name: '迷你棉花糖檸檬塔(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: '301004003', cat: 'dessert', name: '小倉月燒(紅豆)', specs: [{ label: '中盒 (24入)', price: 720 }] },
+            { id: 'A01014018', cat: 'dessert', name: '覆盆子巧克力杯子蛋糕', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'A01014005', cat: 'dessert', name: '抹茶巧克力杯子蛋糕', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'A01014031', cat: 'dessert', name: '迷你烏龍茶蛋糕捲', specs: [{ label: '中盒 (30入)', price: 1500 }] },
+            { id: 'D07', cat: 'dessert', name: '迷你小甜球(覆盆子)', specs: [{ label: '中盒 (40入)', price: 1200 }] },
             { id: 'A05018010', cat: 'dessert', name: '放牧雞蛋肉桂布丁麵包', specs: [{ label: '中盒 (28入)', price: 1400 }] },
-            { id: '301003004', cat: 'dessert', name: '繽紛馬卡龍(蛋奶素)', specs: [{ label: '中盒 (28入)', price: 840 }] },
-            { id: 'A01012003', cat: 'dessert', name: '日式抹茶蕨餅(蛋奶素)', specs: [{ label: '中盒 (24入)', price: 1680 }] },
-            
-            // 飲品 (cat: 'beverage')
+            { id: 'A05014027', cat: 'dessert', name: '烏龍茶瑪德蓮', specs: [{ label: '中盒 (32入)', price: 2400 }] },
+            { id: '05014008', cat: 'dessert', name: '台東洛神花瑪德蓮', specs: [{ label: '中盒 (32入)', price: 2400 }] },
+            { id: 'A01014014', cat: 'dessert', name: '焦糖海鹽磅蛋糕', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: 'A01014020', cat: 'dessert', name: '椰絲鳳梨磅蛋糕', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: '301003004', cat: 'dessert', name: '繽紛馬卡龍', specs: [{ label: '中盒 (28入)', price: 840 }] },
+            { id: 'A05012005', cat: 'dessert', name: '茶拉米蘇', specs: [{ label: '中盒 (24入)', price: 2040 }] },
+            { id: 'A01012003', cat: 'dessert', name: '日式抹茶蕨餅', specs: [{ label: '中盒 (24入)', price: 1680 }] },
+            { id: 'A05013004', cat: 'dessert', name: '黑糖桂花釀梔子粉粿', specs: [{ label: '中盒 (24入)', price: 1920 }] },
+
+            // 飲品系列 (2項)
             { id: 'A09001003', cat: 'beverage', name: '有機蜜香紅茶(冰桶裝)', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
             { id: 'A09003002', cat: 'beverage', name: '公平貿易熱咖啡(桶裝)', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
@@ -272,12 +277,11 @@
             const transportFee = isRoundTrip ? 1500 : 500;
 
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            document.getElementById('transport-desc').innerText = isRoundTrip ? "自動判定：來回/回收" : "自動判定：單趟配送";
-            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收項目";
+            document.getElementById('transport-desc').innerText = isRoundTrip ? "判定：來回/回收" : "判定：單趟配送";
+            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿2萬/桶裝/道具" : "未滿2萬且無回收";
 
             const handling = parseInt(document.getElementById('handling-type').value);
             const serviceSub = transportFee + handling;
-            document.getElementById('val-handling').innerText = `$${handling.toLocaleString()}`;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
 
@@ -290,12 +294,11 @@
 
         function submitToMake() {
             const data = {
+                order_id: "Y_20250909-01",
                 customer: {
                     company: document.querySelector('input[placeholder="抬頭"]').value,
                     guests: document.getElementById('guest-count').value,
-                    address: document.querySelector('input[placeholder="請輸入完整路名/門牌"]').value,
-                    floor: document.querySelector('input[placeholder="F"]').value,
-                    parking: document.querySelector('input[name="parking"]:checked')?.value
+                    address: document.querySelector('input[placeholder="路名/門牌"]').value
                 },
                 items: cart,
                 total: document.getElementById('grand-total').innerText

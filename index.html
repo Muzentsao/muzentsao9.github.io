@@ -27,7 +27,7 @@
             <div class="text-sm">
                 <h1 class="text-3xl font-bold tracking-tighter mb-1">木人艸</h1>
                 <p>服務專線：02-2883-2113</p>
-                <p>公司地址：台北市士林區大南路379號</p>
+                <p>公司地址：台北市士林區後港街185號4樓</p>
             </div>
             <div class="text-center">
                 <h2 class="text-xl font-bold tracking-widest uppercase">木人艸股份有限公司</h2>
@@ -54,8 +54,8 @@
                         <input type="text" placeholder="  月  日" class="no-border-input text-center">
                     </td>
                     <td colspan="5" class="text-alert">
-                        ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>
-                        ● 夜間加成：若撤場時間 16:30-19:00，需隔日撤場或加價 1,000 元進行撤場
+                        ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元 <br>
+                        ● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元於 16:30-19:00 進行撤場
                     </td>
                 </tr>
                 <tr>
@@ -83,12 +83,28 @@
                 </tr>
                 <tr>
                     <td class="header-bg">送餐地址</td>
-                    <td colspan="7"><input type="text" placeholder="請輸入完整送餐地址" class="no-border-input"></td>
+                    <td colspan="5"><input type="text" placeholder="請輸入完整路名/門牌" class="no-border-input"></td>
+                    <td class="header-bg w-20">樓層</td>
+                    <td><input type="text" class="no-border-input text-center" placeholder="F"></td>
+                </tr>
+                <tr>
+                    <td class="header-bg">地下停車場</td>
+                    <td colspan="7">
+                        <div class="flex items-center gap-6 px-2 py-1">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="parking" value="yes" class="w-4 h-4"> 有
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="parking" value="no" class="w-4 h-4"> 無
+                            </label>
+                            <span class="text-xs text-gray-400 font-normal">(大樓本身是否有地下停車場，作為物流判斷依據)</span>
+                        </div>
+                    </td>
                 </tr>
                 <tr>
                     <td class="header-bg">備註</td>
                     <td colspan="7">
-                        <textarea class="no-border-input text-xs text-orange-700 font-bold leading-relaxed" rows="3" placeholder="司機不上樓，須請一樓取餐。若需循環餐具請於此處說明。建議勿於室溫下放置超過2小時，夏天時(超過32℃)勿超過1小時。"></textarea>
+                        <textarea class="no-border-input text-xs text-orange-700 font-bold leading-relaxed" rows="3" placeholder="司機不上樓，須請一樓取餐。建議勿於室溫下放置超過2小時。"></textarea>
                     </td>
                 </tr>
             </table>
@@ -128,7 +144,7 @@
                         <td class="text-center">人造花租賃陳列</td>
                         <td>木箱 / 人造花 / 植栽</td>
                         <td class="text-center font-medium">免費商借</td>
-                        <td class="text-xs text-gray-400 font-medium">一日內歸還</td>
+                        <td class="text-xs text-gray-500">一日內歸還</td>
                     </tr>
                     <tr>
                         <td class="text-center font-medium">交通費</td>
@@ -151,11 +167,11 @@
                     <tr>
                         <td class="text-center font-medium">餐具提供</td>
                         <td class="flex justify-between items-center italic text-gray-500">
-                            <span>免費一次性餐具 (內含包材成本)</span>
+                            <span>免費一次性餐具 (內含包材)</span>
                             <span id="utensil-info">100 組</span>
                         </td>
-                        <td class="text-center text-gray-400 font-medium">贈送</td>
-                        <td class="text-xs text-gray-400 font-medium">依人數自動帶入</td>
+                        <td class="text-center text-gray-400">贈送</td>
+                        <td class="text-xs text-gray-400">依人數自動帶入</td>
                     </tr>
                 </tbody>
             </table>
@@ -164,10 +180,9 @@
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
             <div class="flex-1 text-xs space-y-2 border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-2 uppercase">訂購須知</p>
-                <p>1. 需於餐會前兩週支付七成定金，公司檔期以支付定金為依據。</p>
-                <p>2. 餐點尾款需於餐飲日期結束後一週內匯款。</p>
+                <p>1. 建議勿於室溫下放置超過 2 小時。</p>
+                <p>2. 需於餐會前兩週支付七成定金，公司檔期以支付定金為依據。</p>
                 <p>3. 刷卡需額外支付 5% 手續費。</p>
-                <p>4. 取消規範依消基會「外燴服務定型化契約」規定辦理。</p>
             </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
@@ -197,18 +212,17 @@
 
         <div class="mt-12 flex flex-wrap gap-4 no-print justify-center">
             <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認並提交訂單 (JSON)</button>
-            <button onclick="window.print()" class="bg-gray-100 text-gray-700 px-10 py-3 rounded-full font-bold hover:bg-gray-200 transition border border-gray-300">儲存為 PDF / 列印</button>
+            <button onclick="window.print()" class="bg-gray-100 text-gray-700 px-10 py-3 rounded-full font-bold hover:bg-gray-200 border border-gray-300">儲存 PDF</button>
         </div>
     </div>
 
     <script>
         const products = [
-            { id: 'A0100204', cat: '小食', name: '照燒風味迷你漢堡(牛肉)', specs: [{ label: '中盒 (約15入)', price: 1350 }, { label: '小盒 (約9入)', price: 850 }] },
-            { id: 'A05010020', cat: '小食', name: '鹽麴雞肉墨西哥捲餅', specs: [{ label: '中盒 (約22入)', price: 1650 }, { label: '小盒 (約12入)', price: 980 }] },
-            { id: '303001018', cat: '小食', name: '迷你花生時蔬三明治', specs: [{ label: '中盒 (約14入)', price: 560 }, { label: '小盒 (約8入)', price: 350 }] },
-            { id: '302001003', cat: '小食', name: '綜合花壽司', specs: [{ label: '中盒 (約48入)', price: 960 }, { label: '小盒 (約24入)', price: 550 }] },
-            { id: '301001005', cat: '甜點', name: '迷你棉花糖檸檬塔', specs: [{ label: '中盒 (約24入)', price: 1440 }, { label: '小盒 (約12入)', price: 780 }] },
-            { id: 'A09001003', cat: '飲料', name: '有機蜜香紅茶(冰)', specs: [{ label: '8公升/桶', price: 1000 }] }
+            { id: 'A0100204', cat: '小食', name: '照燒風味迷你漢堡(牛肉)', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (9入)', price: 850 }] },
+            { id: 'A05010020', cat: '小食', name: '鹽麴雞肉墨西哥捲餅', specs: [{ label: '中盒 (22入)', price: 1650 }, { label: '小盒 (12入)', price: 980 }] },
+            { id: '303001018', cat: '小食', name: '迷你花生時蔬三明治', specs: [{ label: '中盒 (14入)', price: 560 }, { label: '小盒 (8入)', price: 350 }] },
+            { id: '302001003', cat: '小食', name: '綜合花壽司', specs: [{ label: '中盒 (48入)', price: 960 }, { label: '小盒 (24入)', price: 550 }] },
+            { id: '301001005', cat: '甜點', name: '迷你棉花糖檸檬塔', specs: [{ label: '中盒 (24入)', price: 1440 }, { label: '小盒 (12入)', price: 780 }] }
         ];
 
         let cart = {};
@@ -226,7 +240,7 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs text-gray-400">內含基本包材</td>
+                    <td class="text-xs text-gray-400">內含包材費</td>
                 `;
                 body.appendChild(tr);
             });
@@ -276,18 +290,16 @@
                 order_id: "Y_20250909-01",
                 customer: {
                     company: document.querySelector('input[placeholder="抬頭"]').value,
-                    tax_id: document.querySelector('input[placeholder="8碼數字"]').value,
                     guests: document.getElementById('guest-count').value,
-                    address: document.querySelector('input[placeholder="請輸入完整送餐地址"]').value
+                    address: document.querySelector('input[placeholder="請輸入完整路名/門牌"]').value,
+                    floor: document.querySelector('input[placeholder="F"]').value,
+                    has_parking: document.querySelector('input[name="parking"]:checked').value
                 },
-                cart_items: cart,
-                financials: {
-                    total: document.getElementById('grand-total').innerText,
-                    deposit: document.getElementById('deposit-total').innerText
-                }
+                items: cart,
+                total: document.getElementById('grand-total').innerText
             };
             console.log("導出 JSON 資料:", data);
-            alert("訂單資料已成功打包！請見 Console 以對接 Make.com。");
+            alert("訂單已成功打包為 JSON！請見 Console。");
         }
 
         init();

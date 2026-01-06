@@ -60,6 +60,26 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
+        /* 匯出 PDF 時用：用 JS 在 clone DOM 加上 .pdf-export */
+.pdf-export .no-print { 
+  display: none !important; 
+}
+
+/* 匯出時讓 input/select 比較不會因瀏覽器樣式造成高度差 */
+.pdf-export input,
+.pdf-export select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent !important;
+  color: #000;
+}
+
+/* 更保險：整體顏色輸出 */
+.pdf-export * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.pdf-export .no-print { display: none !important; }
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -295,7 +315,12 @@
                 }).join(' ');
                 
                 tr.innerHTML = `
-                    <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
+                    const imgSrc = p.img.startsWith('http') ? p.img : encodeURI(p.img);
+
+tr.innerHTML = `
+  <td class="text-center no-print">
+    <img src="${imgSrc}" class="img-preview" onclick="openLightbox('${imgSrc}')">
+  </td>
                     <td class="font-bold">${p.name}</td>
                     <td><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('')}</select></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
@@ -407,31 +432,60 @@
             if (errors.length > 0) { alert("請填寫所有必填欄位並選購餐點。"); return false; }
             return true;
         }
+        const required = ['delivery-date','delivery-time','contact-name','company-name','tax-id','phone-number','delivery-address','floor'];
 
-       async function downloadPDF() {
-    const element = document.getElementById('quotation-content');
-    const orderId = document.getElementById('order-id').innerText;
-    
-    const opt = {
-        margin: [10, 10, 10, 10], 
-        filename: `木人艸報價單_${orderId}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true, 
-            letterRendering: true,
-            // 關鍵修正：強制以 1100px 渲染，確保欄位不擠壓
-            windowWidth: 1100, 
-            width: 1100,
-            x: 0,
-            y: 0
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        // 修正：移除 avoid-all，避免因為內容太長產生前幾頁空白
-        pagebreak: { mode: ['css', 'legacy'] } 
-    };
 
-    return html2pdf().set(opt).from(element).save();
+      async function downloadPDF() {
+  const element = document.getElementById('quotation-content');
+  const orderId = document.getElementById('order-id').innerText;
+
+  // 1) 先等圖片載入（避免截圖時圖還沒出現）
+  const imgs = Array.from(element.querySelectorAll('img'));
+  await Promise.all(imgs.map(img => {
+    if (img.src && img.src.startsWith('http')) img.crossOrigin = 'anonymous';
+    if (img.complete) return Promise.resolve();
+    return new Promise(resolve => {
+      img.onload = resolve;
+      img.onerror = resolve; // 圖壞也不要卡住
+    });
+  }));
+
+  const opt = {
+    margin: 10,
+    filename: `木人艸報價單_${orderId}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+
+      // 防止捲動造成截圖偏移
+      scrollY: -window.scrollY,
+
+      // 鎖定渲染寬度，避免欄位被擠壓
+      windowWidth: 1100,
+
+      // ✅ 關鍵：在 clone DOM 套用匯出用 class + 隱藏 no-print
+      onclone: (doc) => {
+        const cloned = doc.getElementById('quotation-content');
+        if (cloned) cloned.classList.add('pdf-export');
+
+        doc.querySelectorAll('.no-print').forEach(el => {
+          el.style.display = 'none';
+        });
+
+        doc.querySelectorAll('img').forEach(img => {
+          if (img.src && img.src.startsWith('http')) img.setAttribute('crossorigin', 'anonymous');
+        });
+      }
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+
+    // ✅ 避免切 tr（比 avoid-all 不容易空白頁）
+    pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' }
+  };
+
+  return html2pdf().set(opt).from(element).save();
 }
 
         init();

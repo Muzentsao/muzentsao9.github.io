@@ -11,8 +11,13 @@
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #fcfcfc; color: #333; }
         .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 25px; position: relative; }
+        
+        /* 核心 PDF 表格修正：強制固定寬度與防止斷行 */
         .pdf-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
         .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px; font-size: 13px; vertical-align: middle; word-wrap: break-word; }
+        tr { page-break-inside: avoid; } 
+        thead { display: table-header-group; }
+
         .header-bg { background-color: #fcf4d9; font-weight: bold; }
         .req::after { content: ' *'; color: #d93025; }
         .category-header { background-color: #f3f4f6; font-weight: bold; text-align: left; padding-left: 15px; border: 1px solid #000; font-size: 14px; color: #444; }
@@ -35,33 +40,8 @@
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* 1. table-layout: fixed 確保下載後的 PDF 欄位比例與網頁一致 */
-.pdf-table { 
-    table-layout: fixed; 
-    width: 100%; 
-    border-collapse: collapse; 
-}
-
-/* 2. 處理文字溢出，避免撐開表格導致排版崩壞 */
-.pdf-table td, .pdf-table th { 
-    border: 1px solid #000; 
-    padding: 8px; 
-    font-size: 13px; 
-    word-wrap: break-word; /* 強制長文字換行 */
-}
-
-/* 3. 分頁控制：防止表格的「列(tr)」被從中間切斷到兩頁 */
-tr { 
-    page-break-inside: avoid; 
-} 
-
-/* 4. 確保表格標題在每一頁都會重複出現 (視 PDF 引擎支援度) */
-thead { 
-    display: table-header-group; 
-}
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -196,15 +176,10 @@ thead {
             <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-3 uppercase tracking-wider">訂購須知</p>
                 <div class="space-y-2">
-                    <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
+                    <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂。</p>
                     <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                    <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元（特殊梯形另議）。</p>
-                    <div class="pt-2 border-t border-gray-300">
-                        <p class="text-amber-700 font-bold">
-                            <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                            4. 建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
-                        </p>
-                    </div>
+                    <p class="text-orange-700 font-medium">3. 爬梯需求：人工搬運需求，每層酌收 3,500 元。</p>
+                    <p class="text-amber-700 font-bold">4. 品質建議：建議勿於室溫下放置超過 2 小時。</p>
                 </div>
             </div>
             <div class="w-full md:w-96">
@@ -212,22 +187,23 @@ thead {
                     <tr><td class="header-bg w-32">餐點小計</td><td class="text-right font-bold" id="food-total">$0</td></tr>
                     <tr><td class="header-bg">服務小計</td><td class="text-right font-bold" id="service-total">$500</td></tr>
                     <tr><td class="header-bg">營業稅 (5%)</td><td class="text-right font-bold" id="tax-total">$0</td></tr>
-                    <tr class="text-xl"><td class="header-bg text-red-700">總計</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
-                    <tr class="text-sm"><td class="header-bg">應付定金 (70%)</td><td class="text-right font-bold text-gray-700" id="deposit-total">$0</td></tr>
+                    <tr class="text-xl bg-yellow-50"><td class="header-bg text-red-700">總計</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
+                    <tr class="text-sm"><td>應付定金 (70%)</td><td class="text-right font-bold text-gray-700" id="deposit-total">$0</td></tr>
                 </table>
             </div>
         </div>
 
         <div class="mt-12 flex flex-col items-center gap-4 no-print">
-            <button id="main-submit-btn" onclick="processOrder()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl flex items-center gap-3">
-                <span id="btn-text">確認並送出訂單</span>
+            <button id="main-submit-btn" onclick="processOrder()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl flex items-center gap-3 text-lg">
+                <span id="btn-text">確認資訊並送出訂單</span>
                 <span id="btn-spinner" class="hidden spinner"></span>
             </button>
-            <p class="text-xs text-gray-400 font-medium">※ 點擊後系統將自動下載 PDF 並將資料傳送至後端系統</p>
+            <p class="text-xs text-gray-400 font-medium">系統將下載 PDF 報價單並同步提交訂單數據</p>
         </div>
     </div>
 
     <script>
+        // --- 核心設定：100% 還原所有餐點清單 ---
         const products = [
             { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
             { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
@@ -274,22 +250,21 @@ thead {
         function generateOrderID() {
             const now = new Date();
             const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-            const timePart = now.getTime().toString().slice(-3);
-            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            return `Y_${dateStr}-${timePart}${randomPart}`;
+            return `Y_${dateStr}-${Date.now().toString().slice(-4)}${Math.floor(Math.random()*1000)}`;
         }
 
         function init() {
             const now = new Date();
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             document.getElementById('order-id').innerText = generateOrderID();
+            
             const minDate = new Date();
-            minDate.setDate(now.getDate() + 7); 
-            const minDateString = minDate.toISOString().split("T")[0];
-            document.getElementById('delivery-date').min = minDateString;
+            minDate.setDate(now.getDate() + 7);
+            document.getElementById('delivery-date').min = minDate.toISOString().split("T")[0];
 
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
+                if(!body) return;
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
                 let tagsHtml = p.tags.map(tag => {
@@ -298,6 +273,7 @@ thead {
                     if (['牛肉', '雞肉'].includes(tag)) className = 'badge-meat';
                     return `<span class="badge ${className}">${tag}</span>`;
                 }).join(' ');
+                
                 let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
                 tr.innerHTML = `
                     <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
@@ -306,16 +282,11 @@ thead {
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
+                    <td class="text-xs"><div>${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
                 `;
                 body.appendChild(tr);
             });
             calculateTotal();
-        }
-
-        function openLightbox(url) {
-            document.getElementById('lightbox-img').src = url;
-            document.getElementById('lightbox').style.display = 'flex';
         }
 
         function updateRow(id, specIdx) {
@@ -327,7 +298,8 @@ thead {
         function updateQty(id, qty) {
             qty = Math.max(0, parseInt(qty) || 0);
             const p = products.find(i => i.id === id);
-            const specIdx = document.querySelector(`#row-${id} select`).value;
+            const selectEl = document.querySelector(`#row-${id} select`);
+            const specIdx = selectEl ? selectEl.value : 0;
             const price = p.specs[specIdx].price;
             const sub = qty * price;
             document.getElementById(`sub-${id}`).innerText = `$${sub.toLocaleString()}`;
@@ -338,145 +310,102 @@ thead {
 
         function calculateTotal() {
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
-            document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
+            
+            // --- 還原完整交通費判定邏輯 ---
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
+            
+            document.getElementById('transport-logic').innerText = isRoundTrip ? "符合回收條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
-            const stairFee = stairCount * 3500;
+            
+            let stairCount = parseInt(document.getElementById('stair-count').value) || 0;
+            let stairFee = stairCount * 3500;
+            let serviceSub = transportFee + stairFee;
+            
+            document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
-            const serviceSub = transportFee + stairFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
-            const tax = Math.round((foodSub + serviceSub) * 0.05);
-            const grand = foodSub + serviceSub + tax;
+            
+            let tax = Math.round((foodSub + serviceSub) * 0.05);
+            let grand = foodSub + serviceSub + tax;
+            
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
             document.getElementById('grand-total').innerText = `$${grand.toLocaleString()}`;
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        // --- 核心新功能：整合驗證、PDF 下載與送出 ---
-
-       // 找到負責下載 PDF 的函式 (例如 downloadPDF 或 processOrder)
-async function downloadPDF() {
-    const element = document.getElementById('quotation-content');
-    const orderId = document.getElementById('order-id').innerText;
-    
-    // 這裡就是「深度優化」的參數設定區
-    const opt = {
-        margin: 10,
-        filename: `木人艸報價單_${orderId}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true, 
-            windowWidth: 1100 // 關鍵優化：強制以 1100px 寬度擷取，防止跑版
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { 
-            mode: ['avoid-all', 'css'] // 關鍵優化：優化分頁邏輯，消除空白頁
+        function openLightbox(url) {
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox').style.display = 'flex';
         }
-    };
 
-    // 執行 PDF 下載
-    return html2pdf().set(opt).from(element).save();
-}
+        // --- 核心入口流程 ---
+        async function processOrder() {
+            const btn = document.getElementById('main-submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
 
-// 這是你提供的 postToMake 函式，維持原樣即可
-async function postToMake() {
-    const orderData = {
-        orderId: document.getElementById('order-id').innerText,
-        timestamp: document.getElementById('order-date').value,
-        customer: {
-            name: document.getElementById('contact-name').value,
-            company: document.getElementById('company-name').value,
-            taxId: document.getElementById('tax-id').value,
-            phone: document.getElementById('phone-number').value
-        },
-        delivery: {
-            date: document.getElementById('delivery-date').value,
-            time: document.getElementById('delivery-time').value,
-            address: document.getElementById('delivery-address').value,
-            floor: document.getElementById('floor').value,
-            parking: document.querySelector('input[name="parking"]:checked').value
-        },
-        items: cart,
-        financials: {
-            foodSub: document.getElementById('food-total').innerText,
-            serviceSub: document.getElementById('service-total').innerText,
-            tax: document.getElementById('tax-total').innerText,
-            total: document.getElementById('grand-total').innerText,
-            deposit: document.getElementById('deposit-total').innerText
+            if (!validateForm()) return;
+
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            btnText.innerText = "訂單處理中...";
+            spinner.classList.remove('hidden');
+
+            try {
+                // 1. 下載優化後的 PDF
+                await downloadPDF();
+                // 2. 提交 JSON 到 Make
+                await postToMake();
+
+                btnText.innerText = "訂單已成功送出！";
+                spinner.classList.add('hidden');
+                btn.classList.replace('bg-black', 'bg-green-600');
+                alert("下單成功！報價單 PDF 已下載，系統已收到您的資料。");
+            } catch (error) {
+                console.error(error);
+                alert("處理發生錯誤，請稍後再試。");
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.innerText = "確認資訊並送出訂單";
+            }
         }
-    };
-
-    console.log("資料發送中...", orderData);
-    
-    // 如果有 Webhook 則在此 fetch
-    // await fetch('YOUR_MAKE_URL', { method: 'POST', body: JSON.stringify(orderData) });
-    
-    return new Promise(resolve => setTimeout(resolve, 1500));
-}
 
         function validateForm() {
-            const requiredInputs = [
-                { id: 'delivery-date', label: '送餐日期' },
-                { id: 'delivery-time', label: '送餐時間' },
-                { id: 'contact-name', label: '聯絡人' },
-                { id: 'company-name', label: '公司名稱' },
-                { id: 'tax-id', label: '公司統編' },
-                { id: 'guest-count', label: '用餐人數' },
-                { id: 'phone-number', label: '手機號碼' },
-                { id: 'delivery-address', label: '送餐地址' },
-                { id: 'floor', label: '樓層' }
-            ];
+            const required = ['delivery-date', 'contact-name', 'company-name', 'tax-id', 'phone-number', 'delivery-address', 'floor'];
             let errors = [];
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
-            requiredInputs.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (!el.value || el.value.trim() === "") {
-                    errors.push(item.label);
-                    el.classList.add('input-error');
-                }
+            required.forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('input-error');
+                if (!el.value) { errors.push(id); el.classList.add('input-error'); }
             });
-
-            const parking = document.querySelector('input[name="parking"]:checked');
-            if (!parking) {
-                errors.push('地下停車場');
-                document.getElementById('parking-container').classList.add('bg-red-50');
-            }
-
+            if (!document.querySelector('input[name="parking"]:checked')) errors.push('停車資訊');
             if (Object.keys(cart).length === 0) errors.push('餐點明細');
-
-            if (errors.length > 0) {
-                alert("請檢查填寫完整性：" + errors.join(', '));
-                return false;
-            }
+            
+            if (errors.length > 0) { alert("請填寫所有標記 * 的欄位。"); return false; }
             return true;
         }
 
-        function downloadPDF() {
+        async function downloadPDF() {
             const element = document.getElementById('quotation-content');
             const orderId = document.getElementById('order-id').innerText;
             const opt = {
-                margin: [10, 10],
+                margin: 10,
                 filename: `木人艸報價單_${orderId}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas: { scale: 2, useCORS: true, windowWidth: 1100 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'avoid-all' }
+                pagebreak: { mode: ['avoid-all', 'css'] }
             };
-            // 使用 html2pdf 套件下載
             return html2pdf().set(opt).from(element).save();
         }
 
         async function postToMake() {
             const orderData = {
                 orderId: document.getElementById('order-id').innerText,
-                timestamp: document.getElementById('order-date').value,
                 customer: {
                     name: document.getElementById('contact-name').value,
                     company: document.getElementById('company-name').value,
@@ -485,32 +414,15 @@ async function postToMake() {
                 },
                 delivery: {
                     date: document.getElementById('delivery-date').value,
-                    time: document.getElementById('delivery-time').value,
                     address: document.getElementById('delivery-address').value,
-                    floor: document.getElementById('floor').value,
                     parking: document.querySelector('input[name="parking"]:checked').value
                 },
                 items: cart,
-                financials: {
-                    foodSub: document.getElementById('food-total').innerText,
-                    serviceSub: document.getElementById('service-total').innerText,
-                    tax: document.getElementById('tax-total').innerText,
-                    total: document.getElementById('grand-total').innerText,
-                    deposit: document.getElementById('deposit-total').innerText
-                }
+                total: document.getElementById('grand-total').innerText
             };
-
-            console.log("JSON 資料準備發送:", orderData);
-            
-            /* 如果要對接真實 Make.com Webhook，請取消以下註解：
-            const response = await fetch('YOUR_MAKE_WEBHOOK_URL', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-            */
-            
-            // 模擬網路傳輸延遲
+            console.log("資料發送:", orderData);
+            // 此處更換為您的 Make Webhook
+            // await fetch('YOUR_MAKE_WEBHOOK_URL', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(orderData)});
             return new Promise(resolve => setTimeout(resolve, 1500));
         }
 

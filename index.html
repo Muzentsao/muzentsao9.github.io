@@ -67,9 +67,9 @@
                         <input type="date" id="delivery-date" class="no-border-input text-center font-bold">
                     </td>
                     <td colspan="5" class="text-alert">
-                        ● 預訂限制：需於出餐前 5 個工作天預訂（不含國定假日與週末）<br>
+                        ● 預訂限制：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）<br>
                         ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>
-                        ● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元進行撤場
+                        ● 撤場規定：若撤場時間晚於 18:00，則另議隔日撤場或加價延遲撤場
                     </td>
                 </tr>
                 <tr>
@@ -157,7 +157,6 @@
     </div>
 
     <script>
-        // --- 產品資料保持不變 ---
         const products = [
             { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
             { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
@@ -203,18 +202,14 @@
 
         function init() {
             const now = new Date();
-            // 設定派單日期顯示
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             
-            // --- 重點：鎖定未來的 7 天 ---
-            // 計算 7 天後的日期
+            // 保持鎖定未來 7 天的邏輯
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
-            // 轉換為 YYYY-MM-DD 格式以符合 input date 的要求
             const minDateString = minDate.toISOString().split("T")[0];
             document.getElementById('delivery-date').min = minDateString;
 
-            // 渲染餐點列表
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
                 const tr = document.createElement('tr');
@@ -246,7 +241,6 @@
             calculateTotal();
         }
 
-        // --- 核心計算邏輯保持不變 ---
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';

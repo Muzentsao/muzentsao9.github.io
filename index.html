@@ -94,7 +94,7 @@
                 <tr>
                     <td class="header-bg">場地需求備註</td>
                     <td colspan="7" class="bg-white">
-                        <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求（例如：進場動線、電梯載重等）" class="no-border-input">
+                        <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求（例如：進場動線、電梯載重限制等）" class="no-border-input">
                         <div class="mt-1 px-2 py-1 bg-blue-50 border-l-4 border-blue-400">
                             <p class="text-xs text-blue-800 leading-relaxed">
                                 <span class="font-bold">建議：</span>現場需有基本的水電供應（以符合衛生安全）
@@ -142,6 +142,23 @@
                 <tbody>
                     <tr><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (需回收/運費$1,500)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
                     <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
+                    <tr>
+                        <td class="text-center font-medium text-orange-700">人工爬梯搬運</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <select id="stair-count" class="no-border-input font-bold w-20 text-orange-700" onchange="calculateTotal()">
+                                    <option value="0">無需求</option>
+                                    <option value="1">1 層</option>
+                                    <option value="2">2 層</option>
+                                    <option value="3">3 層</option>
+                                    <option value="4">4 層</option>
+                                </select>
+                                <span class="text-[10px] text-gray-400 font-normal">(每層 $3,500，特殊梯形另議)</span>
+                            </div>
+                        </td>
+                        <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
+                        <td class="text-xs">按選擇層數計算</td>
+                    </tr>
                     <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具 (內含包材)</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數帶入</td></tr>
                 </tbody>
             </table>
@@ -153,6 +170,9 @@
                 <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
                 <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
                 <p>3. 支付手續費：刷卡需支付 5% 手續費。</p>
+                <div class="mt-2 text-orange-700 font-medium">
+                    5. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元（特殊梯形另議）。
+                </div>
                 <div class="mt-3 pt-3 border-t border-gray-300">
                     <p class="text-amber-700 font-bold">
                         <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
@@ -287,15 +307,25 @@
         function calculateTotal() {
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
+            
+            // 交通費計算
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
             document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
-            const serviceSub = transportFee;
+            
+            // 人工爬梯費計算
+            const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
+            const stairFee = stairCount * 3500;
+            document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
+
+            const serviceSub = transportFee + stairFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
+            
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
+            
             const tax = Math.round((foodSub + serviceSub) * 0.05);
             const grand = foodSub + serviceSub + tax;
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
@@ -308,7 +338,8 @@
                 customerInfo: {
                     deliveryDate: document.getElementById('delivery-date').value,
                     deliveryTime: document.getElementById('delivery-time').value,
-                    venueRemarks: document.getElementById('venue-remarks').value
+                    venueRemarks: document.getElementById('venue-remarks').value,
+                    stairCount: document.getElementById('stair-count').value
                 },
                 items: cart, 
                 total: document.getElementById('grand-total').innerText 

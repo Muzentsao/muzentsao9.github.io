@@ -25,9 +25,9 @@
         
         /* 標籤 Badge 樣式 */
         .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 2px; }
-        .badge-vege { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; } /* 素食標籤 */
-        .badge-meat { background-color: #fff3e0; color: #ef6c00; border: 1px solid #ffe0b2; } /* 肉類標籤 */
-        .badge-gray { background-color: #f5f5f5; color: #757575; border: 1px solid #e0e0e0; } /* 一般備註 */
+        .badge-vege { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .badge-meat { background-color: #fff3e0; color: #ef6c00; border: 1px solid #ffe0b2; }
+        .badge-gray { background-color: #f5f5f5; color: #757575; border: 1px solid #e0e0e0; }
 
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
@@ -57,13 +57,22 @@
         <div class="table-responsive mb-8">
             <table class="w-full pdf-table">
                 <tr>
-                    <td class="header-bg w-24">派單日期</td><td colspan="2"><input type="text" class="no-border-input" value="2025/11/4 0:00" readonly></td>
+                    <td class="header-bg w-24">派單日期</td><td colspan="2"><input type="text" id="order-date" class="no-border-input" readonly></td>
                     <td class="header-bg w-24">訂單編號</td><td colspan="2">Y_20250909-01</td>
                     <td class="header-bg w-24">報價業務</td><td>Yvonne</td>
                 </tr>
                 <tr>
-                    <td class="header-bg">送餐日期</td><td colspan="2" class="text-center font-bold"><input type="text" placeholder="  月  日" class="no-border-input text-center"></td>
-                    <td colspan="5" class="text-alert">● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元進行撤場</td>
+                    <td class="header-bg">送餐日期</td>
+                    <td colspan="2" class="text-center font-bold">
+                        <input type="date" id="delivery-date" class="no-border-input text-center font-bold" onchange="calculateDeadline()">
+                        <div id="deadline-container" class="hidden mt-1 text-[10px] text-red-600 font-normal border-t border-red-100 pt-1">
+                            最後修改期限：<span id="deadline-date">---</span>
+                        </div>
+                    </td>
+                    <td colspan="5" class="text-alert">
+                        ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>
+                        ● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元進行撤場
+                    </td>
                 </tr>
                 <tr>
                     <td class="header-bg">聯絡人</td><td><input type="text" class="no-border-input" placeholder="姓名"></td>
@@ -128,8 +137,9 @@
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
             <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-2 uppercase">訂購須知</p>
-                <p>1. 需於餐會前兩週支付七成定金。</p>
-                <p>2. 刷卡需支付 5% 手續費。</p>
+                <p class="text-red-700 font-bold">1. 最後修改與下單期限：需於「出餐前 5 個工作天」完成（不含國定假日與週末）。</p>
+                <p>2. 需於餐會前兩週支付七成定金。</p>
+                <p>3. 刷卡需支付 5% 手續費。</p>
             </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
@@ -143,13 +153,14 @@
         </div>
 
         <div class="mt-12 flex flex-wrap gap-4 no-print justify-center">
+            <button onclick="window.print()" class="bg-gray-200 text-black px-10 py-3 rounded-full font-bold hover:bg-gray-300 transition shadow-lg">列印 / 存成 PDF</button>
             <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認並提交訂單 (JSON)</button>
         </div>
     </div>
 
     <script>
+        // 資料集保持不變
         const products = [
-            // 小食系列 (20項) [cite: 11, 17]
             { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
             { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
             { id: 'S03', cat: 'appetizer', name: '鹽麴雞肉墨西哥捲餅', tags: ['雞肉'], img: '18.鹽麴雞肉墨西哥捲餅.jpg', specs: [{ label: '中盒 (22入)', price: 1650 }] },
@@ -170,8 +181,6 @@
             { id: 'S18', cat: 'appetizer', name: '番茄莎莎玉米脆片', tags: ['五辛素'], img: '19.番茄莎莎玉米脆片(五辛素).jpg', specs: [{ label: '中盒', price: 1000 }] },
             { id: 'S19', cat: 'appetizer', name: '美式炸物組合', tags: [], img: '21.美式炸物組合.jpg', specs: [{ label: '中盒', price: 1050 }] },
             { id: 'S20', cat: 'appetizer', name: '檸檬酸辣翅小腿', tags: ['雞肉'], img: '22.檸檬酸辣翅小腿.jpg', specs: [{ label: '中盒', price: 1600 }] },
-
-            // 甜點系列 (16項) [cite: 18, 20]
             { id: 'D01', cat: 'dessert', name: '冰心葡式蛋塔', tags: [], img: '冰心葡式蛋塔.png', specs: [{ label: '中盒 (24入)', price: 1200 }] },
             { id: 'D02', cat: 'dessert', name: '迷你棉花糖檸檬塔', tags: ['蛋奶素'], img: '25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg', specs: [{ label: '中盒 (24入)', price: 1440 }] },
             { id: 'D03', cat: 'dessert', name: '小倉月燒(紅豆)', tags: ['蛋奶素'], img: '26.小倉月燒.jpg', specs: [{ label: '中盒 (24入)', price: 720 }] },
@@ -182,14 +191,12 @@
             { id: 'D08', cat: 'dessert', name: '放牧雞蛋肉桂布丁麵包', tags: [], img: '31.放牧雞蛋肉桂布丁麵包.jpg', specs: [{ label: '中盒 (28入)', price: 1400 }] },
             { id: 'D09', cat: 'dessert', name: '烏龍茶瑪德蓮', tags: ['蛋奶素'], img: '32.烏龍茶瑪德蓮（大）.jpg', specs: [{ label: '中盒 (32入)', price: 2400 }] },
             { id: 'D10', cat: 'dessert', name: '台東洛神花瑪德蓮', tags: ['蛋奶素'], img: '33.洛神花瑪德蓮（大）.jpg', specs: [{ label: '中盒 (32入)', price: 2400 }] },
-            { id: 'D11', cat: 'dessert', name: '焦糖海鹽磅蛋糕', tags: ['蛋奶素'], img: '37.焦糖海鹽磅蛋糕 (蛋奶素).jpg', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: 'D11', cat: 'dessert', name: '焦 caramel 海鹽磅蛋糕', tags: ['蛋奶素'], img: '37.焦糖海鹽磅蛋糕 (蛋奶素).jpg', specs: [{ label: '中盒 (49入)', price: 2450 }] },
             { id: 'D12', cat: 'dessert', name: '椰絲鳳梨磅蛋糕', tags: ['蛋奶素'], img: '39.椰絲鳳梨磅蛋糕(蛋奶素).jpg', specs: [{ label: '中盒 (49入)', price: 2450 }] },
             { id: 'D13', cat: 'dessert', name: '繽紛馬卡龍', tags: ['蛋奶素'], img: '41.繽紛馬卡龍.jpg', specs: [{ label: '中盒 (28入)', price: 840 }] },
             { id: 'D14', cat: 'dessert', name: '茶拉米蘇', tags: ['蛋奶素'], img: '45.茶拉米蘇 (蛋奶素).jpg', specs: [{ label: '中盒 (24入)', price: 2040 }] },
             { id: 'D15', cat: 'dessert', name: '日式抹茶蕨餅', tags: ['蛋奶素'], img: '43.抹茶蕨餅杯 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1680 }] },
             { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', tags: ['全素'], img: '44.黑糖桂花釀梔子粉粿 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1920 }] },
-
-            // 飲品系列 (2項) [cite: 20]
             { id: 'B01', cat: 'beverage', name: '有機蜜香紅茶(冰桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
             { id: 'B02', cat: 'beverage', name: '公平貿易熱咖啡(桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
@@ -197,12 +204,18 @@
         let cart = {};
 
         function init() {
+            // 初始化派單日期為今天
+            const now = new Date();
+            document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            
+            // 初始化送餐日期最小值為今天
+            document.getElementById('delivery-date').min = now.toISOString().split("T")[0];
+
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
                 
-                // 處理標籤 HTML
                 let tagsHtml = p.tags.map(tag => {
                     let className = 'badge-gray';
                     if (['蛋奶素', '全素', '五辛素'].includes(tag)) className = 'badge-vege';
@@ -229,8 +242,40 @@
             calculateTotal();
         }
 
-        // ... 保持原有 Lightbox, updateRow, updateQty, calculateTotal, submitToMake 邏輯不變 ...
+        // --- 新增：工作日期限計算邏輯 ---
+        function calculateDeadline() {
+            const dateVal = document.getElementById('delivery-date').value;
+            const container = document.getElementById('deadline-container');
+            const display = document.getElementById('deadline-date');
 
+            if (!dateVal) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            let deliveryDate = new Date(dateVal);
+            let count = 0;
+            let deadline = new Date(deliveryDate);
+
+            // 往回推 5 個工作天 (排除週六 6, 週日 0)
+            while (count < 5) {
+                deadline.setDate(deadline.getDate() - 1);
+                let day = deadline.getDay();
+                if (day !== 0 && day !== 6) {
+                    count++;
+                }
+            }
+
+            const y = deadline.getFullYear();
+            const m = deadline.getMonth() + 1;
+            const d = deadline.getDate();
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            
+            display.innerText = `${y}/${m}/${d} (${weekDays[deadline.getDay()]}) 17:00 前`;
+            container.classList.remove('hidden');
+        }
+
+        // --- 原有邏輯保持不變 ---
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';
@@ -274,7 +319,14 @@
         }
 
         function submitToMake() {
-            const data = { items: cart, total: document.getElementById('grand-total').innerText };
+            const data = { 
+                customerInfo: {
+                    deliveryDate: document.getElementById('delivery-date').value,
+                    deadline: document.getElementById('deadline-date').innerText
+                },
+                items: cart, 
+                total: document.getElementById('grand-total').innerText 
+            };
             console.log("JSON 資料:", data);
             alert("訂單已成功打包！請見 Console。");
         }

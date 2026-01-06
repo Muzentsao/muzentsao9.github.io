@@ -38,6 +38,30 @@
         /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* 1. table-layout: fixed 確保下載後的 PDF 欄位比例與網頁一致 */
+.pdf-table { 
+    table-layout: fixed; 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+/* 2. 處理文字溢出，避免撐開表格導致排版崩壞 */
+.pdf-table td, .pdf-table th { 
+    border: 1px solid #000; 
+    padding: 8px; 
+    font-size: 13px; 
+    word-wrap: break-word; /* 強制長文字換行 */
+}
+
+/* 3. 分頁控制：防止表格的「列(tr)」被從中間切斷到兩頁 */
+tr { 
+    page-break-inside: avoid; 
+} 
+
+/* 4. 確保表格標題在每一頁都會重複出現 (視 PDF 引擎支援度) */
+thead { 
+    display: table-header-group; 
+}
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -335,43 +359,66 @@
 
         // --- 核心新功能：整合驗證、PDF 下載與送出 ---
 
-        async function processOrder() {
-            const btn = document.getElementById('main-submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnSpinner = document.getElementById('btn-spinner');
-
-            // 1. 執行表單驗證
-            const isValid = validateForm();
-            if (!isValid) return;
-
-            // 2. UI 載入中狀態 (防止連點)
-            btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
-            btnText.innerText = "訂單處理中...";
-            btnSpinner.classList.remove('hidden');
-
-            try {
-                // 3. 生成並下載 PDF
-                await downloadPDF();
-
-                // 4. 提交資料到 Make.com (JSON)
-                await postToMake();
-
-                // 5. 成功完成
-                btnText.innerText = "訂單提交成功！";
-                btnSpinner.classList.add('hidden');
-                btn.classList.replace('bg-black', 'bg-green-600');
-                alert("恭喜您！訂單已成功提交，報價單 PDF 已自動下載。");
-
-            } catch (error) {
-                console.error(error);
-                alert("發生錯誤，請稍後再試。");
-                btn.disabled = false;
-                btn.classList.remove('opacity-70', 'cursor-not-allowed');
-                btnText.innerText = "確認並送出訂單";
-                btnSpinner.classList.add('hidden');
-            }
+       // 找到負責下載 PDF 的函式 (例如 downloadPDF 或 processOrder)
+async function downloadPDF() {
+    const element = document.getElementById('quotation-content');
+    const orderId = document.getElementById('order-id').innerText;
+    
+    // 這裡就是「深度優化」的參數設定區
+    const opt = {
+        margin: 10,
+        filename: `木人艸報價單_${orderId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            windowWidth: 1100 // 關鍵優化：強制以 1100px 寬度擷取，防止跑版
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { 
+            mode: ['avoid-all', 'css'] // 關鍵優化：優化分頁邏輯，消除空白頁
         }
+    };
+
+    // 執行 PDF 下載
+    return html2pdf().set(opt).from(element).save();
+}
+
+// 這是你提供的 postToMake 函式，維持原樣即可
+async function postToMake() {
+    const orderData = {
+        orderId: document.getElementById('order-id').innerText,
+        timestamp: document.getElementById('order-date').value,
+        customer: {
+            name: document.getElementById('contact-name').value,
+            company: document.getElementById('company-name').value,
+            taxId: document.getElementById('tax-id').value,
+            phone: document.getElementById('phone-number').value
+        },
+        delivery: {
+            date: document.getElementById('delivery-date').value,
+            time: document.getElementById('delivery-time').value,
+            address: document.getElementById('delivery-address').value,
+            floor: document.getElementById('floor').value,
+            parking: document.querySelector('input[name="parking"]:checked').value
+        },
+        items: cart,
+        financials: {
+            foodSub: document.getElementById('food-total').innerText,
+            serviceSub: document.getElementById('service-total').innerText,
+            tax: document.getElementById('tax-total').innerText,
+            total: document.getElementById('grand-total').innerText,
+            deposit: document.getElementById('deposit-total').innerText
+        }
+    };
+
+    console.log("資料發送中...", orderData);
+    
+    // 如果有 Webhook 則在此 fetch
+    // await fetch('YOUR_MAKE_URL', { method: 'POST', body: JSON.stringify(orderData) });
+    
+    return new Promise(resolve => setTimeout(resolve, 1500));
+}
 
         function validateForm() {
             const requiredInputs = [

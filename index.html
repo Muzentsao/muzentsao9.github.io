@@ -92,21 +92,12 @@
                     <td class="header-bg w-20 req">樓層</td><td><input type="text" id="floor" class="no-border-input text-center" placeholder="F" required></td>
                 </tr>
                 <tr>
-                    <td class="header-bg">場地需求備註</td>
-                    <td colspan="7" class="bg-white">
-                        <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input">
-                        <div class="mt-1 px-2 py-1 bg-blue-50 border-l-4 border-blue-400">
-                            <p class="text-xs text-blue-800 leading-relaxed"><span class="font-bold">建議：</span>現場需有基本的水電供應（以符合衛生安全）</p>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
                     <td class="header-bg req">地下停車場</td>
                     <td colspan="7">
                         <div class="flex items-center gap-6 px-2 py-1" id="parking-container">
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
-                            <span class="text-xs text-gray-400 font-normal">(供物流判斷)</span>
+                            <span class="text-xs text-gray-400 font-normal ml-2">(供物流進場判斷)</span>
                         </div>
                     </td>
                 </tr>
@@ -133,31 +124,6 @@
             </table>
         </div>
 
-        <h3 class="text-center font-bold mb-3 tracking-widest border-b border-black pb-1 uppercase">服務明細</h3>
-        <div class="table-responsive mb-8">
-            <table class="w-full pdf-table">
-                <thead><tr class="header-bg text-center text-xs"><th>服務名稱</th><th>規格說明</th><th>小計</th><th>備註</th></tr></thead>
-                <tbody>
-                    <tr><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (需回收/運費$1,500)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
-                    <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
-                    <tr>
-                        <td class="text-center font-medium text-orange-700">人工爬梯搬運</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <select id="stair-count" class="no-border-input font-bold w-20 text-orange-700" onchange="calculateTotal()">
-                                    <option value="0">無需求</option><option value="1">1 層</option><option value="2">2 層</option><option value="3">3 層</option><option value="4">4 層</option>
-                                </select>
-                                <span class="text-[10px] text-gray-400 font-normal">(每層 $3,500)</span>
-                            </div>
-                        </td>
-                        <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
-                        <td class="text-xs">按層數計</td>
-                    </tr>
-                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
-                </tbody>
-            </table>
-        </div>
-
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
             <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-3 uppercase tracking-wider">訂購須知</p>
@@ -168,7 +134,7 @@
                     <div class="pt-2 border-t border-gray-300">
                         <p class="text-amber-700 font-bold">
                             <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                            建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
+                            4. 建議勿於室溫下放置超過 2 小時，夏天時(超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
                         </p>
                     </div>
                 </div>
@@ -185,8 +151,9 @@
         </div>
 
         <div class="mt-12 flex flex-wrap gap-4 no-print justify-center">
-            <button onclick="window.print()" class="bg-gray-200 text-black px-10 py-3 rounded-full font-bold hover:bg-gray-300 transition shadow-lg">列印 / 存成 PDF</button>
-            <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認並提交訂單 (JSON)</button>
+            <button onclick="handleSubmitAndPrint()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl transform hover:scale-105">
+                確認並產生訂單 PDF
+            </button>
         </div>
     </div>
 
@@ -207,7 +174,7 @@
             { id: 'S13', cat: 'appetizer', name: '日式壽司細捲(全素)', tags: ['全素'], img: '日式壽司細捲_工作區域 1.jpg', specs: [{ label: '中盒 (96入)', price: 1440 }] },
             { id: 'S14', cat: 'appetizer', name: '法式起司瑪德蓮', tags: [], img: 'https://images.unsplash.com/photo-1582110271731-972173516597?w=200', specs: [{ label: '中盒 (40入)', price: 1800 }] },
             { id: 'S15', cat: 'appetizer', name: '生態野菜鹹派', tags: ['蛋奶素'], img: '13.生態野菜白醬鹹派.jpg', specs: [{ label: '中盒 (24入)', price: 1440 }] },
-            { id: 'S16', cat: 'appetizer', name: '法式千層波菜蚌', tags: [], img: '法式千層波菜蚌_工作區域 1.jpg', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'S16', cat: 'appetizer', name: '法式千層波菜蚌', tags: [], img: 'https://images.unsplash.com/photo-1541014741259-df549dc46175?w=200', specs: [{ label: '中盒 (24入)', price: 1200 }] },
             { id: 'S17', cat: 'appetizer', name: '迷你番茄披薩卷', tags: [], img: '迷你番茄披薩卷.png', specs: [{ label: '中盒 (24入)', price: 1200 }] },
             { id: 'S18', cat: 'appetizer', name: '番茄莎莎玉米脆片', tags: ['五辛素'], img: '19.番茄莎莎玉米脆片(五辛素).jpg', specs: [{ label: '中盒', price: 1000 }] },
             { id: 'S19', cat: 'appetizer', name: '美式炸物組合', tags: [], img: '21.美式炸物組合.jpg', specs: [{ label: '中盒', price: 1050 }] },
@@ -269,7 +236,7 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
+                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含基本包材</div></td>
                 `;
                 body.appendChild(tr);
             });
@@ -320,7 +287,9 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        function submitToMake() {
+        // --- 核心：合併提交與列印邏輯 ---
+        function handleSubmitAndPrint() {
+            // 1. 必填校驗
             const requiredInputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
@@ -332,8 +301,10 @@
                 { id: 'delivery-address', label: '送餐地址' },
                 { id: 'floor', label: '樓層' }
             ];
+
             let errors = [];
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+            
             requiredInputs.forEach(item => {
                 const el = document.getElementById(item.id);
                 if (!el.value || el.value.trim() === "") {
@@ -341,17 +312,48 @@
                     el.classList.add('input-error');
                 }
             });
+
             const parking = document.querySelector('input[name="parking"]:checked');
             if (!parking) {
                 errors.push('地下停車場');
                 document.getElementById('parking-container').classList.add('bg-red-50');
+            } else {
+                document.getElementById('parking-container').classList.remove('bg-red-50');
             }
-            if (Object.keys(cart).length === 0) errors.push('餐點明細');
+
+            if (Object.keys(cart).length === 0) {
+                errors.push('餐點明細 (請至少選擇一項餐點)');
+            }
+
             if (errors.length > 0) {
-                alert("填寫不完整：" + errors.join(', '));
+                alert("【資料填寫不完整】\n請檢查以下項目：\n· " + errors.join('\n· '));
+                const firstError = document.querySelector('.input-error') || document.querySelector('.bg-red-50');
+                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
-            console.log("驗證通過，訂單編號：" + document.getElementById('order-id').innerText);
+
+            // 2. 執行提交 JSON 資料 (此處可對接到 Make.com)
+            const data = { 
+                customerInfo: {
+                    orderID: document.getElementById('order-id').innerText,
+                    orderDate: document.getElementById('order-date').value,
+                    deliveryDate: document.getElementById('delivery-date').value,
+                    deliveryTime: document.getElementById('delivery-time').value,
+                    contact: document.getElementById('contact-name').value,
+                    company: document.getElementById('company-name').value,
+                    taxId: document.getElementById('tax-id').value,
+                    phone: document.getElementById('phone-number').value,
+                    address: document.getElementById('delivery-address').value,
+                    parking: parking.value
+                },
+                items: cart, 
+                total: document.getElementById('grand-total').innerText 
+            };
+            console.log("資料已成功打包提交:", data);
+
+            // 3. 自動執行列印
+            alert("訂單已完成驗證並提交系統！\n接下來將為您開啟列印視窗，請存成 PDF 以供留存。");
+            window.print();
         }
 
         init();

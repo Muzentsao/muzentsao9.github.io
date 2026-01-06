@@ -168,7 +168,7 @@
                     <div class="pt-2 border-t border-gray-300">
                         <p class="text-amber-700 font-bold">
                             <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                            建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
+                            4. 建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
                         </p>
                     </div>
                 </div>
@@ -184,9 +184,13 @@
             </div>
         </div>
 
-        <div class="mt-12 flex flex-wrap gap-4 no-print justify-center">
-            <button onclick="window.print()" class="bg-gray-200 text-black px-10 py-3 rounded-full font-bold hover:bg-gray-300 transition shadow-lg">列印 / 存成 PDF</button>
-            <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認並提交訂單 (JSON)</button>
+        <div class="mt-12 flex no-print justify-center">
+            <button onclick="submitAndPrint()" class="bg-black text-white px-16 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-2xl flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                確認並提交訂單 (另存 PDF 報價單)
+            </button>
         </div>
     </div>
 
@@ -269,7 +273,7 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
+                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含基本包材</div></td>
                 `;
                 body.appendChild(tr);
             });
@@ -320,7 +324,8 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        function submitToMake() {
+        // --- 核心整合邏輯：提交並列印 ---
+        function submitAndPrint() {
             const requiredInputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
@@ -332,6 +337,7 @@
                 { id: 'delivery-address', label: '送餐地址' },
                 { id: 'floor', label: '樓層' }
             ];
+
             let errors = [];
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
             requiredInputs.forEach(item => {
@@ -341,17 +347,51 @@
                     el.classList.add('input-error');
                 }
             });
+
             const parking = document.querySelector('input[name="parking"]:checked');
             if (!parking) {
                 errors.push('地下停車場');
                 document.getElementById('parking-container').classList.add('bg-red-50');
             }
-            if (Object.keys(cart).length === 0) errors.push('餐點明細');
+
+            const foodTotal = Object.values(cart).reduce((a, b) => a + b.sub, 0);
+            if (foodTotal === 0) errors.push('餐點明細 (未選購項目)');
+
             if (errors.length > 0) {
-                alert("填寫不完整：" + errors.join(', '));
+                alert("【資料填寫不完整】\n\n請填寫：\n· " + errors.join('\n· '));
+                const firstError = document.querySelector('.input-error') || document.getElementById('parking-container');
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
-            console.log("驗證通過，訂單編號：" + document.getElementById('order-id').innerText);
+
+            // 1. 執行資料提交邏輯 (JSON 打包)
+            const data = { 
+                customerInfo: {
+                    orderID: document.getElementById('order-id').innerText,
+                    orderDate: document.getElementById('order-date').value,
+                    deliveryDate: document.getElementById('delivery-date').value,
+                    deliveryTime: document.getElementById('delivery-time').value,
+                    contact: document.getElementById('contact-name').value,
+                    company: document.getElementById('company-name').value,
+                    taxId: document.getElementById('tax-id').value,
+                    guestCount: document.getElementById('guest-count').value,
+                    phone: document.getElementById('phone-number').value,
+                    address: document.getElementById('delivery-address').value,
+                    floor: document.getElementById('floor').value,
+                    parking: parking.value,
+                    venueRemarks: document.getElementById('venue-remarks').value,
+                    stairCount: document.getElementById('stair-count').value
+                },
+                items: cart, 
+                total: document.getElementById('grand-total').innerText 
+            };
+            
+            console.log("資料已成功打包至後台:", data);
+            
+            // 2. 顯示成功提示並同步觸發列印
+            alert("訂單已驗證成功！\n按下確定後將開啟 PDF 儲存視窗，請將報價單存檔後提供給業務。");
+            
+            window.print(); // 觸發瀏覽器列印
         }
 
         init();

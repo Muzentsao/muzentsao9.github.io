@@ -35,7 +35,6 @@
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -172,14 +171,11 @@
             <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-3 uppercase tracking-wider">訂購須知</p>
                 <div class="space-y-2">
-                    <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
+                    <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂。</p>
                     <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                    <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元（特殊梯形另議）。</p>
+                    <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元。</p>
                     <div class="pt-2 border-t border-gray-300">
-                        <p class="text-amber-700 font-bold">
-                            <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                            4. 建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
-                        </p>
+                        <p class="text-amber-700 font-bold">4. 建議勿於室溫下放置超過 2 小時，夏天勿超過 1 小時。</p>
                     </div>
                 </div>
             </div>
@@ -196,10 +192,9 @@
 
         <div class="mt-12 flex flex-col items-center gap-4 no-print">
             <button id="main-submit-btn" onclick="processOrder()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl flex items-center gap-3">
-                <span id="btn-text">確認並送出訂單</span>
+                <span id="btn-text">確認並下載報價單 PDF</span>
                 <span id="btn-spinner" class="hidden spinner"></span>
             </button>
-            <p class="text-xs text-gray-400 font-medium">※ 點擊後系統將自動下載 PDF 並將資料傳送至後端系統</p>
         </div>
     </div>
 
@@ -250,39 +245,28 @@
         function generateOrderID() {
             const now = new Date();
             const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-            const timePart = now.getTime().toString().slice(-3);
-            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            return `Y_${dateStr}-${timePart}${randomPart}`;
+            return `QUO-${dateStr}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
         }
 
         function init() {
             const now = new Date();
-            document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             document.getElementById('order-id').innerText = generateOrderID();
-            const minDate = new Date();
-            minDate.setDate(now.getDate() + 7); 
-            const minDateString = minDate.toISOString().split("T")[0];
-            document.getElementById('delivery-date').min = minDateString;
-
+            
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
+                if(!body) return;
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
-                let tagsHtml = p.tags.map(tag => {
-                    let className = 'badge-gray';
-                    if (['蛋奶素', '全素', '五辛素'].includes(tag)) className = 'badge-vege';
-                    if (['牛肉', '雞肉'].includes(tag)) className = 'badge-meat';
-                    return `<span class="badge ${className}">${tag}</span>`;
-                }).join(' ');
                 let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
                 tr.innerHTML = `
                     <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
                     <td class="font-bold">${p.name}</td>
                     <td><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
-                    <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
+                    <td class="text-right" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
+                    <td class="text-xs">內含包材</td>
                 `;
                 body.appendChild(tr);
             });
@@ -317,11 +301,9 @@
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
-            const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
-            const transportFee = isRoundTrip ? 1500 : 500;
+            const transportFee = (foodSub >= 20000 || hasBucket || hasRentalProps) ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
-            const stairFee = stairCount * 3500;
+            const stairFee = (parseInt(document.getElementById('stair-count').value) || 0) * 3500;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
             const serviceSub = transportFee + stairFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
@@ -333,138 +315,82 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        // --- 核心新功能：整合驗證、PDF 下載與送出 ---
-
         async function processOrder() {
             const btn = document.getElementById('main-submit-btn');
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
 
-            // 1. 執行表單驗證
-            const isValid = validateForm();
-            if (!isValid) return;
+            if (!validateForm()) return;
 
-            // 2. UI 載入中狀態 (防止連點)
             btn.disabled = true;
-            btn.classList.add('opacity-70', 'cursor-not-allowed');
-            btnText.innerText = "訂單處理中...";
-            btnSpinner.classList.remove('hidden');
+            btnText.innerText = "PDF 產生中...";
+            if(btnSpinner) btnSpinner.classList.remove('hidden');
 
             try {
-                // 3. 生成並下載 PDF
                 await downloadPDF();
-
-                // 4. 提交資料到 Make.com (JSON)
-                await postToMake();
-
-                // 5. 成功完成
-                btnText.innerText = "訂單提交成功！";
-                btnSpinner.classList.add('hidden');
+                btnText.innerText = "下載成功";
+                if(btnSpinner) btnSpinner.classList.add('hidden');
                 btn.classList.replace('bg-black', 'bg-green-600');
-                alert("恭喜您！訂單已成功提交，報價單 PDF 已自動下載。");
-
+                alert("報價單 PDF 已成功下載。");
             } catch (error) {
                 console.error(error);
-                alert("發生錯誤，請稍後再試。");
+                alert("產生 PDF 時發生錯誤。");
                 btn.disabled = false;
-                btn.classList.remove('opacity-70', 'cursor-not-allowed');
-                btnText.innerText = "確認並送出訂單";
-                btnSpinner.classList.add('hidden');
+                btnText.innerText = "確認並下載報價單 PDF";
+                if(btnSpinner) btnSpinner.classList.add('hidden');
             }
         }
 
         function validateForm() {
-            const requiredInputs = [
-                { id: 'delivery-date', label: '送餐日期' },
-                { id: 'delivery-time', label: '送餐時間' },
-                { id: 'contact-name', label: '聯絡人' },
-                { id: 'company-name', label: '公司名稱' },
-                { id: 'tax-id', label: '公司統編' },
-                { id: 'guest-count', label: '用餐人數' },
-                { id: 'phone-number', label: '手機號碼' },
-                { id: 'delivery-address', label: '送餐地址' },
-                { id: 'floor', label: '樓層' }
-            ];
+            const required = ['delivery-date', 'contact-name', 'company-name', 'tax-id', 'phone-number', 'delivery-address'];
             let errors = [];
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
-            requiredInputs.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (!el.value || el.value.trim() === "") {
-                    errors.push(item.label);
-                    el.classList.add('input-error');
-                }
+            required.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value) { errors.push(id); el.classList.add('input-error'); }
+                else { el.classList.remove('input-error'); }
             });
-
-            const parking = document.querySelector('input[name="parking"]:checked');
-            if (!parking) {
-                errors.push('地下停車場');
-                document.getElementById('parking-container').classList.add('bg-red-50');
-            }
-
-            if (Object.keys(cart).length === 0) errors.push('餐點明細');
-
-            if (errors.length > 0) {
-                alert("請檢查填寫完整性：" + errors.join(', '));
-                return false;
-            }
+            if (Object.keys(cart).length === 0) errors.push('尚未選擇餐點');
+            if (errors.length > 0) { alert("請填寫完整資訊並選擇餐點。"); return false; }
             return true;
         }
 
-        function downloadPDF() {
+        async function downloadPDF() {
             const element = document.getElementById('quotation-content');
             const orderId = document.getElementById('order-id').innerText;
+            
+            // 建立「影子容器」解決 PDF 跑版與寬度問題
+            const clone = element.cloneNode(true);
+            Object.assign(clone.style, {
+                width: '1050px',
+                position: 'absolute',
+                left: '-9999px',
+                top: '0',
+                backgroundColor: 'white'
+            });
+
+            // 將複製品中的 input/select 內容轉為純文字呈現
+            const originalInputs = element.querySelectorAll('input, select');
+            const clonedInputs = clone.querySelectorAll('input, select');
+            originalInputs.forEach((input, i) => {
+                const span = document.createElement('span');
+                span.innerText = input.value;
+                if (clonedInputs[i].parentElement) {
+                    clonedInputs[i].parentElement.replaceChild(span, clonedInputs[i]);
+                }
+            });
+
+            document.body.appendChild(clone);
+
             const opt = {
                 margin: [10, 10],
                 filename: `木人艸報價單_${orderId}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: 'avoid-all' }
-            };
-            // 使用 html2pdf 套件下載
-            return html2pdf().set(opt).from(element).save();
-        }
-
-        async function postToMake() {
-            const orderData = {
-                orderId: document.getElementById('order-id').innerText,
-                timestamp: document.getElementById('order-date').value,
-                customer: {
-                    name: document.getElementById('contact-name').value,
-                    company: document.getElementById('company-name').value,
-                    taxId: document.getElementById('tax-id').value,
-                    phone: document.getElementById('phone-number').value
-                },
-                delivery: {
-                    date: document.getElementById('delivery-date').value,
-                    time: document.getElementById('delivery-time').value,
-                    address: document.getElementById('delivery-address').value,
-                    floor: document.getElementById('floor').value,
-                    parking: document.querySelector('input[name="parking"]:checked').value
-                },
-                items: cart,
-                financials: {
-                    foodSub: document.getElementById('food-total').innerText,
-                    serviceSub: document.getElementById('service-total').innerText,
-                    tax: document.getElementById('tax-total').innerText,
-                    total: document.getElementById('grand-total').innerText,
-                    deposit: document.getElementById('deposit-total').innerText
-                }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            console.log("JSON 資料準備發送:", orderData);
-            
-            /* 如果要對接真實 Make.com Webhook，請取消以下註解：
-            const response = await fetch('YOUR_MAKE_WEBHOOK_URL', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-            */
-            
-            // 模擬網路傳輸延遲
-            return new Promise(resolve => setTimeout(resolve, 1500));
+            await html2pdf().set(opt).from(clone).save();
+            document.body.removeChild(clone);
         }
 
         init();

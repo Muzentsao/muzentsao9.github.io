@@ -83,7 +83,10 @@
                 </tr>
                 <tr>
                     <td class="header-bg">活動模式</td>
-                    <td><select class="no-border-input font-bold"><option value="派對餐盒">派對餐盒</option><option value="會議餐飲">會議餐飲</option></select></td>
+                    <td class="font-bold px-2">
+                        派對餐盒
+                        <input type="hidden" id="activity-mode" value="派對餐盒">
+                    </td>
                     <td class="header-bg w-20">用餐人數</td><td class="text-center"><input type="number" id="guest-count" class="no-border-input text-center font-bold" value="100" oninput="calculateTotal()"> 人</td>
                     <td class="header-bg w-20">手機號碼</td><td colspan="3"><input type="text" class="no-border-input" placeholder="09XX-XXX-XXX"></td>
                 </tr>
@@ -307,8 +310,6 @@
         function calculateTotal() {
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
-            
-            // 交通費計算
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
@@ -316,14 +317,12 @@
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
             document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
             
-            // 人工爬梯費計算
             const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
             const stairFee = stairCount * 3500;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
 
             const serviceSub = transportFee + stairFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
-            
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
             
             const tax = Math.round((foodSub + serviceSub) * 0.05);
@@ -338,6 +337,7 @@
                 customerInfo: {
                     deliveryDate: document.getElementById('delivery-date').value,
                     deliveryTime: document.getElementById('delivery-time').value,
+                    activityMode: document.getElementById('activity-mode').value, // 抓取固定值
                     venueRemarks: document.getElementById('venue-remarks').value,
                     stairCount: document.getElementById('stair-count').value
                 },

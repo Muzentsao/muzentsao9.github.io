@@ -11,26 +11,21 @@
         .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 25px; position: relative; }
         .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px; font-size: 13px; vertical-align: middle; }
         .header-bg { background-color: #fcf4d9; font-weight: bold; }
-        /* 必填星號樣式 */
         .req::after { content: ' *'; color: #d93025; }
         .category-header { background-color: #f3f4f6; font-weight: bold; text-align: left; padding-left: 15px; border: 1px solid #000; font-size: 14px; color: #444; }
         .text-alert { color: #d93025; font-size: 11px; line-height: 1.5; font-weight: 500; }
         .no-border-input { border: none; width: 100%; background: transparent; outline: none; padding: 4px; }
         .no-border-input:focus { background-color: #fffef0; }
-        /* 錯誤欄位高亮 */
         .input-error { background-color: #fff0f0 !important; border: 1px inset #d93025 !important; }
         input[type="number"] { width: 55px; text-align: center; border: 1px solid #ddd; border-radius: 4px; }
         @media print { .no-print { display: none; } .pdf-container { border: none; box-shadow: none; padding: 0; } }
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        
         .img-preview { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; cursor: zoom-in; transition: transform 0.2s; }
         .img-preview:hover { transform: scale(1.1); border-color: #556b2f; }
-        
         .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 2px; }
         .badge-vege { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .badge-meat { background-color: #fff3e0; color: #ef6c00; border: 1px solid #ffe0b2; }
         .badge-gray { background-color: #f5f5f5; color: #757575; border: 1px solid #e0e0e0; }
-
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     </style>
@@ -60,7 +55,7 @@
             <table class="w-full pdf-table">
                 <tr>
                     <td class="header-bg w-24">派單日期</td><td colspan="2"><input type="text" id="order-date" class="no-border-input" readonly></td>
-                    <td class="header-bg w-24">訂單編號</td><td colspan="2">Y_20250909-01</td>
+                    <td class="header-bg w-24">訂單編號</td><td colspan="2" class="font-mono font-bold text-blue-800" id="order-id">產產生中...</td>
                     <td class="header-bg w-24">報價業務</td><td>Yvonne</td>
                 </tr>
                 <tr>
@@ -105,7 +100,7 @@
                 <tr>
                     <td class="header-bg req">地下停車場</td>
                     <td colspan="7">
-                        <div class="flex items-center gap-6 px-2 py-1">
+                        <div class="flex items-center gap-6 px-2 py-1" id="parking-container">
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
                             <span class="text-xs text-gray-400 font-normal">(供物流判斷)</span>
@@ -170,7 +165,7 @@
                     <div class="pt-2 border-t border-gray-300">
                         <p class="text-amber-700 font-bold">
                             <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                            4. 建議勿於室溫下放置超過 2 小時，並請盡快食用完畢。
+                            4. 建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
                         </p>
                     </div>
                 </div>
@@ -229,16 +224,35 @@
             { id: 'D13', cat: 'dessert', name: '繽紛馬卡龍', tags: ['蛋奶素'], img: '41.繽紛馬卡龍.jpg', specs: [{ label: '中盒 (28入)', price: 840 }] },
             { id: 'D14', cat: 'dessert', name: '茶拉米蘇', tags: ['蛋奶素'], img: '45.茶拉米蘇 (蛋奶素).jpg', specs: [{ label: '中盒 (24入)', price: 2040 }] },
             { id: 'D15', cat: 'dessert', name: '日式抹茶蕨餅', tags: ['蛋奶素'], img: '43.抹茶蕨餅杯 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1680 }] },
-            { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', tags: ['全素'], img: '44.黑糖桂花釀梔子粉粿 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1920 }] },
+            { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', tags: ['全素'], img: '44.黑糖桂花釀梔子粉粿 (全素).jpg', specs: [{ label: 'un(24入)', price: 1920 }] },
             { id: 'B01', cat: 'beverage', name: '有機蜜香紅茶(冰桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
             { id: 'B02', cat: 'beverage', name: '公平貿易熱咖啡(桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
 
         let cart = {};
 
+        // --- 核心功能：產生唯一訂單編號 ---
+        function generateOrderID() {
+            const now = new Date();
+            const dateStr = now.getFullYear().toString() +
+                          (now.getMonth() + 1).toString().padStart(2, '0') +
+                          now.getDate().toString().padStart(2, '0');
+            
+            // 使用「毫秒後三位」+「四位隨機數」，大幅降低同時下單的重複率
+            const timePart = now.getTime().toString().slice(-3);
+            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            
+            return `Y_${dateStr}-${timePart}${randomPart}`;
+        }
+
         function init() {
             const now = new Date();
+            // 派單日期設定
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            
+            // 自動產生唯一編號
+            document.getElementById('order-id').innerText = generateOrderID();
+
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
             const minDateString = minDate.toISOString().split("T")[0];
@@ -314,9 +328,7 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        // --- 核心校驗邏輯 ---
         function submitToMake() {
-            // 1. 定義必填欄位
             const requiredInputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
@@ -330,11 +342,7 @@
             ];
 
             let errors = [];
-            
-            // 清除之前的錯誤樣式
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-
-            // 檢查一般輸入框
             requiredInputs.forEach(item => {
                 const el = document.getElementById(item.id);
                 if (!el.value || el.value.trim() === "") {
@@ -343,34 +351,25 @@
                 }
             });
 
-            // 檢查 Radio (停車場)
             const parking = document.querySelector('input[name="parking"]:checked');
             if (!parking) {
-                errors.push('地下停車場 (是否可供停放)');
-                // 為了視覺提示，將父容器標色
-                document.querySelector('input[name="parking"]').parentElement.parentElement.classList.add('bg-red-50');
+                errors.push('地下停車場');
+                document.getElementById('parking-container').classList.add('bg-red-50');
             } else {
-                document.querySelector('input[name="parking"]').parentElement.parentElement.classList.remove('bg-red-50');
+                document.getElementById('parking-container').classList.remove('bg-red-50');
             }
 
-            // 檢查是否已點餐
             const foodTotal = Object.values(cart).reduce((a, b) => a + b.sub, 0);
-            if (foodTotal === 0) {
-                errors.push('餐點明細 (請至少選購一項餐點)');
-            }
+            if (foodTotal === 0) errors.push('餐點明細 (未選購項目)');
 
-            // 處理結果
             if (errors.length > 0) {
-                alert("【資料填寫不完整】\n\n請檢查以下欄位：\n· " + errors.join('\n· '));
-                // 自動滾動到第一個錯誤欄位
-                const firstError = document.querySelector('.input-error') || document.querySelector('.bg-red-50');
-                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                alert("【資料未完整】\n\n請填寫：\n· " + errors.join('\n· '));
                 return;
             }
 
-            // 資料完整才打包執行
             const data = { 
                 customerInfo: {
+                    orderID: document.getElementById('order-id').innerText, // 確保抓取產生的編號
                     orderDate: document.getElementById('order-date').value,
                     deliveryDate: document.getElementById('delivery-date').value,
                     deliveryTime: document.getElementById('delivery-time').value,
@@ -390,7 +389,7 @@
             };
             
             console.log("驗證通過，JSON 資料:", data);
-            alert("訂單資料已驗證完整，正在打包！");
+            alert("訂單已產生！編號為：" + data.customerInfo.orderID);
         }
 
         init();

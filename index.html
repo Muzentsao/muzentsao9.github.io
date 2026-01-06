@@ -12,9 +12,11 @@
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #fcfcfc; color: #333; }
         .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 25px; position: relative; }
         
-        /* 核心 PDF 表格修正：強制固定寬度與防止斷行 */
+        /* 核心表格設定：解決 PDF 下載後跑位與欄位擠壓 */
         .pdf-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
         .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 8px; font-size: 13px; vertical-align: middle; word-wrap: break-word; }
+        
+        /* 防止 PDF 跨頁時將表格列 (tr) 從中間切斷 */
         tr { page-break-inside: avoid; } 
         thead { display: table-header-group; }
 
@@ -40,6 +42,7 @@
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
+        /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -165,9 +168,9 @@
                             </div>
                         </td>
                         <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
-                        <td class="text-xs">按層數計</td>
+                        <td class="text-xs text-center">按層數計</td>
                     </tr>
-                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
+                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500 px-4"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs text-center">依人數</td></tr>
                 </tbody>
             </table>
         </div>
@@ -178,8 +181,8 @@
                 <div class="space-y-2">
                     <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂。</p>
                     <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                    <p class="text-orange-700 font-medium">3. 爬梯需求：人工搬運需求，每層酌收 3,500 元。</p>
-                    <p class="text-amber-700 font-bold">4. 品質建議：建議勿於室溫下放置超過 2 小時。</p>
+                    <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元。</p>
+                    <p class="text-amber-700 font-bold">4. 品質建議：建議勿於室溫下放置超過 2 小時，夏天勿超過 1 小時。</p>
                 </div>
             </div>
             <div class="w-full md:w-96">
@@ -194,16 +197,16 @@
         </div>
 
         <div class="mt-12 flex flex-col items-center gap-4 no-print">
-            <button id="main-submit-btn" onclick="processOrder()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl flex items-center gap-3 text-lg">
-                <span id="btn-text">確認資訊並送出訂單</span>
+            <button id="final-action-btn" onclick="processQuotation()" class="bg-black text-white px-14 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-2xl flex items-center gap-4 text-lg">
+                <span id="btn-text">確認資訊並下載報價單</span>
                 <span id="btn-spinner" class="hidden spinner"></span>
             </button>
-            <p class="text-xs text-gray-400 font-medium">系統將下載 PDF 報價單並同步提交訂單數據</p>
+            <p class="text-xs text-gray-400">※ 點擊後系統將執行驗證並自動下載優化後的 PDF 報價單</p>
         </div>
     </div>
 
     <script>
-        // --- 核心設定：100% 還原所有餐點清單 ---
+        // --- 完整餐點清單還原 (S01-B02) ---
         const products = [
             { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
             { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
@@ -250,7 +253,7 @@
         function generateOrderID() {
             const now = new Date();
             const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-            return `Y_${dateStr}-${Date.now().toString().slice(-4)}${Math.floor(Math.random()*1000)}`;
+            return `Y_${dateStr}-${Date.now().toString().slice(-6)}`;
         }
 
         function init() {
@@ -274,11 +277,10 @@
                     return `<span class="badge ${className}">${tag}</span>`;
                 }).join(' ');
                 
-                let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
                 tr.innerHTML = `
                     <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
                     <td class="font-bold">${p.name}</td>
-                    <td><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select></td>
+                    <td><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('')}</select></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
@@ -311,13 +313,13 @@
         function calculateTotal() {
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             
-            // --- 還原完整交通費判定邏輯 ---
+            // --- 還原原始交通費判定邏輯 ---
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
             
-            document.getElementById('transport-logic').innerText = isRoundTrip ? "符合回收條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
+            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿2萬/桶裝/道具(需回收)" : "金額未滿2萬且無回收";
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
             
             let stairCount = parseInt(document.getElementById('stair-count').value) || 0;
@@ -342,35 +344,35 @@
             document.getElementById('lightbox').style.display = 'flex';
         }
 
-        // --- 核心入口流程 ---
-        async function processOrder() {
-            const btn = document.getElementById('main-submit-btn');
+        // --- 核心入口：整合驗證與下載 ---
+        async function processQuotation() {
+            const btn = document.getElementById('final-action-btn');
             const btnText = document.getElementById('btn-text');
             const spinner = document.getElementById('btn-spinner');
 
+            // 1. 驗證
             if (!validateForm()) return;
 
+            // 2. 鎖定按鈕與顯示載入
             btn.disabled = true;
             btn.classList.add('opacity-70', 'cursor-not-allowed');
-            btnText.innerText = "訂單處理中...";
+            btnText.innerText = "正在生成 PDF...";
             spinner.classList.remove('hidden');
 
             try {
-                // 1. 下載優化後的 PDF
+                // 3. 執行 PDF 下載 (深度優化參數)
                 await downloadPDF();
-                // 2. 提交 JSON 到 Make
-                await postToMake();
 
-                btnText.innerText = "訂單已成功送出！";
+                btnText.innerText = "報價單下載成功！";
                 spinner.classList.add('hidden');
                 btn.classList.replace('bg-black', 'bg-green-600');
-                alert("下單成功！報價單 PDF 已下載，系統已收到您的資料。");
+                alert("下單驗證成功！優化後的 PDF 報價單已開始下載。");
             } catch (error) {
                 console.error(error);
-                alert("處理發生錯誤，請稍後再試。");
+                alert("下載失敗，請稍後再試。");
                 btn.disabled = false;
                 spinner.classList.add('hidden');
-                btnText.innerText = "確認資訊並送出訂單";
+                btnText.innerText = "確認資訊並下載報價單";
             }
         }
 
@@ -380,12 +382,12 @@
             required.forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('input-error');
-                if (!el.value) { errors.push(id); el.classList.add('input-error'); }
+                if (!el.value || el.value.trim() === "") { errors.push(id); el.classList.add('input-error'); }
             });
             if (!document.querySelector('input[name="parking"]:checked')) errors.push('停車資訊');
             if (Object.keys(cart).length === 0) errors.push('餐點明細');
             
-            if (errors.length > 0) { alert("請填寫所有標記 * 的欄位。"); return false; }
+            if (errors.length > 0) { alert("請填寫所有必填欄位並選購餐點。"); return false; }
             return true;
         }
 
@@ -396,34 +398,15 @@
                 margin: 10,
                 filename: `木人艸報價單_${orderId}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, windowWidth: 1100 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    windowWidth: 1100 // 強制模擬寬度，確保表格比例 1:1 還原網頁
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['avoid-all', 'css'] }
             };
             return html2pdf().set(opt).from(element).save();
-        }
-
-        async function postToMake() {
-            const orderData = {
-                orderId: document.getElementById('order-id').innerText,
-                customer: {
-                    name: document.getElementById('contact-name').value,
-                    company: document.getElementById('company-name').value,
-                    taxId: document.getElementById('tax-id').value,
-                    phone: document.getElementById('phone-number').value
-                },
-                delivery: {
-                    date: document.getElementById('delivery-date').value,
-                    address: document.getElementById('delivery-address').value,
-                    parking: document.querySelector('input[name="parking"]:checked').value
-                },
-                items: cart,
-                total: document.getElementById('grand-total').innerText
-            };
-            console.log("資料發送:", orderData);
-            // 此處更換為您的 Make Webhook
-            // await fetch('YOUR_MAKE_WEBHOOK_URL', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(orderData)});
-            return new Promise(resolve => setTimeout(resolve, 1500));
         }
 
         init();

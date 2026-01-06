@@ -64,7 +64,11 @@
                 <tr>
                     <td class="header-bg">送餐日期</td>
                     <td colspan="2" class="text-center font-bold">
-                        <input type="date" id="delivery-date" class="no-border-input text-center font-bold">
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                            <input type="date" id="delivery-date" class="no-border-input text-center font-bold w-full md:w-auto">
+                            <span class="hidden md:inline text-gray-300">|</span>
+                            <input type="time" id="delivery-time" class="no-border-input text-center font-bold w-full md:w-auto" value="12:00">
+                        </div>
                     </td>
                     <td colspan="5" class="text-alert">
                         ● 預訂限制：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）<br>
@@ -168,7 +172,6 @@
     </div>
 
     <script>
-        // 資料集與核心邏輯保持不變
         const products = [
             { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
             { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
@@ -214,13 +217,16 @@
 
         function init() {
             const now = new Date();
+            // 派單日期設定
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             
+            // 限制送餐日期最快為 7 天後
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
             const minDateString = minDate.toISOString().split("T")[0];
             document.getElementById('delivery-date').min = minDateString;
 
+            // 渲染餐點
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
                 const tr = document.createElement('tr');
@@ -252,6 +258,7 @@
             calculateTotal();
         }
 
+        // --- 功能邏輯區域 ---
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';
@@ -298,6 +305,7 @@
             const data = { 
                 customerInfo: {
                     deliveryDate: document.getElementById('delivery-date').value,
+                    deliveryTime: document.getElementById('delivery-time').value, // 調整：新增時間輸出
                     venueRemarks: document.getElementById('venue-remarks').value
                 },
                 items: cart, 

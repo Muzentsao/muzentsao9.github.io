@@ -54,34 +54,37 @@
         <div class="table-responsive mb-8">
             <table class="w-full pdf-table">
                 <tr>
-                    <td class="header-bg w-24">派單日期</td><td colspan="2"><input type="text" id="order-date" class="no-border-input" readonly></td>
-                    <td class="header-bg w-24">訂單編號</td><td colspan="2" class="font-mono font-bold text-blue-800" id="order-id">產產生中...</td>
-                    <td class="header-bg w-24">報價業務</td><td>Yvonne</td>
+                    <td class="header-bg w-24">派單日期</td>
+                    <td colspan="3"><input type="text" id="order-date" class="no-border-input" readonly></td>
+                    <td class="header-bg w-24">訂單編號</td>
+                    <td colspan="3" class="font-mono font-bold text-blue-800" id="order-id">產生中...</td>
                 </tr>
                 <tr>
                     <td class="header-bg req">送餐日期</td>
-                    <td colspan="2" class="text-center font-bold">
-                        <div class="flex flex-col md:flex-row items-center justify-center gap-1 md:gap-2">
+                    <td colspan="3" class="text-center font-bold">
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-2">
                             <input type="date" id="delivery-date" class="no-border-input text-center font-bold w-full md:w-auto" required>
                             <span class="hidden md:inline text-gray-300">|</span>
                             <input type="time" id="delivery-time" class="no-border-input text-center font-bold w-full md:w-auto" value="12:00" required>
                         </div>
                     </td>
-                    <td colspan="5" class="text-alert">
+                    <td colspan="4" class="text-alert">
                         ● 預訂限制：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）<br>
                         ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>
                         ● 撤場規定：若撤場時間晚於 18:00，則另議隔日撤場或加價延遲撤場
                     </td>
                 </tr>
                 <tr>
-                    <td class="header-bg req">聯絡人</td><td><input type="text" id="contact-name" class="no-border-input" placeholder="姓名" required></td>
-                    <td class="header-bg w-20 req">公司名稱</td><td><input type="text" id="company-name" class="no-border-input" placeholder="抬頭" required></td>
-                    <td class="header-bg w-20 req">公司統編</td><td colspan="3"><input type="text" id="tax-id" class="no-border-input" placeholder="8碼數字" required maxlength="8"></td>
+                    <td class="header-bg req">聯絡人</td><td colspan="3"><input type="text" id="contact-name" class="no-border-input" placeholder="姓名" required></td>
+                    <td class="header-bg w-20 req">公司名稱</td><td colspan="3"><input type="text" id="company-name" class="no-border-input" placeholder="抬頭" required></td>
                 </tr>
                 <tr>
                     <td class="header-bg">活動模式</td>
-                    <td class="font-bold px-2">派對餐盒<input type="hidden" id="activity-mode" value="派對餐盒"></td>
-                    <td class="header-bg w-20 req">用餐人數</td><td class="text-center"><input type="number" id="guest-count" class="no-border-input text-center font-bold" value="100" oninput="calculateTotal()" required min="1"> 人</td>
+                    <td class="font-bold px-2" colspan="3">派對餐盒<input type="hidden" id="activity-mode" value="派對餐盒"></td>
+                    <td class="header-bg w-20 req">公司統編</td><td colspan="3"><input type="text" id="tax-id" class="no-border-input" placeholder="8碼數字" required maxlength="8"></td>
+                </tr>
+                <tr>
+                    <td class="header-bg req">用餐人數</td><td class="text-center" colspan="3"><input type="number" id="guest-count" class="no-border-input text-center font-bold" value="100" oninput="calculateTotal()" required min="1"> 人</td>
                     <td class="header-bg w-20 req">手機號碼</td><td colspan="3"><input type="text" id="phone-number" class="no-border-input" placeholder="09XX-XXX-XXX" required></td>
                 </tr>
                 <tr>
@@ -224,35 +227,25 @@
             { id: 'D13', cat: 'dessert', name: '繽紛馬卡龍', tags: ['蛋奶素'], img: '41.繽紛馬卡龍.jpg', specs: [{ label: '中盒 (28入)', price: 840 }] },
             { id: 'D14', cat: 'dessert', name: '茶拉米蘇', tags: ['蛋奶素'], img: '45.茶拉米蘇 (蛋奶素).jpg', specs: [{ label: '中盒 (24入)', price: 2040 }] },
             { id: 'D15', cat: 'dessert', name: '日式抹茶蕨餅', tags: ['蛋奶素'], img: '43.抹茶蕨餅杯 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1680 }] },
-            { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', tags: ['全素'], img: '44.黑糖桂花釀梔子粉粿 (全素).jpg', specs: [{ label: 'un(24入)', price: 1920 }] },
+            { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', tags: ['全素'], img: '44.黑糖桂花釀梔子粉粿 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1920 }] },
             { id: 'B01', cat: 'beverage', name: '有機蜜香紅茶(冰桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
             { id: 'B02', cat: 'beverage', name: '公平貿易熱咖啡(桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
 
         let cart = {};
 
-        // --- 核心功能：產生唯一訂單編號 ---
         function generateOrderID() {
             const now = new Date();
-            const dateStr = now.getFullYear().toString() +
-                          (now.getMonth() + 1).toString().padStart(2, '0') +
-                          now.getDate().toString().padStart(2, '0');
-            
-            // 使用「毫秒後三位」+「四位隨機數」，大幅降低同時下單的重複率
+            const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
             const timePart = now.getTime().toString().slice(-3);
             const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            
             return `Y_${dateStr}-${timePart}${randomPart}`;
         }
 
         function init() {
             const now = new Date();
-            // 派單日期設定
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
-            
-            // 自動產生唯一編號
             document.getElementById('order-id').innerText = generateOrderID();
-
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
             const minDateString = minDate.toISOString().split("T")[0];
@@ -276,7 +269,7 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含基本包材</div></td>
+                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
                 `;
                 body.appendChild(tr);
             });
@@ -314,7 +307,6 @@
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
             const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
             const stairFee = stairCount * 3500;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
@@ -340,7 +332,6 @@
                 { id: 'delivery-address', label: '送餐地址' },
                 { id: 'floor', label: '樓層' }
             ];
-
             let errors = [];
             document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
             requiredInputs.forEach(item => {
@@ -350,46 +341,17 @@
                     el.classList.add('input-error');
                 }
             });
-
             const parking = document.querySelector('input[name="parking"]:checked');
             if (!parking) {
                 errors.push('地下停車場');
                 document.getElementById('parking-container').classList.add('bg-red-50');
-            } else {
-                document.getElementById('parking-container').classList.remove('bg-red-50');
             }
-
-            const foodTotal = Object.values(cart).reduce((a, b) => a + b.sub, 0);
-            if (foodTotal === 0) errors.push('餐點明細 (未選購項目)');
-
+            if (Object.keys(cart).length === 0) errors.push('餐點明細');
             if (errors.length > 0) {
-                alert("【資料未完整】\n\n請填寫：\n· " + errors.join('\n· '));
+                alert("填寫不完整：" + errors.join(', '));
                 return;
             }
-
-            const data = { 
-                customerInfo: {
-                    orderID: document.getElementById('order-id').innerText, // 確保抓取產生的編號
-                    orderDate: document.getElementById('order-date').value,
-                    deliveryDate: document.getElementById('delivery-date').value,
-                    deliveryTime: document.getElementById('delivery-time').value,
-                    contact: document.getElementById('contact-name').value,
-                    company: document.getElementById('company-name').value,
-                    taxId: document.getElementById('tax-id').value,
-                    guestCount: document.getElementById('guest-count').value,
-                    phone: document.getElementById('phone-number').value,
-                    address: document.getElementById('delivery-address').value,
-                    floor: document.getElementById('floor').value,
-                    parking: parking.value,
-                    venueRemarks: document.getElementById('venue-remarks').value,
-                    stairCount: document.getElementById('stair-count').value
-                },
-                items: cart, 
-                total: document.getElementById('grand-total').innerText 
-            };
-            
-            console.log("驗證通過，JSON 資料:", data);
-            alert("訂單已產生！編號為：" + data.customerInfo.orderID);
+            console.log("驗證通過，訂單編號：" + document.getElementById('order-id').innerText);
         }
 
         init();

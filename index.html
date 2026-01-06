@@ -88,6 +88,13 @@
                     <td class="header-bg w-20">樓層</td><td><input type="text" class="no-border-input text-center" placeholder="F"></td>
                 </tr>
                 <tr>
+                    <td class="header-bg">場地需求備註</td>
+                    <td colspan="7">
+                        <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input">
+                        <p class="text-[10px] text-blue-600 px-1 italic">建議：現場需有基本的水電供應（以符合衛生安全）</p>
+                    </td>
+                </tr>
+                <tr>
                     <td class="header-bg">地下停車場</td>
                     <td colspan="7">
                         <div class="flex items-center gap-6 px-2 py-1">
@@ -157,6 +164,7 @@
     </div>
 
     <script>
+        // --- 產品資料與邏輯保持不變 ---
         const products = [
             { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
             { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
@@ -204,7 +212,6 @@
             const now = new Date();
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             
-            // 保持鎖定未來 7 天的邏輯
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
             const minDateString = minDate.toISOString().split("T")[0];
@@ -286,7 +293,8 @@
         function submitToMake() {
             const data = { 
                 customerInfo: {
-                    deliveryDate: document.getElementById('delivery-date').value
+                    deliveryDate: document.getElementById('delivery-date').value,
+                    venueRemarks: document.getElementById('venue-remarks').value
                 },
                 items: cart, 
                 total: document.getElementById('grand-total').innerText 

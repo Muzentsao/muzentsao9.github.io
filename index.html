@@ -94,7 +94,7 @@
                 <tr>
                     <td class="header-bg">場地需求備註</td>
                     <td colspan="7" class="bg-white">
-                        <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求（例如：需進場動線說明、電梯載重限制等）" class="no-border-input">
+                        <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求（例如：進場動線、電梯載重等）" class="no-border-input">
                         <div class="mt-1 px-2 py-1 bg-blue-50 border-l-4 border-blue-400">
                             <p class="text-xs text-blue-800 leading-relaxed">
                                 <span class="font-bold">建議：</span>現場需有基本的水電供應（以符合衛生安全）
@@ -153,6 +153,12 @@
                 <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
                 <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
                 <p>3. 支付手續費：刷卡需支付 5% 手續費。</p>
+                <div class="mt-3 pt-3 border-t border-gray-300">
+                    <p class="text-amber-700 font-bold">
+                        <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
+                        4. 建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
+                    </p>
+                </div>
             </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
@@ -217,16 +223,13 @@
 
         function init() {
             const now = new Date();
-            // 派單日期設定
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             
-            // 限制送餐日期最快為 7 天後
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
             const minDateString = minDate.toISOString().split("T")[0];
             document.getElementById('delivery-date').min = minDateString;
 
-            // 渲染餐點
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
                 const tr = document.createElement('tr');
@@ -258,7 +261,6 @@
             calculateTotal();
         }
 
-        // --- 功能邏輯區域 ---
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
             document.getElementById('lightbox').style.display = 'flex';
@@ -305,7 +307,7 @@
             const data = { 
                 customerInfo: {
                     deliveryDate: document.getElementById('delivery-date').value,
-                    deliveryTime: document.getElementById('delivery-time').value, // 調整：新增時間輸出
+                    deliveryTime: document.getElementById('delivery-time').value,
                     venueRemarks: document.getElementById('venue-remarks').value
                 },
                 items: cart, 

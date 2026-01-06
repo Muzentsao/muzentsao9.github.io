@@ -438,7 +438,7 @@ async function processOrder() {
 
     try {
         // 4. 同步將資料傳送至 GAS (請替換為您的部署網址)
-        const gasUrl = "您的APPS_SCRIPT_網頁應用程式網址";
+        const gasUrl = "https://script.google.com/macros/s/AKfycbzZljHQggmL3anQUxgZSLbhg91G7flseZ5TIWKpYpTGf_GcjhYzgfbnDiWH3zgJGJOchA/exec";
         
         // 使用 fetch 發送資料，但不等待回應即開啟列印，以優化體驗
         fetch(gasUrl, {

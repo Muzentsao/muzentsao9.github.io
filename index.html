@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>木人艸 | 派對餐盒報價單</title>
+    <title>木人艸 | 互動式報價系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
     
@@ -239,7 +239,7 @@
             { id: 'S13', cat: 'appetizer', name: '日式壽司細捲(全素)', tags: ['全素'], img: '日式壽司細捲_工作區域 1.jpg', specs: [{ label: '中盒 (96入)', price: 1440 }] },
             { id: 'S14', cat: 'appetizer', name: '法式起司瑪德蓮', tags: [], img: 'https://images.unsplash.com/photo-1582110271731-972173516597?w=200', specs: [{ label: '中盒 (40入)', price: 1800 }] },
             { id: 'S15', cat: 'appetizer', name: '生態野菜鹹派', tags: ['蛋奶素'], img: '13.生態野菜白醬鹹派.jpg', specs: [{ label: '中盒 (24入)', price: 1440 }] },
-            { id: 'S16', cat: 'appetizer', name: '法式千層波菜蚌', tags: [], img: '法式千層波菜蚌_工作區域 1.jpg', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'S16', cat: 'appetizer', name: '法式千層波菜蚌', tags: [], img: 'https://images.unsplash.com/photo-1541014741259-df549dc46175?w=200', specs: [{ label: '中盒 (24入)', price: 1200 }] },
             { id: 'S17', cat: 'appetizer', name: '迷你番茄披薩卷', tags: [], img: '迷你番茄披薩卷.png', specs: [{ label: '中盒 (24入)', price: 1200 }] },
             { id: 'S18', cat: 'appetizer', name: '番茄莎莎玉米脆片', tags: ['五辛素'], img: '19.番茄莎莎玉米脆片(五辛素).jpg', specs: [{ label: '中盒', price: 1000 }] },
             { id: 'S19', cat: 'appetizer', name: '美式炸物組合', tags: [], img: '21.美式炸物組合.jpg', specs: [{ label: '中盒', price: 1050 }] },
@@ -401,72 +401,6 @@
             }
             return true;
         }
-        // 請在 processOrder 函式中加入 fetch 邏輯
-
-async function processOrder() {
-    const btn = document.getElementById('main-submit-btn');
-    const btnText = document.getElementById('btn-text');
-
-    // 1. 執行表單驗證
-    if (!validateForm()) return;
-
-    // 2. 準備要傳送給 Apps Script 的資料資料物件
-    const orderData = {
-        orderId: document.getElementById('order-id').innerText, [cite: 8]
-        customer: {
-            name: document.getElementById('contact-name').value, [cite: 8]
-            company: document.getElementById('company-name').value, [cite: 8]
-            taxId: document.getElementById('tax-id').value, [cite: 8]
-            phone: document.getElementById('phone-number').value [cite: 8]
-        },
-        delivery: {
-            date: document.getElementById('delivery-date').value, [cite: 8]
-            time: document.getElementById('delivery-time').value, [cite: 8]
-            address: document.getElementById('delivery-address').value, [cite: 8]
-            floor: document.getElementById('floor').value [cite: 8]
-        },
-        items: cart, // 包含餐點名稱、規格、盒數、小計 [cite: 10]
-        financials: {
-            total: document.getElementById('grand-total').innerText, [cite: 34]
-            deposit: document.getElementById('deposit-total').innerText [cite: 34]
-        }
-    };
-
-    // 3. UI 狀態更新
-    btn.disabled = true;
-    btnText.innerText = "正在傳送並開啟列印...";
-
-    try {
-        // 4. 同步將資料傳送至 GAS (請替換為您的部署網址)
-        const gasUrl = "https://script.google.com/macros/s/AKfycbzZljHQggmL3anQUxgZSLbhg91G7flseZ5TIWKpYpTGf_GcjhYzgfbnDiWH3zgJGJOchA/exec";
-        
-        // 使用 fetch 發送資料，但不等待回應即開啟列印，以優化體驗
-        fetch(gasUrl, {
-            method: 'POST',
-            mode: 'no-cors', // 解決跨域問題
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        });
-
-        // 5. 修改檔名並執行原生列印
-        const originalTitle = document.title;
-        document.title = "木人艸報價單_" + orderData.orderId;
-        window.print();
-        document.title = originalTitle;
-
-        // 6. 恢復按鈕
-        setTimeout(() => {
-            btn.disabled = false;
-            btnText.innerText = "再次產出報價單";
-        }, 3000);
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("傳送訂單時發生錯誤，請聯絡管理員。");
-        btn.disabled = false;
-        btnText.innerText = "產出報價單 (開啟列印)";
-    }
-}
 
         init();
     </script>

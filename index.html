@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>木人艸 | 互動式報價系統 (Excel版)</title>
+    <title>木人艸 | 互動式報價系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #fcfcfc; color: #333; }
@@ -33,13 +32,36 @@
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
+        /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- 瀏覽器列印專用設定 --- */
+        @media print {
+            body { background-color: #fff !important; }
+            .no-print { display: none !important; }
+            .pdf-container { 
+                border: none !important; 
+                box-shadow: none !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                max-width: none !important;
+            }
+            .header-bg { background-color: #fcf4d9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .category-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .badge-vege { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
+            .badge-meat { background-color: #fff3e0 !important; -webkit-print-color-adjust: exact; }
+            .badge-gray { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
+            .text-blue-800 { color: #1e40af !important; -webkit-print-color-adjust: exact; }
+            .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
+            input { background: transparent !important; }
+        }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div id="lightbox" onclick="this.style.display='none'">
+    <div id="lightbox" onclick="this.style.display='none'" class="no-print">
         <img id="lightbox-img" src="" alt="餐點大圖">
         <p class="absolute bottom-10 text-white text-sm font-light">點擊任何地方關閉預覽</p>
     </div>
@@ -102,6 +124,9 @@
                     <td class="header-bg">場地需求備註</td>
                     <td colspan="7" class="bg-white">
                         <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input">
+                        <div class="mt-1 px-2 py-1 bg-blue-50 border-l-4 border-blue-400 no-print">
+                            <p class="text-xs text-blue-800 leading-relaxed"><span class="font-bold">建議：</span>現場需有基本的水電供應（以符合衛生安全）</p>
+                        </div>
                     </td>
                 </tr>
                 <tr>
@@ -110,6 +135,7 @@
                         <div class="flex items-center gap-6 px-2 py-1" id="parking-container">
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
                             <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
+                            <span class="text-xs text-gray-400 font-normal no-print">(供物流判斷)</span>
                         </div>
                     </td>
                 </tr>
@@ -121,7 +147,7 @@
             <table class="w-full pdf-table">
                 <thead>
                     <tr class="header-bg text-center text-xs">
-                        <th class="w-16">示意圖</th>
+                        <th class="w-16 no-print">示意圖</th>
                         <th>中文餐點名稱</th>
                         <th class="w-32">規格選擇</th>
                         <th class="w-16">盒數</th>
@@ -146,13 +172,17 @@
                     <tr>
                         <td class="text-center font-medium text-orange-700">人工爬梯搬運</td>
                         <td>
-                            <select id="stair-count" class="no-border-input font-bold w-20 text-orange-700" onchange="calculateTotal()">
-                                <option value="0">無需求</option><option value="1">1 層</option><option value="2">2 層</option><option value="3">3 層</option><option value="4">4 層</option>
-                            </select>
+                            <div class="flex items-center gap-2">
+                                <select id="stair-count" class="no-border-input font-bold w-20 text-orange-700" onchange="calculateTotal()">
+                                    <option value="0">無需求</option><option value="1">1 層</option><option value="2">2 層</option><option value="3">3 層</option><option value="4">4 層</option>
+                                </select>
+                                <span class="text-[10px] text-gray-400 font-normal">(每層 $3,500)</span>
+                            </div>
                         </td>
                         <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
-                        <td class="text-xs">按層數計 ($3,500/層)</td>
+                        <td class="text-xs">按層數計</td>
                     </tr>
+                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
                 </tbody>
             </table>
         </div>
@@ -160,9 +190,17 @@
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
             <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-3 uppercase tracking-wider">訂購須知</p>
-                <p>1. 預訂期限：需於出餐前 5 個工作天預訂。</p>
-                <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                <p>3. 此文件僅供報價參考，訂單確認以專員回覆為準。</p>
+                <div class="space-y-2">
+                    <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
+                    <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
+                    <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元（特殊梯形另議）。</p>
+                    <div class="pt-2 border-t border-gray-300">
+                        <p class="text-amber-700 font-bold">
+                            <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
+                            4. 建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
+                        </p>
+                    </div>
+                </div>
             </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
@@ -175,11 +213,12 @@
             </div>
         </div>
 
-        <div class="mt-12 flex flex-col items-center gap-4">
+        <div class="mt-12 flex flex-col items-center gap-4 no-print">
             <button id="main-submit-btn" onclick="processOrder()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl flex items-center gap-3">
-                <span id="btn-text">確認並下載 Excel 報價單</span>
+                <span id="btn-text">產出報價單 (開啟列印)</span>
                 <span id="btn-spinner" class="hidden spinner"></span>
             </button>
+            <p class="text-xs text-gray-400 font-medium">※ 點擊後將開啟瀏覽器列印視窗，請選擇「另存為 PDF」</p>
         </div>
     </div>
 
@@ -241,25 +280,28 @@
             document.getElementById('order-id').innerText = generateOrderID();
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
-            document.getElementById('delivery-date').min = minDate.toISOString().split("T")[0];
+            const minDateString = minDate.toISOString().split("T")[0];
+            document.getElementById('delivery-date').min = minDateString;
 
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
                 let tagsHtml = p.tags.map(tag => {
-                    let className = (['蛋奶素', '全素', '五辛素'].includes(tag)) ? 'badge-vege' : (['牛肉', '雞肉'].includes(tag) ? 'badge-meat' : 'badge-gray');
+                    let className = 'badge-gray';
+                    if (['蛋奶素', '全素', '五辛素'].includes(tag)) className = 'badge-vege';
+                    if (['牛肉', '雞肉'].includes(tag)) className = 'badge-meat';
                     return `<span class="badge ${className}">${tag}</span>`;
                 }).join(' ');
                 let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
                 tr.innerHTML = `
-                    <td class="text-center"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
+                    <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
                     <td class="font-bold">${p.name}</td>
                     <td><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div>${tagsHtml}</div></td>
+                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
                 `;
                 body.appendChild(tr);
             });
@@ -294,9 +336,11 @@
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
-            const transportFee = (foodSub >= 20000 || hasBucket || hasRentalProps) ? 1500 : 500;
+            const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
+            const transportFee = isRoundTrip ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            const stairFee = (parseInt(document.getElementById('stair-count').value) || 0) * 3500;
+            const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
+            const stairFee = stairCount * 3500;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
             const serviceSub = transportFee + stairFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
@@ -308,87 +352,54 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        // --- 核心更動：生成 Excel 邏輯 ---
+        // --- 核心更新：替換成原生列印 ---
 
-        async function processOrder() {
-            const btn = document.getElementById('main-submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnSpinner = document.getElementById('btn-spinner');
+        function processOrder() {
+            // 1. 執行表單驗證
+            const isValid = validateForm();
+            if (!isValid) return;
 
-            if (!validateForm()) return;
-
-            btn.disabled = true;
-            btnText.innerText = "Excel 生成中...";
-            btnSpinner.classList.remove('hidden');
-
-            try {
-                await downloadExcel();
-                btnText.innerText = "Excel 已下載！";
-                btnSpinner.classList.add('hidden');
-                btn.classList.replace('bg-black', 'bg-green-600');
-                
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.classList.replace('bg-green-600', 'bg-black');
-                    btnText.innerText = "再次下載 Excel 報價單";
-                }, 3000);
-            } catch (e) {
-                console.error(e);
-                alert("下載失敗");
-                btn.disabled = false;
-                btnSpinner.classList.add('hidden');
-            }
+            // 2. 呼叫瀏覽器原生列印
+            // 列印完成後，使用者可自行選擇「另存為 PDF」
+            window.print();
         }
 
         function validateForm() {
-            const required = ['delivery-date', 'contact-name', 'company-name', 'tax-id', 'phone-number', 'delivery-address'];
-            let valid = true;
-            required.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el.value) { el.classList.add('input-error'); valid = false; }
-                else { el.classList.remove('input-error'); }
-            });
-            if (Object.keys(cart).length === 0) { alert("請至少選擇一項餐點"); valid = false; }
-            return valid;
-        }
-
-        function downloadExcel() {
-            // 1. 準備 Excel 數據
-            const orderId = document.getElementById('order-id').innerText;
-            const data = [
-                ["木人艸 - 互動式報價單", "", "", "", "", ""],
-                ["訂單編號", orderId, "", "派單日期", document.getElementById('order-date').value, ""],
-                ["聯絡人", document.getElementById('contact-name').value, "", "公司名稱", document.getElementById('company-name').value, ""],
-                ["送餐日期", document.getElementById('delivery-date').value + " " + document.getElementById('delivery-time').value, "", "手機", document.getElementById('phone-number').value, ""],
-                ["送餐地址", document.getElementById('delivery-address').value + " (" + document.getElementById('floor').value + "樓)", "", "統編", document.getElementById('tax-id').value, ""],
-                ["", "", "", "", "", ""],
-                ["餐點明細", "", "", "", "", ""],
-                ["餐點名稱", "規格", "單價", "數量", "小計", "備註"]
+            const requiredInputs = [
+                { id: 'delivery-date', label: '送餐日期' },
+                { id: 'delivery-time', label: '送餐時間' },
+                { id: 'contact-name', label: '聯絡人' },
+                { id: 'company-name', label: '公司名稱' },
+                { id: 'tax-id', label: '公司統編' },
+                { id: 'guest-count', label: '用餐人數' },
+                { id: 'phone-number', label: '手機號碼' },
+                { id: 'delivery-address', label: '送餐地址' },
+                { id: 'floor', label: '樓層' }
             ];
-
-            // 2. 注入餐點資料
-            Object.values(cart).forEach(item => {
-                data.push([item.name, item.spec, item.price, item.qty, item.sub, ""]);
+            let errors = [];
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+            
+            requiredInputs.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (!el.value || el.value.trim() === "") {
+                    errors.push(item.label);
+                    el.classList.add('input-error');
+                }
             });
 
-            // 3. 注入服務與總計
-            data.push(["", "", "", "", "", ""]);
-            data.push(["服務與總計", "", "", "", "", ""]);
-            data.push(["交通費", document.getElementById('val-transport').innerText, "", "", "", ""]);
-            data.push(["爬梯費", document.getElementById('val-stair').innerText, "", "", "", ""]);
-            data.push(["餐點小計", document.getElementById('food-total').innerText, "", "", "", ""]);
-            data.push(["營業稅 (5%)", document.getElementById('tax-total').innerText, "", "", "", ""]);
-            data.push(["應付總額", document.getElementById('grand-total').innerText, "", "", "", ""]);
-            data.push(["應付定金 (70%)", document.getElementById('deposit-total').innerText, "", "", "", ""]);
+            const parking = document.querySelector('input[name="parking"]:checked');
+            if (!parking) {
+                errors.push('地下停車場');
+                document.getElementById('parking-container').classList.add('bg-red-50');
+            }
 
-            // 4. 創建活頁簿
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "報價單");
+            if (Object.keys(cart).length === 0) errors.push('餐點明細');
 
-            // 5. 輸出檔案
-            XLSX.writeFile(wb, `木人艸報價單_${orderId}.xlsx`);
-            return Promise.resolve();
+            if (errors.length > 0) {
+                alert("請檢查填寫完整性：" + errors.join(', '));
+                return false;
+            }
+            return true;
         }
 
         init();

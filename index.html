@@ -19,9 +19,11 @@
         @media print { .no-print { display: none; } .pdf-container { border: none; box-shadow: none; padding: 0; } }
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         
+        /* 圖片預覽樣式 */
         .img-preview { width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #eee; cursor: zoom-in; transition: transform 0.2s; }
         .img-preview:hover { transform: scale(1.1); border-color: #556b2f; }
         
+        /* 標籤 Badge 樣式 */
         .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 2px; }
         .badge-vege { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .badge-meat { background-color: #fff3e0; color: #ef6c00; border: 1px solid #ffe0b2; }
@@ -65,8 +67,9 @@
                         <input type="date" id="delivery-date" class="no-border-input text-center font-bold">
                     </td>
                     <td colspan="5" class="text-alert">
-                        ● 預訂限制：需於出餐前 5 個工作天預訂 (不含假日/國定假日)<br>
-                        ● 早晨加成：若餐盒開餐時間於 9:00 以前，另收取費用 3,500 元
+                        ● 預訂限制：需於出餐前 5 個工作天預訂（不含國定假日與週末）<br>
+                        ● 早晨加成：若餐盒開餐時間於 9:00 以前，將另收取費用 3,500 元<br>
+                        ● 夜間加成：若撤場時間 16:30-19:00，加價 1,000 元進行撤場
                     </td>
                 </tr>
                 <tr>
@@ -83,6 +86,16 @@
                 <tr>
                     <td class="header-bg">送餐地址</td><td colspan="5"><input type="text" placeholder="路名/門牌" class="no-border-input"></td>
                     <td class="header-bg w-20">樓層</td><td><input type="text" class="no-border-input text-center" placeholder="F"></td>
+                </tr>
+                <tr>
+                    <td class="header-bg">地下停車場</td>
+                    <td colspan="7">
+                        <div class="flex items-center gap-6 px-2 py-1">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
+                            <span class="text-xs text-gray-400 font-normal">(大樓本身是否有地下停車場，作為物流判斷依據)</span>
+                        </div>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -101,18 +114,30 @@
                         <th class="w-32">備註</th>
                     </tr>
                 </thead>
-                <tbody id="menu-appetizer"><tr><td colspan="7" class="category-header">● 小食系列 (Appetizers)</td></tr></tbody>
-                <tbody id="menu-dessert"><tr><td colspan="7" class="category-header">● 精緻甜點 (Desserts)</td></tr></tbody>
-                <tbody id="menu-beverage"><tr><td colspan="7" class="category-header">● 飲品 (Beverages)</td></tr></tbody>
+                <tbody id="menu-appetizer"><tr><td colspan="7" class="category-header">● 小食系列 (Appetizers) - 20項</td></tr></tbody>
+                <tbody id="menu-dessert"><tr><td colspan="7" class="category-header">● 精緻甜點 (Desserts) - 16項</td></tr></tbody>
+                <tbody id="menu-beverage"><tr><td colspan="7" class="category-header">● 飲品 (Beverages) - 2項</td></tr></tbody>
+            </table>
+        </div>
+
+        <h3 class="text-center font-bold mb-3 tracking-widest border-b border-black pb-1 uppercase">服務明細</h3>
+        <div class="table-responsive mb-8">
+            <table class="w-full pdf-table">
+                <thead><tr class="header-bg text-center text-xs"><th>服務名稱</th><th>規格說明</th><th>小計</th><th>備註</th></tr></thead>
+                <tbody>
+                    <tr><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (需回收/運費$1,500)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
+                    <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
+                    <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具 (內含包材)</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數帶入</td></tr>
+                </tbody>
             </table>
         </div>
 
         <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
             <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                 <p class="font-bold underline text-sm mb-2 uppercase">訂購須知</p>
-                <p class="text-red-700 font-bold">1. 預訂期限：請於出餐前至少 5 個工作天完成下單預訂。</p>
+                <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
                 <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                <p>3. 運費說明：金額未滿 2 萬且無需回收道具，運費 $500。</p>
+                <p>3. 支付手續費：刷卡需支付 5% 手續費。</p>
             </div>
             <div class="w-full md:w-96">
                 <table class="w-full pdf-table">
@@ -120,54 +145,88 @@
                     <tr><td class="header-bg">服務小計</td><td class="text-right font-bold" id="service-total">$500</td></tr>
                     <tr><td class="header-bg">營業稅 (5%)</td><td class="text-right font-bold" id="tax-total">$0</td></tr>
                     <tr class="text-xl"><td class="header-bg text-red-700">總計</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
+                    <tr class="text-sm"><td class="header-bg">應付定金 (70%)</td><td class="text-right font-bold text-gray-700" id="deposit-total">$0</td></tr>
                 </table>
             </div>
         </div>
 
         <div class="mt-12 flex flex-wrap gap-4 no-print justify-center">
-            <button onclick="window.print()" class="bg-gray-200 text-black px-10 py-3 rounded-full font-bold hover:bg-gray-300 transition shadow-lg">列印報價單</button>
-            <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認送出訂單</button>
+            <button onclick="window.print()" class="bg-gray-200 text-black px-10 py-3 rounded-full font-bold hover:bg-gray-300 transition shadow-lg">列印 / 存成 PDF</button>
+            <button onclick="submitToMake()" class="bg-black text-white px-10 py-3 rounded-full font-bold hover:bg-gray-800 transition shadow-lg">確認並提交訂單 (JSON)</button>
         </div>
     </div>
 
     <script>
-        // 產品資料 (簡略標示)
+        // --- 產品資料保持不變 ---
         const products = [
-            { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (8入)', price: 850 }] },
-            { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
-            { id: 'D01', cat: 'dessert', name: '冰心葡式蛋塔', tags: ['蛋奶素'], img: 'd1.jpg', specs: [{ label: '中盒 (24入)', price: 1200 }] },
-            { id: 'B01', cat: 'beverage', name: '有機蜜香紅茶(冰桶)', tags: ['全素'], img: 'b1.jpg', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true }
+            { id: 'S01', cat: 'appetizer', name: '照燒風味迷你漢堡(牛肉)', tags: ['牛肉'], img: '1.照燒風味迷你漢堡(豬肉) (正常).jpg', specs: [{ label: '中盒 (15入)', price: 1350 }, { label: '小盒 (850)', price: 850 }] },
+            { id: 'S02', cat: 'appetizer', name: '照燒風味迷你漢堡(雞肉)', tags: ['雞肉'], img: '2.迷你照燒雞腿漢堡（正常）.jpg', specs: [{ label: '中盒 (15入)', price: 1275 }] },
+            { id: 'S03', cat: 'appetizer', name: '鹽麴雞肉墨西哥捲餅', tags: ['雞肉'], img: '18.鹽麴雞肉墨西哥捲餅.jpg', specs: [{ label: '中盒 (22入)', price: 1650 }] },
+            { id: 'S04', cat: 'appetizer', name: '迷你花生時蔬三明治', tags: ['蛋奶素'], img: '迷你花生時蔬三明治(蛋奶素)_工作區域 1.jpg', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: 'S05', cat: 'appetizer', name: '迷你燻雞時蔬三明治', tags: ['雞肉'], img: '5.迷你燻雞吐司三明治.jpg', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: 'S06', cat: 'appetizer', name: '迷你火腿起司三明治', tags: [], img: '4.迷你火腿起司吐司三明治.jpg', specs: [{ label: '中盒 (14入)', price: 560 }] },
+            { id: 'S07', cat: 'appetizer', name: '復刻版迷你營養三明治', tags: [], img: '3.復刻版迷你營養三明治.jpg', specs: [{ label: '中盒 (12入)', price: 720 }] },
+            { id: 'S08', cat: 'appetizer', name: '復刻版迷你營養三明治(素)', tags: ['蛋奶素'], img: '3.復刻版迷你營養三明治.jpg', specs: [{ label: '中盒 (12入)', price: 720 }] },
+            { id: 'S09', cat: 'appetizer', name: '綜合花壽司', tags: [], img: '10.綜合花壽司.jpg', specs: [{ label: '中盒 (48入)', price: 960 }] },
+            { id: 'S10', cat: 'appetizer', name: '綜合花壽司(全素)', tags: ['全素'], img: '10.綜合花壽司.jpg', specs: [{ label: '中盒 (48入)', price: 960 }] },
+            { id: 'S11', cat: 'appetizer', name: '豆皮壽司(素)', tags: ['全素'], img: '11.豆皮壽司(素).jpg', specs: [{ label: '中盒 (40入)', price: 800 }] },
+            { id: 'S12', cat: 'appetizer', name: '日式壽司細捲', tags: [], img: '日式壽司細捲_工作區域 1.jpg', specs: [{ label: '中盒 (96入)', price: 1440 }] },
+            { id: 'S13', cat: 'appetizer', name: '日式壽司細捲(全素)', tags: ['全素'], img: '日式壽司細捲_工作區域 1.jpg', specs: [{ label: '中盒 (96入)', price: 1440 }] },
+            { id: 'S14', cat: 'appetizer', name: '法式起司瑪德蓮', tags: [], img: 'https://images.unsplash.com/photo-1582110271731-972173516597?w=200', specs: [{ label: '中盒 (40入)', price: 1800 }] },
+            { id: 'S15', cat: 'appetizer', name: '生態野菜鹹派', tags: ['蛋奶素'], img: '13.生態野菜白醬鹹派.jpg', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: 'S16', cat: 'appetizer', name: '法式千層波菜蚌', tags: [], img: 'https://images.unsplash.com/photo-1541014741259-df549dc46175?w=200', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'S17', cat: 'appetizer', name: '迷你番茄披薩卷', tags: [], img: '迷你番茄披薩卷.png', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'S18', cat: 'appetizer', name: '番茄莎莎玉米脆片', tags: ['五辛素'], img: '19.番茄莎莎玉米脆片(五辛素).jpg', specs: [{ label: '中盒', price: 1000 }] },
+            { id: 'S19', cat: 'appetizer', name: '美式炸物組合', tags: [], img: '21.美式炸物組合.jpg', specs: [{ label: '中盒', price: 1050 }] },
+            { id: 'S20', cat: 'appetizer', name: '檸檬酸辣翅小腿', tags: ['雞肉'], img: '22.檸檬酸辣翅小腿.jpg', specs: [{ label: '中盒', price: 1600 }] },
+            { id: 'D01', cat: 'dessert', name: '冰心葡式蛋塔', tags: [], img: '冰心葡式蛋塔.png', specs: [{ label: '中盒 (24入)', price: 1200 }] },
+            { id: 'D02', cat: 'dessert', name: '迷你棉花糖檸檬塔', tags: ['蛋奶素'], img: '25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg', specs: [{ label: '中盒 (24入)', price: 1440 }] },
+            { id: 'D03', cat: 'dessert', name: '小倉月燒(紅豆)', tags: ['蛋奶素'], img: '26.小倉月燒.jpg', specs: [{ label: '中盒 (24入)', price: 720 }] },
+            { id: 'D04', cat: 'dessert', name: '覆盆子巧克力杯子蛋糕', tags: ['蛋奶素'], img: '28.覆盆子杯子蛋糕.jpg', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'D05', cat: 'dessert', name: '抹茶巧克力杯子蛋糕', tags: ['蛋奶素'], img: '27.抹茶杯子蛋糕.jpg', specs: [{ label: '中盒 (35入)', price: 2275 }] },
+            { id: 'D06', cat: 'dessert', name: '迷你烏龍茶蛋糕捲', tags: ['蛋奶素'], img: '29.烏龍茶生凍蛋糕捲.jpg', specs: [{ label: '中盒 (30入)', price: 1500 }] },
+            { id: 'D07', cat: 'dessert', name: '迷你小甜球', tags: [], img: '迷你小甜球(覆盆子)_工作區域 1.jpg', specs: [{ label: '中盒 (40入)', price: 1200 }] },
+            { id: 'D08', cat: 'dessert', name: '放牧雞蛋肉桂布丁麵包', tags: [], img: '31.放牧雞蛋肉桂布丁麵包.jpg', specs: [{ label: '中盒 (28入)', price: 1400 }] },
+            { id: 'D09', cat: 'dessert', name: '烏龍茶瑪德蓮', tags: ['蛋奶素'], img: '32.烏龍茶瑪德蓮（大）.jpg', specs: [{ label: '中盒 (32入)', price: 2400 }] },
+            { id: 'D10', cat: 'dessert', name: '台東洛神花瑪德蓮', tags: ['蛋奶素'], img: '33.洛神花瑪德蓮（大）.jpg', specs: [{ label: '中盒 (32入)', price: 2400 }] },
+            { id: 'D11', cat: 'dessert', name: '焦糖海鹽磅蛋糕', tags: ['蛋奶素'], img: '37.焦糖海鹽磅蛋糕 (蛋奶素).jpg', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: 'D12', cat: 'dessert', name: '椰絲鳳梨磅蛋糕', tags: ['蛋奶素'], img: '39.椰絲鳳梨磅蛋糕(蛋奶素).jpg', specs: [{ label: '中盒 (49入)', price: 2450 }] },
+            { id: 'D13', cat: 'dessert', name: '繽紛馬卡龍', tags: ['蛋奶素'], img: '41.繽紛馬卡龍.jpg', specs: [{ label: '中盒 (28入)', price: 840 }] },
+            { id: 'D14', cat: 'dessert', name: '茶拉米蘇', tags: ['蛋奶素'], img: '45.茶拉米蘇 (蛋奶素).jpg', specs: [{ label: '中盒 (24入)', price: 2040 }] },
+            { id: 'D15', cat: 'dessert', name: '日式抹茶蕨餅', tags: ['蛋奶素'], img: '43.抹茶蕨餅杯 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1680 }] },
+            { id: 'D16', cat: 'dessert', name: '黑糖桂花釀粉粿', tags: ['全素'], img: '44.黑糖桂花釀梔子粉粿 (全素).jpg', specs: [{ label: '中盒 (24入)', price: 1920 }] },
+            { id: 'B01', cat: 'beverage', name: '有機蜜香紅茶(冰桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1000 }], requiresCollection: true },
+            { id: 'B02', cat: 'beverage', name: '公平貿易熱咖啡(桶)', tags: ['全素'], img: '飲料桶_工作區域 1.jpg', specs: [{ label: '8公升/桶', price: 1500 }], requiresCollection: true }
         ];
 
         let cart = {};
 
         function init() {
-            // 1. 設定派單日期 (現在時間)
             const now = new Date();
+            // 設定派單日期顯示
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             
-            // 2. 鎖定未來 7 天 (含假日)
-            // 原理：今天的日期 + 7 天 = 客戶最早能選的日期
-            const minDeliveryDate = new Date();
-            minDeliveryDate.setDate(now.getDate() + 7); 
-            
-            // 格式化為 YYYY-MM-DD
-            const y = minDeliveryDate.getFullYear();
-            const m = (minDeliveryDate.getMonth() + 1).toString().padStart(2, '0');
-            const d = minDeliveryDate.getDate().toString().padStart(2, '0');
-            const minDateString = `${y}-${m}-${d}`;
-            
-            const dateInput = document.getElementById('delivery-date');
-            dateInput.min = minDateString; // 寫入 min 屬性
-            dateInput.value = minDateString; // 預設為可選的第一天
+            // --- 重點：鎖定未來的 7 天 ---
+            // 計算 7 天後的日期
+            const minDate = new Date();
+            minDate.setDate(now.getDate() + 7); 
+            // 轉換為 YYYY-MM-DD 格式以符合 input date 的要求
+            const minDateString = minDate.toISOString().split("T")[0];
+            document.getElementById('delivery-date').min = minDateString;
 
-            // 3. 初始化產品列表
+            // 渲染餐點列表
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
-                if(!body) return;
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
                 
+                let tagsHtml = p.tags.map(tag => {
+                    let className = 'badge-gray';
+                    if (['蛋奶素', '全素', '五辛素'].includes(tag)) className = 'badge-vege';
+                    if (['牛肉', '雞肉'].includes(tag)) className = 'badge-meat';
+                    return `<span class="badge ${className}">${tag}</span>`;
+                }).join(' ');
+
                 let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
                 
                 tr.innerHTML = `
@@ -177,14 +236,22 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs text-gray-400">內含基本包材</td>
+                    <td class="text-xs">
+                        <div class="flex flex-wrap gap-1">${tagsHtml}</div>
+                        <div class="text-gray-400 mt-1">內含基本包材</div>
+                    </td>
                 `;
                 body.appendChild(tr);
             });
             calculateTotal();
         }
 
-        // --- 以下為原有核心邏輯 ---
+        // --- 核心計算邏輯保持不變 ---
+        function openLightbox(url) {
+            document.getElementById('lightbox-img').src = url;
+            document.getElementById('lightbox').style.display = 'flex';
+        }
+
         function updateRow(id, specIdx) {
             const p = products.find(i => i.id === id);
             document.getElementById(`price-${id}`).innerText = `$${p.specs[specIdx].price.toLocaleString()}`;
@@ -211,7 +278,7 @@
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件" : "一般運費";
+            document.getElementById('transport-logic').innerText = isRoundTrip ? "滿足加價條件(滿2萬/桶裝/道具)" : "金額未滿2萬且無回收";
             const serviceSub = transportFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
@@ -224,18 +291,14 @@
 
         function submitToMake() {
             const data = { 
-                orderDate: document.getElementById('order-date').value,
-                deliveryDate: document.getElementById('delivery-date').value,
+                customerInfo: {
+                    deliveryDate: document.getElementById('delivery-date').value
+                },
                 items: cart, 
-                grandTotal: document.getElementById('grand-total').innerText 
+                total: document.getElementById('grand-total').innerText 
             };
-            console.log("提交 JSON:", data);
-            alert("訂單資料已生成！");
-        }
-
-        function openLightbox(url) {
-            document.getElementById('lightbox-img').src = url;
-            document.getElementById('lightbox').style.display = 'flex';
+            console.log("JSON 資料:", data);
+            alert("訂單已成功打包！請見 Console。");
         }
 
         init();

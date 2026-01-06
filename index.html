@@ -354,14 +354,59 @@
 
         // --- 核心更新：替換成原生列印 ---
 
-        function processOrder() {
+        // --- 核心更新：串接 GAS 網址並執行列印 ---
+
+        async function processOrder() {
             // 1. 執行表單驗證
             const isValid = validateForm();
             if (!isValid) return;
 
-            // 2. 呼叫瀏覽器原生列印
-            // 列印完成後，使用者可自行選擇「另存為 PDF」
+            // 2. 準備傳送給 GAS 的資料物件
+            const orderData = {
+                orderId: document.getElementById('order-id').innerText,
+                customer: {
+                    name: document.getElementById('contact-name').value,
+                    company: document.getElementById('company-name').value,
+                    taxId: document.getElementById('tax-id').value,
+                    phone: document.getElementById('phone-number').value
+                },
+                delivery: {
+                    date: document.getElementById('delivery-date').value,
+                    time: document.getElementById('delivery-time').value,
+                    address: document.getElementById('delivery-address').value,
+                    floor: document.getElementById('floor').value,
+                    parking: document.querySelector('input[name="parking"]:checked') ? document.querySelector('input[name="parking"]:checked').value : '未勾選'
+                },
+                items: cart,
+                financials: {
+                    foodSub: document.getElementById('food-total').innerText,
+                    serviceSub: document.getElementById('service-total').innerText,
+                    tax: document.getElementById('tax-total').innerText,
+                    total: document.getElementById('grand-total').innerText,
+                    deposit: document.getElementById('deposit-total').innerText
+                }
+            };
+
+            // 3. 傳送資料到您的 GAS 網址
+            // 使用 no-cors 模式確保發送動作能跳過跨域限制
+            const gasUrl = "https://script.google.com/macros/s/AKfycbzZljHQggmL3anQUxgZSLbhg91G7flseZ5TIWKpYpTGf_GcjhYzgfbnDiWH3zgJGJOchA/exec";
+            
+            fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            // 4. 動態修改網頁標題（這會成為另存 PDF 時的預設檔名）
+            const originalTitle = document.title;
+            document.title = "木人艸報價單_" + orderData.orderId;
+
+            // 5. 呼叫瀏覽器原生列印
             window.print();
+
+            // 6. 列印完成後還原網頁標題
+            document.title = originalTitle;
         }
 
         function validateForm() {

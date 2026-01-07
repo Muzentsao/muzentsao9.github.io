@@ -32,38 +32,22 @@
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- [新增修改] 兩階段機制相關樣式 --- */
+        /* 兩階段機制相關樣式 */
         .stage-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
         .hidden-stage { display: none !important; }
         .fade-in { animation: fadeIn 0.5s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* ---------------------------------- */
 
-        /* --- 瀏覽器列印專用設定 --- */
         @media print {
             body { background-color: #fff !important; }
             .no-print { display: none !important; }
-            /* 確保列印時所有階段皆顯示 */
             .hidden-stage { display: block !important; }
-            .pdf-container { 
-                border: none !important; 
-                box-shadow: none !important; 
-                padding: 0 !important; 
-                margin: 0 !important; 
-                width: 100% !important; 
-                max-width: none !important;
-            }
+            .pdf-container { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
             .header-bg { background-color: #fcf4d9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .category-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .badge-vege { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
-            .badge-meat { background-color: #fff3e0 !important; -webkit-print-color-adjust: exact; }
-            .badge-gray { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
-            .text-blue-800 { color: #1e40af !important; -webkit-print-color-adjust: exact; }
-            .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
             input { background: transparent !important; }
         }
     </style>
@@ -134,9 +118,6 @@
                         <td class="header-bg">場地需求備註</td>
                         <td colspan="7" class="bg-white">
                             <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input">
-                            <div class="mt-1 px-2 py-1 bg-blue-50 border-l-4 border-blue-400 no-print">
-                                <p class="text-xs text-blue-800 leading-relaxed"><span class="font-bold">建議：</span>現場需有基本的水電供應（以符合衛生安全）</p>
-                            </div>
                         </td>
                     </tr>
                     <tr>
@@ -145,7 +126,6 @@
                             <div class="flex items-center gap-6 px-2 py-1" id="parking-container">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
-                                <span class="text-xs text-gray-400 font-normal no-print">(供物流判斷)</span>
                             </div>
                         </td>
                     </tr>
@@ -161,9 +141,8 @@
         </div>
 
         <div id="stage-2-section" class="stage-transition hidden-stage">
-            
             <div class="mb-4 no-print">
-                <button onclick="backToStage1()" class="text-blue-600 font-medium flex items-center gap-1 hover:underline">
+                <button onclick="backToStage1()" class="text-blue-600 font-medium flex items-center gap-1 hover:underline text-sm">
                     ← 返回修改基本資料
                 </button>
             </div>
@@ -197,16 +176,8 @@
                         <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
                         <tr>
                             <td class="text-center font-medium text-orange-700">人工爬梯搬運</td>
-                            <td>
-                                <div class="flex items-center gap-2">
-                                    <select id="stair-count" class="no-border-input font-bold w-20 text-orange-700" onchange="calculateTotal()">
-                                        <option value="0">無需求</option><option value="1">1 層</option><option value="2">2 層</option><option value="3">3 層</option><option value="4">4 層</option>
-                                    </select>
-                                    <span class="text-[10px] text-gray-400 font-normal">(每層 $3,500)</span>
-                                </div>
-                            </td>
-                            <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
-                            <td class="text-xs">按層數計</td>
+                            <td><select id="stair-count" class="no-border-input font-bold w-20 text-orange-700" onchange="calculateTotal()"><option value="0">無需求</option><option value="1">1 層</option><option value="2">2 層</option><option value="3">3 層</option><option value="4">4 層</option></select></td>
+                            <td class="text-right font-bold text-orange-600" id="val-stair">$0</td><td class="text-xs">按層數計</td>
                         </tr>
                         <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
                     </tbody>
@@ -216,17 +187,8 @@
             <div class="flex flex-col md:flex-row justify-between gap-8 mt-10">
                 <div class="flex-1 text-xs border p-4 border-black bg-gray-50 leading-relaxed">
                     <p class="font-bold underline text-sm mb-3 uppercase tracking-wider">訂購須知</p>
-                    <div class="space-y-2">
-                        <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
-                        <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                        <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元（特殊梯形另議）。</p>
-                        <div class="pt-2 border-t border-gray-300">
-                            <p class="text-amber-700 font-bold">
-                                <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                                建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
-                            </p>
-                        </div>
-                    </div>
+                    <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂。</p>
+                    <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
                 </div>
                 <div class="w-full md:w-96">
                     <table class="w-full pdf-table">
@@ -244,62 +206,53 @@
                     <span id="btn-text">產出報價單 (開啟列印)</span>
                     <span id="btn-spinner" class="hidden spinner"></span>
                 </button>
-                <p class="text-xs text-gray-400 font-medium">※ 點擊後將開啟瀏覽器列印視窗，請選擇「另存為 PDF」</p>
             </div>
         </div>
     </div>
 
     <script>
         const products = [
-    {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}, {"label": "小盒 (9)", "price": 765}]},
-    {"id": "S02", "cat": "appetizer", "name": "照燒風味迷你漢堡(雞肉)", "tags": ["雞肉"], "img": "2.迷你照燒雞腿漢堡（正常）.jpg", "specs": [{"label": "中盒 (15入)", "price": 1275}, {"label": "小盒 (9)", "price": 765}]},
-    {"id": "S03", "cat": "appetizer", "name": "鹽麴雞肉墨西哥捲餅", "tags": ["雞肉"], "img": "18.鹽麴雞肉墨西哥捲餅.jpg", "specs": [{"label": "中盒 (22入)", "price": 1650}, {"label": "小盒 (10)", "price": 750}]},
-    {"id": "S04", "cat": "appetizer", "name": "迷你花生時蔬三明治", "tags": ["蛋奶素"], "img": "迷你花生時蔬三明治(蛋奶素)_工作區域 1.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-    {"id": "S05", "cat": "appetizer", "name": "迷你燻雞時蔬三明治", "tags": ["雞肉"], "img": "5.迷你燻雞吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-    {"id": "S06", "cat": "appetizer", "name": "迷你火腿起司三明治", "tags": [], "img": "4.迷你火腿起司吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-    {"id": "S07", "cat": "appetizer", "name": "復刻版迷你營養三明治", "tags": [], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-    {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-    {"id": "S09", "cat": "appetizer", "name": "綜合花壽司", "tags": [], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
-    {"id": "S10", "cat": "appetizer", "name": "綜合花壽司(全素)", "tags": ["全素"], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
-    {"id": "S11", "cat": "appetizer", "name": "豆皮壽司(素)", "tags": ["全素"], "img": "11.豆皮壽司(素).jpg", "specs": [{"label": "中盒 (40入)", "price": 800}, {"label": "小盒 (25)", "price": 500}]},
-    {"id": "S12", "cat": "appetizer", "name": "日式壽司細捲", "tags": [], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
-    {"id": "S13", "cat": "appetizer", "name": "日式壽司細捲(全素)", "tags": ["全素"], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
-    {"id": "S14", "cat": "appetizer", "name": "法式起司瑪德蓮", "tags": [], "img": "法式起司瑪德蓮_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1800}, {"label": "小盒 (25)", "price": 500}]},
-    {"id": "S15", "cat": "appetizer", "name": "生態野菜鹹派", "tags": ["蛋奶素"], "img": "生態野菜鹹派.png", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (15)", "price": 900}]},
-    {"id": "S16", "cat": "appetizer", "name": "法式千層波菜蚌", "tags": [], "img": "法式千層波菜蚌_工作區域 1.jpg", "specs": [{"label": "中盒 (24入)", "price": 1200}, {"label": "小盒 (15)", "price": 750}]},
-    {"id": "S17", "cat": "appetizer", "name": "迷你番茄披薩卷", "tags": [], "img": "迷你番茄披薩卷.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
-    {"id": "S18", "cat": "appetizer", "name": "番茄莎莎玉米脆片", "tags": ["五辛素"], "img": "19.番茄莎莎玉米脆片(五辛素).jpg", "specs": [{"label": "中盒", "price": 1000}, {"label": "小盒 (1)", "price": 450}]},
-    {"id": "S19", "cat": "appetizer", "name": "美式炸物組合", "tags": [], "img": "21.美式炸物組合.jpg", "specs": [{"label": "中盒", "price": 1050}, {"label": "小盒 (1)", "price": 800}]},
-    {"id": "S20", "cat": "appetizer", "name": "檸檬酸辣翅小腿", "tags": ["雞肉"], "img": "22.檸檬酸辣翅小腿.jpg", "specs": [{"label": "中盒", "price": 1600}, {"label": "小盒 (30)", "price": 870}]},
-    {"id": "D01", "cat": "dessert", "name": "冰心葡式蛋塔", "tags": [], "img": "冰心葡式蛋塔.png", "specs": [{"label": "評中盒 (24入)", "price": 1200}]},
-    {"id": "D02", "cat": "dessert", "name": "迷你棉花糖檸檬塔", "tags": ["蛋奶素"], "img": "25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (16)", "price": 960}]},
-    {"id": "D03", "cat": "dessert", "name": "小倉月燒(紅豆)", "tags": ["蛋奶素"], "img": "26.小倉月燒.jpg", "specs": [{"label": "中盒 (24入)", "price": 720}, {"label": "小盒 (12)", "price": 360}]},
-    {"id": "D04", "cat": "dessert", "name": "覆盆子巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "28.覆盆子杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
-    {"id": "D05", "cat": "dessert", "name": "抹茶巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "27.抹茶杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
-    {"id": "D06", "cat": "dessert", "name": "迷你烏龍茶蛋糕捲", "tags": ["蛋奶素"], "img": "29.烏龍茶生凍蛋糕捲.jpg", "specs": [{"label": "中盒 (30入)", "price": 1500}, {"label": "小盒 (20)", "price": 1000}]},
-    {"id": "D07", "cat": "dessert", "name": "迷你小甜球", "tags": [], "img": "迷你小甜球(覆盆子)_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1200}]},
-    {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
-    {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
-    {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-    {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
-    {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
-    {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
-    {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
-    {"id": "D15", "cat": "dessert", "name": "日式抹茶蕨餅", "tags": ["蛋奶素"], "img": "43.抹茶蕨餅杯 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1680}, {"label": "小盒 (9)", "price": 630}]},
-    {"id": "D16", "cat": "dessert", "name": "黑糖桂花釀粉粿", "tags": ["全素"], "img": "44.黑糖桂花釀梔子粉粿 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1920}, {"label": "小盒 (9)", "price": 720}]},
-    {"id": "B01", "cat": "beverage", "name": "有機蜜香紅茶(冰桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
-    {"id": "B02", "cat": "beverage", "name": "公平貿易熱咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true}
-];
+            {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}, {"label": "小盒 (9)", "price": 765}]},
+            {"id": "S02", "cat": "appetizer", "name": "照燒風味迷你漢堡(雞肉)", "tags": ["雞肉"], "img": "2.迷你照燒雞腿漢堡（正常）.jpg", "specs": [{"label": "中盒 (15入)", "price": 1275}, {"label": "小盒 (9)", "price": 765}]},
+            {"id": "S03", "cat": "appetizer", "name": "鹽麴雞肉墨西哥捲餅", "tags": ["雞肉"], "img": "18.鹽麴雞肉墨西哥捲餅.jpg", "specs": [{"label": "中盒 (22入)", "price": 1650}, {"label": "小盒 (10)", "price": 750}]},
+            {"id": "S04", "cat": "appetizer", "name": "迷你花生時蔬三明治", "tags": ["蛋奶素"], "img": "迷你花生時蔬三明治(蛋奶素)_工作區域 1.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
+            {"id": "S05", "cat": "appetizer", "name": "迷你燻雞時蔬三明治", "tags": ["雞肉"], "img": "5.迷你燻雞吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
+            {"id": "S06", "cat": "appetizer", "name": "迷你火腿起司三明治", "tags": [], "img": "4.迷你火腿起司吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
+            {"id": "S07", "cat": "appetizer", "name": "復刻版迷你營養三明治", "tags": [], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
+            {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
+            {"id": "S09", "cat": "appetizer", "name": "綜合花壽司", "tags": [], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
+            {"id": "S10", "cat": "appetizer", "name": "綜合花壽司(全素)", "tags": ["全素"], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
+            {"id": "S11", "cat": "appetizer", "name": "豆皮壽司(素)", "tags": ["全素"], "img": "11.豆皮壽司(素).jpg", "specs": [{"label": "中盒 (40入)", "price": 800}, {"label": "小盒 (25)", "price": 500}]},
+            {"id": "S12", "cat": "appetizer", "name": "日式壽司細捲", "tags": [], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
+            {"id": "S13", "cat": "appetizer", "name": "日式壽司細捲(全素)", "tags": ["全素"], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
+            {"id": "S14", "cat": "appetizer", "name": "法式起司瑪德蓮", "tags": [], "img": "法式起司瑪德蓮_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1800}, {"label": "小盒 (25)", "price": 500}]},
+            {"id": "S15", "cat": "appetizer", "name": "生態野菜鹹派", "tags": ["蛋奶素"], "img": "生態野菜鹹派.png", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (15)", "price": 900}]},
+            {"id": "S16", "cat": "appetizer", "name": "法式千層波菜蚌", "tags": [], "img": "法式千層波菜蚌_工作區域 1.jpg", "specs": [{"label": "中盒 (24入)", "price": 1200}, {"label": "小盒 (15)", "price": 750}]},
+            {"id": "S17", "cat": "appetizer", "name": "迷你番茄披薩卷", "tags": [], "img": "迷你番茄披薩卷.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
+            {"id": "S18", "cat": "appetizer", "name": "番茄莎莎玉米脆片", "tags": ["五辛素"], "img": "19.番茄莎莎玉米脆片(五辛素).jpg", "specs": [{"label": "中盒", "price": 1000}, {"label": "小盒 (1)", "price": 450}]},
+            {"id": "S19", "cat": "appetizer", "name": "美式炸物組合", "tags": [], "img": "21.美式炸物組合.jpg", "specs": [{"label": "中盒", "price": 1050}, {"label": "小盒 (1)", "price": 800}]},
+            {"id": "S20", "cat": "appetizer", "name": "檸檬酸辣翅小腿", "tags": ["雞肉"], "img": "22.檸檬酸辣翅小腿.jpg", "specs": [{"label": "中盒", "price": 1600}, {"label": "小盒 (30)", "price": 870}]},
+            {"id": "D01", "cat": "dessert", "name": "冰心葡式蛋塔", "tags": [], "img": "冰心葡式蛋塔.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
+            {"id": "D02", "cat": "dessert", "name": "迷你棉花糖檸檬塔", "tags": ["蛋奶素"], "img": "25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (16)", "price": 960}]},
+            {"id": "D03", "cat": "dessert", "name": "小倉月燒(紅豆)", "tags": ["蛋奶素"], "img": "26.小倉月燒.jpg", "specs": [{"label": "中盒 (24入)", "price": 720}, {"label": "小盒 (12)", "price": 360}]},
+            {"id": "D04", "cat": "dessert", "name": "覆盆子巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "28.覆盆子杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
+            {"id": "D05", "cat": "dessert", "name": "抹茶巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "27.抹茶杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
+            {"id": "D06", "cat": "dessert", "name": "迷你烏龍茶蛋糕捲", "tags": ["蛋奶素"], "img": "29.烏龍茶生凍蛋糕捲.jpg", "specs": [{"label": "中盒 (30入)", "price": 1500}, {"label": "小盒 (20)", "price": 1000}]},
+            {"id": "D07", "cat": "dessert", "name": "迷你小甜球", "tags": [], "img": "迷你小甜球(覆盆子)_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1200}]},
+            {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
+            {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
+            {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
+            {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
+            {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
+            {"id": "D15", "cat": "dessert", "name": "日式抹茶蕨餅", "tags": ["蛋奶素"], "img": "43.抹茶蕨餅杯 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1680}, {"label": "小盒 (9)", "price": 630}]},
+            {"id": "D16", "cat": "dessert", "name": "黑糖桂花釀粉粿", "tags": ["全素"], "img": "44.黑糖桂花釀梔子粉粿 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1920}, {"label": "小盒 (9)", "price": 720}]},
+            {"id": "B01", "cat": "beverage", "name": "有機蜜香紅茶(冰桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
+            {"id": "B02", "cat": "beverage", "name": "公平貿易熱咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true}
+        ];
 
         let cart = {};
-
-        function generateOrderID() {
-            const now = new Date();
-            const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-            const timePart = now.getTime().toString().slice(-3);
-            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            return `Y_${dateStr}-${timePart}${randomPart}`;
-        }
 
         function init() {
             const now = new Date();
@@ -307,11 +260,11 @@
             document.getElementById('order-id').innerText = generateOrderID();
             const minDate = new Date();
             minDate.setDate(now.getDate() + 7); 
-            const minDateString = minDate.toISOString().split("T")[0];
-            document.getElementById('delivery-date').min = minDateString;
+            document.getElementById('delivery-date').min = minDate.toISOString().split("T")[0];
 
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
+                if (!body) return;
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
                 let tagsHtml = p.tags.map(tag => {
@@ -328,11 +281,16 @@
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
+                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div></td>
                 `;
                 body.appendChild(tr);
             });
             calculateTotal();
+        }
+
+        function generateOrderID() {
+            const now = new Date();
+            return `Y_${now.getFullYear()}${now.getMonth()+1}${now.getDate()}-${now.getTime().toString().slice(-6)}`;
         }
 
         function openLightbox(url) {
@@ -366,8 +324,7 @@
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            const stairCount = parseInt(document.getElementById('stair-count').value) || 0;
-            const stairFee = stairCount * 3500;
+            const stairFee = (parseInt(document.getElementById('stair-count').value) || 0) * 3500;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
             const serviceSub = transportFee + stairFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
@@ -379,66 +336,27 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        /* --- [新增修改] 兩階段跳轉與通知邏輯 --- */
+        /* --- 兩階段處理邏輯 --- */
 
         async function nextToStage2() {
-            // 1. 驗證第一階段欄位
-            const stage1Inputs = [
-                { id: 'delivery-date', label: '送餐日期' },
-                { id: 'delivery-time', label: '送餐時間' },
-                { id: 'contact-name', label: '聯絡人' },
-                { id: 'company-name', label: '公司名稱' },
-                { id: 'tax-id', label: '公司統編' },
-                { id: 'guest-count', label: '用餐人數' },
-                { id: 'phone-number', label: '手機號碼' },
-                { id: 'delivery-address', label: '送餐地址' },
-                { id: 'floor', label: '樓層' }
-            ];
+            // 驗證第一階段
+            if (!validateStage1()) return;
 
-            let stage1Errors = [];
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
-            stage1Inputs.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (!el.value || el.value.trim() === "") {
-                    stage1Errors.push(item.label);
-                    el.classList.add('input-error');
-                }
-            });
-
-            const parking = document.querySelector('input[name="parking"]:checked');
-            if (!parking) {
-                stage1Errors.push('地下停車場');
-                document.getElementById('parking-container').classList.add('bg-red-50');
-            }
-
-            if (stage1Errors.length > 0) {
-                alert("請填寫基本資料：" + stage1Errors.join(', '));
-                return;
-            }
-
-            // 2. 顯示讀取狀態
             const btn = document.getElementById('next-stage-btn');
             const spinner = document.getElementById('next-spinner');
             btn.disabled = true;
             spinner.classList.remove('hidden');
 
-            // 3. 觸發第一階段通知 (實作/預留 GAS 通知邏輯)
             try {
                 await sendStage1Notification();
-            } catch (e) {
-                console.error("Notification failed", e);
-            }
+            } catch (e) { console.error(e); }
 
-            // 4. 切換 UI 階段
+            // 切換區塊
             document.getElementById('stage-1-section').classList.add('hidden-stage');
             document.getElementById('stage-2-section').classList.remove('hidden-stage');
             document.getElementById('stage-2-section').classList.add('fade-in');
-            
-            // 回到頂部以利選餐
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // 還原按鈕狀態
             btn.disabled = false;
             spinner.classList.add('hidden');
         }
@@ -446,48 +364,48 @@
         function backToStage1() {
             document.getElementById('stage-2-section').classList.add('hidden-stage');
             document.getElementById('stage-1-section').classList.remove('hidden-stage');
-            document.getElementById('stage-1-section').classList.add('fade-in');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function validateStage1() {
+            const required = ['delivery-date', 'contact-name', 'company-name', 'tax-id', 'phone-number', 'delivery-address', 'floor'];
+            let errors = [];
+            required.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) { el.classList.add('input-error'); errors.push(id); }
+                else el.classList.remove('input-error');
+            });
+            const parking = document.querySelector('input[name="parking"]:checked');
+            if (!parking) errors.push('parking');
+            
+            if (errors.length > 0) { alert("請填寫完整的聯絡與送餐資訊"); return false; }
+            return true;
+        }
+
         async function sendStage1Notification() {
-            // 預留通知邏輯：僅發送基本資料給系統備份
-            const gasUrl = "https://script.google.com/macros/s/AKfycbxan9ZW3N4PyaE0-4A0JRJHHCALFqdq49hwtDEDG40tqE6eYWa3MN_LA6E4VpAz5QAVRQ/exec";
-            const briefData = {
-                type: "新客戶初步需求通知",
+            const gasUrl = "https://script.google.com/macros/s/AKfycbxan9ZW3N4PyaE0-4A0JRJHHCALFqdq49hwtDEDG40tqE6eYWa3MN_LA6E4VpAz5QAVRQ/exec"; 
+            const payload = {
+                action: "stage1",
                 orderId: document.getElementById('order-id').innerText,
                 contact: document.getElementById('contact-name').value,
-                phone: document.getElementById('phone-number').value,
                 company: document.getElementById('company-name').value,
+                phone: document.getElementById('phone-number').value,
                 guestCount: document.getElementById('guest-count').value,
                 deliveryDate: document.getElementById('delivery-date').value
             };
-
-            // 使用 fetch 模擬非同步請求
-            return fetch(gasUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(briefData)
-            });
+            return fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
         }
 
-        /* ---------------------------------- */
-
         async function processOrder() {
-            // 1. 執行最終餐點驗證
-            if (Object.keys(cart).length === 0) {
-                alert("請至少選擇一項餐點明細");
-                return;
-            }
-
+            if (Object.keys(cart).length === 0) { alert("請至少選擇一項餐點"); return; }
+            
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
             btnText.innerText = "處理中...";
             btnSpinner.classList.remove('hidden');
 
-            // 2. 準備完整報價單資料
             const orderData = {
+                action: "final_submit",
                 orderId: document.getElementById('order-id').innerText,
                 customer: {
                     name: document.getElementById('contact-name').value,
@@ -500,7 +418,7 @@
                     time: document.getElementById('delivery-time').value,
                     address: document.getElementById('delivery-address').value,
                     floor: document.getElementById('floor').value,
-                    parking: document.querySelector('input[name="parking"]:checked') ? document.querySelector('input[name="parking"]:checked').value : '未勾選'
+                    parking: document.querySelector('input[name="parking"]:checked').value
                 },
                 items: cart,
                 financials: {
@@ -512,25 +430,16 @@
                 }
             };
 
-            // 3. 傳送最終資料
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwQSp8sXhN5ysqahTmCMY_tKZwsaTDstz1qoEvYPjfEfZn5yrUyKagFgqxWve_z5om12A/exec";
-            
+            const gasUrl = "https://script.google.com/macros/s/AKfycbxan9ZW3N4PyaE0-4A0JRJHHCALFqdq49hwtDEDG40tqE6eYWa3MN_LA6E4VpAz5QAVRQ/exec";
             try {
-                await fetch(gasUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
+                await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(orderData) });
             } catch (e) { console.error(e); }
 
-            // 4. 動態修改網頁標題並列印
             const originalTitle = document.title;
-            document.title = "木人艸派對餐盒報價單_" + orderData.orderId;
+            document.title = "木人艸報價單_" + orderData.orderId;
             window.print();
             document.title = originalTitle;
 
-            // 還原按鈕
             btnText.innerText = "產出報價單 (開啟列印)";
             btnSpinner.classList.add('hidden');
         }

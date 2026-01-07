@@ -154,7 +154,7 @@
 
             <div class="flex justify-center py-6 no-print">
                 <button onclick="nextToStage2()" id="next-stage-btn" class="bg-blue-600 text-white px-10 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg flex items-center gap-3">
-                    <span>下一步：選擇餐點</span>
+                    <span id="next-btn-text">下一步：選擇餐點</span>
                     <span id="next-spinner" class="hidden spinner"></span>
                 </button>
             </div>
@@ -281,7 +281,7 @@
     {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
     {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
     {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-    {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+    {"id": "D11", "cat": "dessert", "name": "焦 caramel海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
     {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
     {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
     {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
@@ -379,7 +379,7 @@
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
         }
 
-        /* --- [新增修改] 兩階段跳轉與通知邏輯 --- */
+        // --- STAGE 1 LOGIC START ---
 
         async function nextToStage2() {
             // 1. 驗證第一階段欄位
@@ -410,38 +410,74 @@
             if (!parking) {
                 stage1Errors.push('地下停車場');
                 document.getElementById('parking-container').classList.add('bg-red-50');
+            } else {
+                document.getElementById('parking-container').classList.remove('bg-red-50');
             }
 
             if (stage1Errors.length > 0) {
-                alert("請填寫基本資料：" + stage1Errors.join(', '));
+                alert("請完整填寫基本資料：" + stage1Errors.join(', '));
                 return;
             }
 
-            // 2. 顯示讀取狀態
+            // 2. UI 載入狀態
             const btn = document.getElementById('next-stage-btn');
+            const btnText = document.getElementById('next-btn-text');
             const spinner = document.getElementById('next-spinner');
+            
             btn.disabled = true;
+            btnText.innerText = "處理中...";
             spinner.classList.remove('hidden');
 
-            // 3. 觸發第一階段通知 (實作/預留 GAS 通知邏輯)
+            // 3. 執行 API 發送
             try {
                 await sendStage1Notification();
-            } catch (e) {
-                console.error("Notification failed", e);
+                
+                // 4. 成功後切換頁面
+                document.getElementById('stage-1-section').classList.add('hidden-stage');
+                document.getElementById('stage-2-section').classList.remove('hidden-stage');
+                document.getElementById('stage-2-section').classList.add('fade-in');
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                alert("通訊失敗，請稍後再試。");
+                console.error("Stage 1 Error:", error);
+            } finally {
+                // 還原按鈕狀態
+                btn.disabled = false;
+                btnText.innerText = "下一步：選擇餐點";
+                spinner.classList.add('hidden');
             }
-
-            // 4. 切換 UI 階段
-            document.getElementById('stage-1-section').classList.add('hidden-stage');
-            document.getElementById('stage-2-section').classList.remove('hidden-stage');
-            document.getElementById('stage-2-section').classList.add('fade-in');
-            
-            // 回到頂部以利選餐
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // 還原按鈕狀態
-            btn.disabled = false;
-            spinner.classList.add('hidden');
         }
+
+        async function sendStage1Notification() {
+            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
+            
+            const stage1Data = {
+                action: "stage1",
+                orderId: document.getElementById('order-id').innerText,
+                contact: document.getElementById('contact-name').value,
+                company: document.getElementById('company-name').value,
+                taxId: document.getElementById('tax-id').value,
+                phone: document.getElementById('phone-number').value,
+                guestCount: document.getElementById('guest-count').value,
+                deliveryDate: document.getElementById('delivery-date').value,
+                deliveryTime: document.getElementById('delivery-time').value,
+                address: document.getElementById('delivery-address').value,
+                floor: document.getElementById('floor').value,
+                parking: document.querySelector('input[name="parking"]:checked').value,
+                remarks: document.getElementById('venue-remarks').value
+            };
+
+            // 使用 no-cors 模式發送 POST (GAS 常見配置)
+            return fetch(gasUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(stage1Data)
+            });
+        }
+
+        // --- STAGE 1 LOGIC END ---
 
         function backToStage1() {
             document.getElementById('stage-2-section').classList.add('hidden-stage');
@@ -450,32 +486,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        async function sendStage1Notification() {
-            // 預留通知邏輯：僅發送基本資料給系統備份
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
-            const briefData = {
-                type: "新客戶初步需求通知",
-                orderId: document.getElementById('order-id').innerText,
-                contact: document.getElementById('contact-name').value,
-                phone: document.getElementById('phone-number').value,
-                company: document.getElementById('company-name').value,
-                guestCount: document.getElementById('guest-count').value,
-                deliveryDate: document.getElementById('delivery-date').value
-            };
-
-            // 使用 fetch 模擬非同步請求
-            return fetch(gasUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(briefData)
-            });
-        }
-
-        /* ---------------------------------- */
-
         async function processOrder() {
-            // 1. 執行最終餐點驗證
             if (Object.keys(cart).length === 0) {
                 alert("請至少選擇一項餐點明細");
                 return;
@@ -486,7 +497,6 @@
             btnText.innerText = "處理中...";
             btnSpinner.classList.remove('hidden');
 
-            // 2. 準備完整報價單資料
             const orderData = {
                 orderId: document.getElementById('order-id').innerText,
                 customer: {
@@ -512,7 +522,6 @@
                 }
             };
 
-            // 3. 傳送最終資料
             const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
             
             try {
@@ -524,13 +533,11 @@
                 });
             } catch (e) { console.error(e); }
 
-            // 4. 動態修改網頁標題並列印
             const originalTitle = document.title;
             document.title = "木人艸派對餐盒報價單_" + orderData.orderId;
             window.print();
             document.title = originalTitle;
 
-            // 還原按鈕
             btnText.innerText = "產出報價單 (開啟列印)";
             btnSpinner.classList.add('hidden');
         }

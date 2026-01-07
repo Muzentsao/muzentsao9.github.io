@@ -452,24 +452,13 @@
 
         async function sendStage1Notification() {
             // 預留通知邏輯：僅發送基本資料給系統備份
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
+            const gasUrl = "https://script.google.com/macros/s/AKfycbwQSp8sXhN5ysqahTmCMY_tKZwsaTDstz1qoEvYPjfEfZn5yrUyKagFgqxWve_z5om12A/exec";
             const briefData = {
                 type: "新客戶初步需求通知",
                 orderId: document.getElementById('order-id').innerText,
                 contact: document.getElementById('contact-name').value,
                 phone: document.getElementById('phone-number').value,
                 company: document.getElementById('company-name').value,
-                guestCount: document.getElementById('guest-count').value,
-                deliveryDate: document.getElementById('delivery-date').value
-            };
-async function sendStage1Notification() {
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec"; 
-            const payload = {
-                action: "stage1",
-                orderId: document.getElementById('order-id').innerText,
-                contact: document.getElementById('contact-name').value,
-                company: document.getElementById('company-name').value,
-                phone: document.getElementById('phone-number').value,
                 guestCount: document.getElementById('guest-count').value,
                 deliveryDate: document.getElementById('delivery-date').value
             };

@@ -45,7 +45,6 @@
         @media print {
             body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; }
             .no-print { display: none !important; }
-            /* 確保列印時所有階段皆顯示 */
             .hidden-stage { display: block !important; }
             .pdf-container { 
                 border: none !important; 
@@ -471,36 +470,35 @@
         }
 
         // --- STAGE 2: QUOTE & PRINT LOGIC START ---
-
-        // 輔助函式：將格式化字串 ($1,234) 轉回純數字 (1234)
-        function parseToNumber(str) {
-            return parseInt(str.replace(/[^\d]/g, '')) || 0;
+        
+        // 輔助函式：將包含 $ 與 , 的字串轉回純數字
+        function parsePriceToNumber(priceStr) {
+            return parseInt(priceStr.replace(/[^0-9.-]+/g, "")) || 0;
         }
 
         async function processOrder() {
-            const cartItems = Object.values(cart);
-            if (cartItems.length === 0) {
-                alert("請至少選擇一項餐點明細才能生成報價單");
+            const orderId = document.getElementById('order-id').innerText;
+            const btn = document.getElementById('main-submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
+
+            // 檢查是否選餐
+            if (Object.keys(cart).length === 0) {
+                alert("請先選擇至少一項餐點。");
                 return;
             }
 
-            const mainBtn = document.getElementById('main-submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnSpinner = document.getElementById('btn-spinner');
-
-            // 1. UI 狀態控管：禁用按鈕並顯示處理中
-            mainBtn.disabled = true;
+            // 1. UI 狀態控管：鎖定按鈕
+            btn.disabled = true;
             btnText.innerText = "處理中...";
             btnSpinner.classList.remove('hidden');
 
-            const orderId = document.getElementById('order-id').innerText;
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
-
-            // 2. 資料封裝邏輯 (stage2Data)
-            const stage2Data = {
+            // 2. 封裝發送至 GAS 的資料 (Payload)
+            const payload = {
                 action: "stage2",
                 orderId: orderId,
-                items: cartItems.map(item => ({
+                items: Object.values(cart).map(item => ({
                     name: item.name,
                     spec: item.spec,
                     qty: item.qty,
@@ -508,55 +506,46 @@
                     subtotal: item.sub
                 })),
                 financials: {
-                    mealSubtotal: parseToNumber(document.getElementById('food-total').innerText),
-                    serviceSubtotal: parseToNumber(document.getElementById('service-total').innerText),
-                    tax: parseToNumber(document.getElementById('tax-total').innerText),
-                    grandTotal: parseToNumber(document.getElementById('grand-total').innerText),
-                    deposit: parseToNumber(document.getElementById('deposit-total').innerText)
-                },
-                customerInfo: {
-                    contact: document.getElementById('contact-name').value,
-                    company: document.getElementById('company-name').value,
-                    phone: document.getElementById('phone-number').value,
-                    deliveryDate: document.getElementById('delivery-date').value,
-                    deliveryTime: document.getElementById('delivery-time').value,
-                    deliveryAddress: document.getElementById('delivery-address').value
+                    foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
+                    serviceSub: parsePriceToNumber(document.getElementById('service-total').innerText),
+                    tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
+                    grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
+                    deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
                 }
             };
 
             try {
-                // 3. 非同步發送資料至 GAS
+                // 3. 執行 Fetch POST 請求
                 await fetch(gasUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(stage2Data)
+                    body: JSON.stringify(payload)
                 });
 
-                // 4. 動態修改網頁標題以控管 PDF/列印預設檔名
+                // 4. 列印優化與還原
                 const originalTitle = document.title;
-                document.title = `木人艸派對餐盒報價單_${orderId}`;
+                document.title = `木人艸派對餐盒報價單_${orderId}`; // 設定 PDF 預設存檔名稱
 
-                // 5. 調用瀏覽器原生列印功能
+                // 觸發原生列印
                 window.print();
 
-                // 6. 列印後恢復網頁標題
+                // 還原標題
                 document.title = originalTitle;
 
-                // 7. 體驗優化：彈出完成提示
-                alert("報價單已產出，完整明細已同步發送至您的電子信箱！");
+                // 5. 成功提示
+                alert("報價單已產出，完整明細已發送至您的電子信箱！");
 
             } catch (error) {
-                console.error("Stage 2 Automation Error:", error);
-                alert("資料備份發送失敗，但您仍可進行手動列印。");
+                console.error("Stage 2 Logic Error:", error);
+                alert("報價單發送過程中發生問題，請檢查網路連線後重試。");
             } finally {
-                // 恢復 UI 狀態
-                mainBtn.disabled = false;
+                // 6. 恢復按鈕狀態
+                btn.disabled = false;
                 btnText.innerText = "產出報價單 (開啟列印與發送)";
                 btnSpinner.classList.add('hidden');
             }
         }
-
         // --- STAGE 2: QUOTE & PRINT LOGIC END ---
 
         init();

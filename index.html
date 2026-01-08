@@ -200,7 +200,7 @@
                                 </div>
                             </td>
                             <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
-                            <td class="text-xs">按層數計</td>
+                            <td class="text-xs">按條件計費</td>
                         </tr>
                         <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
                     </tbody>
@@ -213,7 +213,7 @@
                     <div class="space-y-2" id="order-notice-container">
                         <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
                         <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
-                        <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，每層酌收 3,500 元（特殊梯形另議）。</p>
+                        <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，酌收 3,500 元（不累計/特殊梯形另議）。</p>
                         <div class="pt-2 border-t border-gray-300">
                             <p class="text-amber-700 font-bold">
                                 <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
@@ -318,7 +318,6 @@
                 }).join(' ');
                 let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
                 
-                // --- STAGE 2: DRINK TEMPERATURE UI INJECTION START ---
                 let tempHtml = '';
                 if (p.cat === 'beverage') {
                     const isCoffee = p.name.includes('咖啡');
@@ -329,7 +328,6 @@
                         </select>
                     `;
                 }
-                // --- STAGE 2: DRINK TEMPERATURE UI INJECTION END ---
 
                 tr.innerHTML = `
                     <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
@@ -351,37 +349,39 @@
             const stairRow = document.getElementById('manual-stairs-row');
             const envHtml = `
                 <tr id="delivery-env-row">
-                    <td class="text-center font-medium">配送環境</td>
-                    <td>
-                        <div class="flex items-center gap-4 px-2">
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="delivery_env" value="elevator" checked onchange="calculateTotal()"> 有電梯</label>
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="delivery_env" value="no_elevator" onchange="calculateTotal()"> 無電梯</label>
+                    <td class="text-center font-medium">配送環境確認</td>
+                    <td colspan="2">
+                        <div class="flex items-center gap-6 px-2">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="delivery-env" value="elevator" checked onchange="calculateTotal()"> 有電梯
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="delivery-env" value="no-elevator" onchange="calculateTotal()"> 無電梯
+                            </label>
                         </div>
                     </td>
-                    <td class="text-center text-gray-400">-</td>
-                    <td class="text-xs text-gray-400">基本環境判定</td>
+                    <td class="text-xs text-gray-400">系統自動判定費率</td>
                 </tr>
-                <tr id="carry-up-row" class="hidden">
+                <tr id="carry-up-row">
                     <td class="text-center font-medium text-blue-700">送上樓服務</td>
                     <td>
-                        <label class="flex items-center gap-2 px-2 cursor-pointer">
-                            <input type="checkbox" id="need-carry-up" onchange="calculateTotal()"> 
-                            <span class="font-bold text-blue-800">需送上樓 (+$200)</span>
-                        </label>
+                        <div class="flex items-center gap-2 px-2">
+                            <input type="checkbox" id="check-carry-up" onchange="calculateTotal()">
+                            <label for="check-carry-up" class="cursor-pointer font-bold" id="carry-up-label">需送上樓 (+$200)</label>
+                        </div>
                     </td>
                     <td class="text-right font-bold text-blue-600" id="val-carry-up">$0</td>
-                    <td class="text-xs">總額門檻外加</td>
+                    <td class="text-xs" id="carry-up-note">滿 $15,000 免費</td>
                 </tr>
                 <tr id="ramp-row" class="hidden">
                     <td class="text-center font-medium text-purple-700">無障礙坡道</td>
-                    <td>
-                        <div class="flex items-center gap-4 px-2">
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="has_ramp" value="yes" checked> 有</label>
-                            <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="has_ramp" value="no"> 無</label>
+                    <td colspan="2">
+                        <div class="flex items-center gap-6 px-2">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ramp-status" value="yes" checked> 有</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ramp-status" value="no"> 無</label>
                         </div>
                     </td>
-                    <td class="text-center text-gray-400">環境評估</td>
-                    <td class="text-xs text-purple-600">重物配送必填</td>
+                    <td class="text-xs text-purple-600">重物配送環境確認</td>
                 </tr>
             `;
             stairRow.insertAdjacentHTML('beforebegin', envHtml);
@@ -407,7 +407,6 @@
             const sub = qty * price;
             document.getElementById(`sub-${id}`).innerText = `$${sub.toLocaleString()}`;
             
-            // --- STAGE 2: CAPTURE TEMPERATURE DATA START ---
             let temp = null;
             if (p.cat === 'beverage') {
                 temp = document.getElementById(`temp-${id}`).value;
@@ -427,7 +426,6 @@
             } else {
                 delete cart[id];
             }
-            // --- STAGE 2: CAPTURE TEMPERATURE DATA END ---
             
             calculateTotal();
         }
@@ -436,52 +434,74 @@
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
             
-            const hasBucket = Object.values(cart).some(item => item.requiresCollection);
-            const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
             const floor = parseInt(document.getElementById('floor').value) || 1;
-            const env = document.querySelector('input[name="delivery_env"]:checked').value;
-            
-            const carryUpRow = document.getElementById('carry-up-row');
-            let carryUpFee = 0;
-            if (env === 'elevator' && foodSub < 15000) {
-                carryUpRow.classList.remove('hidden');
-                if (document.getElementById('need-carry-up').checked) carryUpFee = 200;
-            } else {
-                carryUpRow.classList.add('hidden');
-                document.getElementById('need-carry-up').checked = false;
-            }
-            document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
-
-            let stairFee = 0;
+            const env = document.querySelector('input[name="delivery-env"]:checked').value;
+            const carryUpCheck = document.getElementById('check-carry-up');
             const stairSelect = document.getElementById('stair-count');
-            if (env === 'no_elevator' && floor >= 2) {
-                stairFee = 3500;
-                stairSelect.value = "1";
+            
+            let carryUpFee = 0;
+            let stairFee = 0;
+
+            // 互斥顯示與核心計費邏輯
+            if (env === 'elevator') {
+                document.getElementById('manual-stairs-row').classList.add('hidden');
+                document.getElementById('carry-up-row').classList.remove('hidden');
+                stairSelect.value = "0"; 
+                
+                // 路徑 A：有電梯
+                if (foodSub >= 15000) {
+                    carryUpCheck.checked = true;
+                    carryUpCheck.disabled = true;
+                    document.getElementById('carry-up-note').innerText = "滿額贈送";
+                    carryUpFee = 0;
+                } else {
+                    carryUpCheck.disabled = false;
+                    document.getElementById('carry-up-note').innerText = "總額門檻外加";
+                    carryUpFee = carryUpCheck.checked ? 200 : 0;
+                }
             } else {
-                const stairCount = parseInt(stairSelect.value) || 0;
-                stairFee = stairCount * 3500;
+                // 路徑 B：無電梯
+                document.getElementById('manual-stairs-row').classList.remove('hidden');
+                document.getElementById('carry-up-row').classList.add('hidden');
+                carryUpCheck.checked = false;
+
+                if (floor >= 2) {
+                    stairFee = 3500;
+                    if (stairSelect.value === "0") stairSelect.value = "1";
+                } else {
+                    stairFee = parseInt(stairSelect.value) * 3500;
+                }
             }
+
+            document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
 
-            const hasIceBucket = Object.values(cart).some(i => i.id.startsWith('B01') || i.id.startsWith('B02'));
-            const rampRow = document.getElementById('ramp-row');
+            // 特殊情況判定 (B01-04 或 租賃)
+            const hasHeavyItems = Object.keys(cart).some(id => 
+                id.startsWith('B01') || id.startsWith('B02') || id.startsWith('B03') || id.startsWith('B04')
+            );
+            const hasRental = document.getElementById('prop-rental').value === 'yes';
             const noticeContainer = document.getElementById('order-notice-container');
-            
-            if (hasIceBucket || hasRentalProps) {
+            const rampRow = document.getElementById('ramp-row');
+
+            if (hasHeavyItems || hasRental) {
                 rampRow.classList.remove('hidden');
-                if (!document.getElementById('deposit-remark')) {
-                    const remarkHtml = `<p id="deposit-remark" class="text-blue-700 font-bold mt-2">● 視現場狀況可能產生 $3,500 環境評估押金</p>`;
-                    noticeContainer.insertAdjacentHTML('beforeend', remarkHtml);
+                if (!document.getElementById('heavy-load-notice')) {
+                    const noticeHtml = `<p id="heavy-load-notice" class="text-blue-700 font-bold border-t pt-2">● 視現場狀況可能產生 $3,500 環境評估押金</p>`;
+                    noticeContainer.insertAdjacentHTML('beforeend', noticeHtml);
                 }
             } else {
                 rampRow.classList.add('hidden');
-                const existingRemark = document.getElementById('deposit-remark');
-                if (existingRemark) existingRemark.remove();
+                const existNotice = document.getElementById('heavy-load-notice');
+                if (existNotice) existNotice.remove();
             }
 
-            const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
+            // 交通費與總計
+            const hasBucket = Object.values(cart).some(item => item.requiresCollection);
+            const isRoundTrip = foodSub >= 20000 || hasBucket || hasRental;
             const transportFee = isRoundTrip ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
+            document.getElementById('transport-logic').innerText = isRoundTrip ? "含回收/滿額" : "單程配送";
             
             const serviceSub = transportFee + stairFee + carryUpFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
@@ -547,7 +567,6 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
                 alert("通訊失敗，請稍後再試。");
-                console.error("Stage 1 Error:", error);
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "下一步：選擇餐點";
@@ -572,12 +591,7 @@
                 parking: document.querySelector('input[name="parking"]:checked').value,
                 remarks: document.getElementById('venue-remarks').value
             };
-            return fetch(gasUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(stage1Data)
-            });
+            return fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(stage1Data) });
         }
 
         function backToStage1() {
@@ -614,12 +628,10 @@
                 orderId: orderId,
                 items: Object.values(cart).map(item => ({
                     name: item.name,
-                    // 將溫度整合進規格欄位中顯示，方便列印模式直接讀取
                     spec: item.temperature ? `${item.spec} (${item.temperature})` : item.spec,
                     qty: item.qty,
                     price: item.price,
-                    subtotal: item.sub,
-                    temperature: item.temperature || "" //Payload 獨立保留溫度欄位
+                    subtotal: item.sub
                 })),
                 financials: {
                     foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
@@ -627,25 +639,23 @@
                     tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
                     grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
                     deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
+                },
+                envInfo: {
+                    deliveryEnv: document.querySelector('input[name="delivery-env"]:checked').value,
+                    floor: document.getElementById('floor').value,
+                    ramp: document.querySelector('input[name="ramp-status"]:checked')?.value || "N/A"
                 }
             };
 
             try {
-                await fetch(gasUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
+                await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 const originalTitle = document.title;
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
                 window.print();
                 document.title = originalTitle;
-                alert("報價單已產出，完整明細已發送至您的電子信箱！");
+                alert("報價單已產出，完整明細已同步備份！");
             } catch (error) {
-                console.error("Stage 2 Logic Error:", error);
-                alert("報價單發送過程中發生問題，請檢查網路連線後重試。");
+                alert("發送失敗，請聯繫客服。");
             } finally {
                 btn.disabled = false;
                 btnText.innerText = "產出報價單 (開啟列印與發送)";

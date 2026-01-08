@@ -31,17 +31,14 @@
         #lightbox { display: none; position: fixed; z-index: 1000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         #lightbox img { max-width: 90%; max-height: 80%; border: 4px solid white; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
 
-        /* 按鈕載入動畫 */
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- 兩階段機制相關樣式 --- */
         .stage-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
         .hidden-stage { display: none !important; }
         .fade-in { animation: fadeIn 0.5s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 瀏覽器列印專用設定 --- */
         @media print {
             body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; }
             .no-print { display: none !important; }
@@ -172,7 +169,7 @@
                         <tr class="header-bg text-center text-xs">
                             <th class="w-16 no-print">示意圖</th>
                             <th>中文餐點名稱</th>
-                            <th class="w-32">規格選擇</th>
+                            <th class="w-48">規格選擇</th>
                             <th class="w-16">盒數</th>
                             <th class="w-24">單價/盒</th>
                             <th class="w-24">小計</th>
@@ -284,11 +281,10 @@
             {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
             {"id": "D15", "cat": "dessert", "name": "日式抹茶蕨餅", "tags": ["蛋奶素"], "img": "43.抹茶蕨餅杯 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1680}, {"label": "小盒 (9)", "price": 630}]},
             {"id": "D16", "cat": "dessert", "name": "黑糖桂花釀粉粿", "tags": ["全素"], "img": "44.黑糖桂花釀梔子粉粿 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1920}, {"label": "小盒 (9)", "price": 720}]},
-            {"id": "B01", "cat": "beverage", "name": "有機蜜香紅茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
-             {"id": "B01", "cat": "beverage", "name": "公平貿易咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
-            {"id": "B02", "cat": "beverage", "name": "百香蘋果味南非國寶茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true},
-             {"id": "B02", "cat": "beverage", "name": "紫蘇南非國寶茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true},
-            
+            {"id": "B01-T", "cat": "beverage", "name": "有機蜜香紅茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
+            {"id": "B01-C", "cat": "beverage", "name": "公平貿易咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
+            {"id": "B02-A", "cat": "beverage", "name": "百香蘋果味南非國寶茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true},
+            {"id": "B02-P", "cat": "beverage", "name": "紫蘇南非國寶茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true},
         ];
 
         let cart = {};
@@ -321,10 +317,24 @@
                     return `<span class="badge ${className}">${tag}</span>`;
                 }).join(' ');
                 let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
+                
+                // --- STAGE 2: DRINK TEMPERATURE UI INJECTION START ---
+                let tempHtml = '';
+                if (p.cat === 'beverage') {
+                    const isCoffee = p.name.includes('咖啡');
+                    tempHtml = `
+                        <select id="temp-${p.id}" class="no-border-input bg-blue-50 text-[11px] rounded ml-1 w-12 font-bold text-blue-600" onchange="updateQty('${p.id}', document.querySelector('#row-${p.id} input[type=number]').value)">
+                            <option value="冰" ${!isCoffee ? 'selected' : ''}>冰</option>
+                            <option value="熱" ${isCoffee ? 'selected' : ''}>熱</option>
+                        </select>
+                    `;
+                }
+                // --- STAGE 2: DRINK TEMPERATURE UI INJECTION END ---
+
                 tr.innerHTML = `
                     <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
                     <td class="font-bold">${p.name}</td>
-                    <td><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select></td>
+                    <td><div class="flex items-center"><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select>${tempHtml}</div></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
                     <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
@@ -333,14 +343,10 @@
                 body.appendChild(tr);
             });
             
-            // --- STAGE 2: DYNAMIC UI INJECTION START ---
             injectDeliveryUI();
-            // --- STAGE 2: DYNAMIC UI INJECTION END ---
-
             calculateTotal();
         }
 
-        // --- STAGE 2: UI INJECTION LOGIC START ---
         function injectDeliveryUI() {
             const stairRow = document.getElementById('manual-stairs-row');
             const envHtml = `
@@ -380,7 +386,6 @@
             `;
             stairRow.insertAdjacentHTML('beforebegin', envHtml);
         }
-        // --- STAGE 2: UI INJECTION LOGIC END ---
 
         function openLightbox(url) {
             document.getElementById('lightbox-img').src = url;
@@ -390,7 +395,8 @@
         function updateRow(id, specIdx) {
             const p = products.find(i => i.id === id);
             document.getElementById(`price-${id}`).innerText = `$${p.specs[specIdx].price.toLocaleString()}`;
-            if (cart[id]) updateQty(id, cart[id].qty);
+            const qty = document.querySelector(`#row-${id} input[type=number]`).value;
+            updateQty(id, qty);
         }
 
         function updateQty(id, qty) {
@@ -400,8 +406,29 @@
             const price = p.specs[specIdx].price;
             const sub = qty * price;
             document.getElementById(`sub-${id}`).innerText = `$${sub.toLocaleString()}`;
-            if (qty > 0) cart[id] = { id: p.id, name: p.name, spec: p.specs[specIdx].label, qty, price, sub, requiresCollection: p.requiresCollection || false };
-            else delete cart[id];
+            
+            // --- STAGE 2: CAPTURE TEMPERATURE DATA START ---
+            let temp = null;
+            if (p.cat === 'beverage') {
+                temp = document.getElementById(`temp-${id}`).value;
+            }
+
+            if (qty > 0) {
+                cart[id] = { 
+                    id: p.id, 
+                    name: p.name, 
+                    spec: p.specs[specIdx].label, 
+                    temperature: temp,
+                    qty, 
+                    price, 
+                    sub, 
+                    requiresCollection: p.requiresCollection || false 
+                };
+            } else {
+                delete cart[id];
+            }
+            // --- STAGE 2: CAPTURE TEMPERATURE DATA END ---
+            
             calculateTotal();
         }
 
@@ -409,15 +436,11 @@
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
             
-            // 基礎參數
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const hasRentalProps = document.getElementById('prop-rental').value === 'yes';
             const floor = parseInt(document.getElementById('floor').value) || 1;
             const env = document.querySelector('input[name="delivery_env"]:checked').value;
             
-            // --- STAGE 2: CORE CALCULATION LOGIC START ---
-            
-            // 1. 送上樓服務費邏輯 (情境 B)
             const carryUpRow = document.getElementById('carry-up-row');
             let carryUpFee = 0;
             if (env === 'elevator' && foodSub < 15000) {
@@ -429,20 +452,18 @@
             }
             document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
 
-            // 2. 人工爬梯費邏輯 (情境 A)
             let stairFee = 0;
             const stairSelect = document.getElementById('stair-count');
             if (env === 'no_elevator' && floor >= 2) {
                 stairFee = 3500;
-                stairSelect.value = "1"; // 自動標註起步層
+                stairSelect.value = "1";
             } else {
                 const stairCount = parseInt(stairSelect.value) || 0;
                 stairFee = stairCount * 3500;
             }
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
 
-            // 3. 特殊需求與押金備註 (情境 C)
-            const hasIceBucket = Object.values(cart).some(i => i.id === 'B01' || i.id === 'B02');
+            const hasIceBucket = Object.values(cart).some(i => i.id.startsWith('B01') || i.id.startsWith('B02'));
             const rampRow = document.getElementById('ramp-row');
             const noticeContainer = document.getElementById('order-notice-container');
             
@@ -457,8 +478,6 @@
                 const existingRemark = document.getElementById('deposit-remark');
                 if (existingRemark) existingRemark.remove();
             }
-
-            // --- STAGE 2: CORE CALCULATION LOGIC END ---
 
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRentalProps;
             const transportFee = isRoundTrip ? 1500 : 500;
@@ -595,10 +614,12 @@
                 orderId: orderId,
                 items: Object.values(cart).map(item => ({
                     name: item.name,
-                    spec: item.spec,
+                    // 將溫度整合進規格欄位中顯示，方便列印模式直接讀取
+                    spec: item.temperature ? `${item.spec} (${item.temperature})` : item.spec,
                     qty: item.qty,
                     price: item.price,
-                    subtotal: item.sub
+                    subtotal: item.sub,
+                    temperature: item.temperature || "" //Payload 獨立保留溫度欄位
                 })),
                 financials: {
                     foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),

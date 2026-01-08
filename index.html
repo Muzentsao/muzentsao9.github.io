@@ -6,7 +6,6 @@
     <title>木人艸 | 派對餐盒報價系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #fcfcfc; color: #333; }
         .pdf-container { background-color: #fff; border: 1.5px solid #000; padding: 25px; position: relative; }
@@ -36,16 +35,15 @@
         .spinner { border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 3px solid #fff; width: 18px; height: 18px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- [新增修改] 兩階段機制相關樣式 --- */
+        /* --- 兩階段機制相關樣式 --- */
         .stage-transition { transition: opacity 0.4s ease, transform 0.4s ease; }
         .hidden-stage { display: none !important; }
         .fade-in { animation: fadeIn 0.5s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* ---------------------------------- */
 
         /* --- 瀏覽器列印專用設定 --- */
         @media print {
-            body { background-color: #fff !important; }
+            body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; }
             .no-print { display: none !important; }
             /* 確保列印時所有階段皆顯示 */
             .hidden-stage { display: block !important; }
@@ -64,7 +62,7 @@
             .badge-gray { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
             .text-blue-800 { color: #1e40af !important; -webkit-print-color-adjust: exact; }
             .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
-            input { background: transparent !important; }
+            input, select { background: transparent !important; appearance: none; -webkit-appearance: none; border: none !important; }
         }
     </style>
 </head>
@@ -244,52 +242,52 @@
                     <span id="btn-text">產出報價單 (開啟列印與發送)</span>
                     <span id="btn-spinner" class="hidden spinner"></span>
                 </button>
-                <p class="text-xs text-gray-400 font-medium">※ 點擊後將自動生成 PDF 下載，並發送明細至後台信箱。</p>
+                <p class="text-xs text-gray-400 font-medium">※ 點擊後將發送電子信箱備份，並自動開啟瀏覽器列印視窗。</p>
             </div>
         </div>
     </div>
 
     <script>
         const products = [
-    {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}, {"label": "小盒 (9)", "price": 765}]},
-    {"id": "S02", "cat": "appetizer", "name": "照燒風味迷你漢堡(雞肉)", "tags": ["雞肉"], "img": "2.迷你照燒雞腿漢堡（正常）.jpg", "specs": [{"label": "中盒 (15入)", "price": 1275}, {"label": "小盒 (9)", "price": 765}]},
-    {"id": "S03", "cat": "appetizer", "name": "鹽麴雞肉墨西哥捲餅", "tags": ["雞肉"], "img": "18.鹽麴雞肉墨西哥捲餅.jpg", "specs": [{"label": "中盒 (22入)", "price": 1650}, {"label": "小盒 (10)", "price": 750}]},
-    {"id": "S04", "cat": "appetizer", "name": "迷你花生時蔬三明治", "tags": ["蛋奶素"], "img": "迷你花生時蔬三明治(蛋奶素)_工作區域 1.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-    {"id": "S05", "cat": "appetizer", "name": "迷你燻雞時蔬三明治", "tags": ["雞肉"], "img": "5.迷你燻雞吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-    {"id": "S06", "cat": "appetizer", "name": "迷你火腿起司三明治", "tags": [], "img": "4.迷你火腿起司吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-    {"id": "S07", "cat": "appetizer", "name": "復刻版迷你營養三明治", "tags": [], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-    {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-    {"id": "S09", "cat": "appetizer", "name": "綜合花壽司", "tags": [], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
-    {"id": "S10", "cat": "appetizer", "name": "綜合花壽司(全素)", "tags": ["全素"], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
-    {"id": "S11", "cat": "appetizer", "name": "豆皮壽司(素)", "tags": ["全素"], "img": "11.豆皮壽司(素).jpg", "specs": [{"label": "中盒 (40入)", "price": 800}, {"label": "小盒 (25)", "price": 500}]},
-    {"id": "S12", "cat": "appetizer", "name": "日式壽司細捲", "tags": [], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
-    {"id": "S13", "cat": "appetizer", "name": "日式壽司細捲(全素)", "tags": ["全素"], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
-    {"id": "S14", "cat": "appetizer", "name": "法式起司瑪德蓮", "tags": [], "img": "法式起司瑪德蓮_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1800}, {"label": "小盒 (25)", "price": 500}]},
-    {"id": "S15", "cat": "appetizer", "name": "生態野菜鹹派", "tags": ["蛋奶素"], "img": "生態野菜鹹派.png", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (15)", "price": 900}]},
-    {"id": "S16", "cat": "appetizer", "name": "法式千層波菜蚌", "tags": [], "img": "法式千層波菜蚌_工作區域 1.jpg", "specs": [{"label": "中盒 (24入)", "price": 1200}, {"label": "小盒 (15)", "price": 750}]},
-    {"id": "S17", "cat": "appetizer", "name": "迷你番茄披薩卷", "tags": [], "img": "迷你番茄披薩卷.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
-    {"id": "S18", "cat": "appetizer", "name": "番茄莎莎玉米脆片", "tags": ["五辛素"], "img": "19.番茄莎莎玉米脆片(五辛素).jpg", "specs": [{"label": "中盒", "price": 1000}, {"label": "小盒 (1)", "price": 450}]},
-    {"id": "S19", "cat": "appetizer", "name": "美式炸物組合", "tags": [], "img": "21.美式炸物組合.jpg", "specs": [{"label": "中盒", "price": 1050}, {"label": "小盒 (1)", "price": 800}]},
-    {"id": "S20", "cat": "appetizer", "name": "檸檬酸辣翅小腿", "tags": ["雞肉"], "img": "22.檸檬酸辣翅小腿.jpg", "specs": [{"label": "中盒", "price": 1600}, {"label": "小盒 (30)", "price": 870}]},
-    {"id": "D01", "cat": "dessert", "name": "冰心葡式蛋塔", "tags": [], "img": "冰心葡式蛋塔.png", "specs": [{"label": "評中盒 (24入)", "price": 1200}]},
-    {"id": "D02", "cat": "dessert", "name": "迷你棉花糖檸檬塔", "tags": ["蛋奶素"], "img": "25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (16)", "price": 960}]},
-    {"id": "D03", "cat": "dessert", "name": "小倉月燒(紅豆)", "tags": ["蛋奶素"], "img": "26.小倉月燒.jpg", "specs": [{"label": "中盒 (24入)", "price": 720}, {"label": "小盒 (12)", "price": 360}]},
-    {"id": "D04", "cat": "dessert", "name": "覆盆子巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "28.覆盆子杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
-    {"id": "D05", "cat": "dessert", "name": "抹茶巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "27.抹茶杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
-    {"id": "D06", "cat": "dessert", "name": "迷你烏龍茶蛋糕捲", "tags": ["蛋奶素"], "img": "29.烏龍茶生凍蛋糕捲.jpg", "specs": [{"label": "中盒 (30入)", "price": 1500}, {"label": "小盒 (20)", "price": 1000}]},
-    {"id": "D07", "cat": "dessert", "name": "迷你小甜球", "tags": [], "img": "迷你小甜球(覆盆子)_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1200}]},
-    {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
-    {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
-    {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-    {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
-    {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
-    {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
-    {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
-    {"id": "D15", "cat": "dessert", "name": "日式抹茶蕨餅", "tags": ["蛋奶素"], "img": "43.抹茶蕨餅杯 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1680}, {"label": "小盒 (9)", "price": 630}]},
-    {"id": "D16", "cat": "dessert", "name": "黑糖桂花釀粉粿", "tags": ["全素"], "img": "44.黑糖桂花釀梔子粉粿 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1920}, {"label": "小盒 (9)", "price": 720}]},
-    {"id": "B01", "cat": "beverage", "name": "有機蜜香紅茶(冰桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
-    {"id": "B02", "cat": "beverage", "name": "公平貿易熱咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true}
-];
+            {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}, {"label": "小盒 (9)", "price": 765}]},
+            {"id": "S02", "cat": "appetizer", "name": "照燒風味迷你漢堡(雞肉)", "tags": ["雞肉"], "img": "2.迷你照燒雞腿漢堡（正常）.jpg", "specs": [{"label": "中盒 (15入)", "price": 1275}, {"label": "小盒 (9)", "price": 765}]},
+            {"id": "S03", "cat": "appetizer", "name": "鹽麴雞肉墨西哥捲餅", "tags": ["雞肉"], "img": "18.鹽麴雞肉墨西哥捲餅.jpg", "specs": [{"label": "中盒 (22入)", "price": 1650}, {"label": "小盒 (10)", "price": 750}]},
+            {"id": "S04", "cat": "appetizer", "name": "迷你花生時蔬三明治", "tags": ["蛋奶素"], "img": "迷你花生時蔬三明治(蛋奶素)_工作區域 1.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
+            {"id": "S05", "cat": "appetizer", "name": "迷你燻雞時蔬三明治", "tags": ["雞肉"], "img": "5.迷你燻雞吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
+            {"id": "S06", "cat": "appetizer", "name": "迷你火腿起司三明治", "tags": [], "img": "4.迷你火腿起司吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
+            {"id": "S07", "cat": "appetizer", "name": "復刻版迷你營養三明治", "tags": [], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
+            {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
+            {"id": "S09", "cat": "appetizer", "name": "綜合花壽司", "tags": [], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
+            {"id": "S10", "cat": "appetizer", "name": "綜合花壽司(全素)", "tags": ["全素"], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
+            {"id": "S11", "cat": "appetizer", "name": "豆皮壽司(素)", "tags": ["全素"], "img": "11.豆皮壽司(素).jpg", "specs": [{"label": "中盒 (40入)", "price": 800}, {"label": "小盒 (25)", "price": 500}]},
+            {"id": "S12", "cat": "appetizer", "name": "日式壽司細捲", "tags": [], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
+            {"id": "S13", "cat": "appetizer", "name": "日式壽司細捲(全素)", "tags": ["全素"], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
+            {"id": "S14", "cat": "appetizer", "name": "法式起司瑪德蓮", "tags": [], "img": "法式起司瑪德蓮_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1800}, {"label": "小盒 (25)", "price": 500}]},
+            {"id": "S15", "cat": "appetizer", "name": "生態野菜鹹派", "tags": ["蛋奶素"], "img": "生態野菜鹹派.png", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (15)", "price": 900}]},
+            {"id": "S16", "cat": "appetizer", "name": "法式千層波菜蚌", "tags": [], "img": "法式千層波菜蚌_工作區域 1.jpg", "specs": [{"label": "中盒 (24入)", "price": 1200}, {"label": "小盒 (15)", "price": 750}]},
+            {"id": "S17", "cat": "appetizer", "name": "迷你番茄披薩卷", "tags": [], "img": "迷你番茄披薩卷.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
+            {"id": "S18", "cat": "appetizer", "name": "番茄莎莎玉米脆片", "tags": ["五辛素"], "img": "19.番茄莎莎玉米脆片(五辛素).jpg", "specs": [{"label": "中盒", "price": 1000}, {"label": "小盒 (1)", "price": 450}]},
+            {"id": "S19", "cat": "appetizer", "name": "美式炸物組合", "tags": [], "img": "21.美式炸物組合.jpg", "specs": [{"label": "中盒", "price": 1050}, {"label": "小盒 (1)", "price": 800}]},
+            {"id": "S20", "cat": "appetizer", "name": "檸檬酸辣翅小腿", "tags": ["雞肉"], "img": "22.檸檬酸辣翅小腿.jpg", "specs": [{"label": "中盒", "price": 1600}, {"label": "小盒 (30)", "price": 870}]},
+            {"id": "D01", "cat": "dessert", "name": "冰心葡式蛋塔", "tags": [], "img": "冰心葡式蛋塔.png", "specs": [{"label": "評中盒 (24入)", "price": 1200}]},
+            {"id": "D02", "cat": "dessert", "name": "迷你棉花糖檸檬塔", "tags": ["蛋奶素"], "img": "25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (16)", "price": 960}]},
+            {"id": "D03", "cat": "dessert", "name": "小倉月燒(紅豆)", "tags": ["蛋奶素"], "img": "26.小倉月燒.jpg", "specs": [{"label": "中盒 (24入)", "price": 720}, {"label": "小盒 (12)", "price": 360}]},
+            {"id": "D04", "cat": "dessert", "name": "覆盆子巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "28.覆盆子杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
+            {"id": "D05", "cat": "dessert", "name": "抹茶巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "27.抹茶杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
+            {"id": "D06", "cat": "dessert", "name": "迷你烏龍茶蛋糕捲", "tags": ["蛋奶素"], "img": "29.烏龍茶生凍蛋糕捲.jpg", "specs": [{"label": "中盒 (30入)", "price": 1500}, {"label": "小盒 (20)", "price": 1000}]},
+            {"id": "D07", "cat": "dessert", "name": "迷你小甜球", "tags": [], "img": "迷你小甜球(覆盆子)_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1200}]},
+            {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
+            {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
+            {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
+            {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
+            {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
+            {"id": "D15", "cat": "dessert", "name": "日式抹茶蕨餅", "tags": ["蛋奶素"], "img": "43.抹茶蕨餅杯 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1680}, {"label": "小盒 (9)", "price": 630}]},
+            {"id": "D16", "cat": "dessert", "name": "黑糖桂花釀粉粿", "tags": ["全素"], "img": "44.黑糖桂花釀梔子粉粿 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1920}, {"label": "小盒 (9)", "price": 720}]},
+            {"id": "B01", "cat": "beverage", "name": "有機蜜香紅茶(冰桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
+            {"id": "B02", "cat": "beverage", "name": "公平貿易熱咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true}
+        ];
 
         let cart = {};
 
@@ -472,10 +470,14 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- STAGE 2: QUOTE & PDF LOGIC START ---
+        // --- STAGE 2: QUOTE & PRINT LOGIC START ---
+
+        // 輔助函式：將格式化字串 ($1,234) 轉回純數字 (1234)
+        function parseToNumber(str) {
+            return parseInt(str.replace(/[^\d]/g, '')) || 0;
+        }
 
         async function processOrder() {
-            // 1. 餐點選擇驗證
             const cartItems = Object.values(cart);
             if (cartItems.length === 0) {
                 alert("請至少選擇一項餐點明細才能生成報價單");
@@ -486,23 +488,17 @@
             const btnSpinner = document.getElementById('btn-spinner');
             const mainBtn = document.getElementById('main-submit-btn');
 
-            // 進入處理狀態
+            // 1. UI 禁用與狀態切換
             mainBtn.disabled = true;
-            btnText.innerText = "正在生成報價單並發送信件...";
+            btnText.innerText = "處理中...";
             btnSpinner.classList.remove('hidden');
 
             const orderId = document.getElementById('order-id').innerText;
 
-            // 2. 準備 Stage 2 完整資料
+            // 2. 準備 Stage 2 發送資料 (含完整財務細節)
             const stage2Data = {
                 action: "stage2",
                 orderId: orderId,
-                customer: {
-                    name: document.getElementById('contact-name').value,
-                    company: document.getElementById('company-name').value,
-                    taxId: document.getElementById('tax-id').value,
-                    phone: document.getElementById('phone-number').value
-                },
                 items: cartItems.map(item => ({
                     name: item.name,
                     spec: item.spec,
@@ -511,50 +507,41 @@
                     subtotal: item.sub
                 })),
                 financials: {
-                    foodSubtotal: document.getElementById('food-total').innerText,
-                    serviceSubtotal: document.getElementById('service-total').innerText,
-                    tax: document.getElementById('tax-total').innerText,
-                    grandTotal: document.getElementById('grand-total').innerText,
-                    deposit: document.getElementById('deposit-total').innerText
-                },
-                delivery: {
-                    date: document.getElementById('delivery-date').value,
-                    time: document.getElementById('delivery-time').value,
-                    address: document.getElementById('delivery-address').value
+                    mealSubtotal: parseToNumber(document.getElementById('food-total').innerText),
+                    serviceSubtotal: parseToNumber(document.getElementById('service-total').innerText),
+                    tax: parseToNumber(document.getElementById('tax-total').innerText),
+                    grandTotal: parseToNumber(document.getElementById('grand-total').innerText),
+                    deposit: parseToNumber(document.getElementById('deposit-total').innerText)
                 }
             };
 
             const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
             
             try {
-                // 3. 發送 Stage 2 通知信件 (非同步)
-                const apiPromise = fetch(gasUrl, {
+                // 3. 發送後端通知
+                await fetch(gasUrl, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(stage2Data)
                 });
 
-                // 4. 生成並下載 PDF (使用 html2pdf.js)
-                const element = document.getElementById('quotation-content');
-                const opt = {
-                    margin:       10,
-                    filename:     `木人艸報價單_${orderId}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
+                // 4. 檔名優化：修改網頁標題以影響列印檔名
+                const originalTitle = document.title;
+                document.title = `木人艸派對餐盒報價單_${orderId}`;
 
-                // 執行下載
-                await html2pdf().set(opt).from(element).save();
-                await apiPromise; // 確保 API 請求也發出去了
+                // 5. 觸發原生列印
+                window.print();
 
-                // 5. 成功提示
-                alert("報價單已成功生成並下載！同步已發送確認信件至您的信箱，專員將盡快與您聯繫。");
+                // 6. 還原網頁標題
+                document.title = originalTitle;
+
+                // 7. 最終提示
+                alert("報價單已產出，完整明細已發送至您的電子信箱！");
 
             } catch (error) {
-                console.error("Stage 2 Processing Error:", error);
-                alert("處理過程中發生錯誤，請截圖保留畫面並聯繫專員。");
+                console.error("Stage 2 Error:", error);
+                alert("發送過程中發生異常，但您仍可手動儲存列印畫面。");
             } finally {
                 // 還原按鈕狀態
                 mainBtn.disabled = false;
@@ -563,7 +550,7 @@
             }
         }
 
-        // --- STAGE 2: QUOTE & PDF LOGIC END ---
+        // --- STAGE 2: QUOTE & PRINT LOGIC END ---
 
         init();
     </script>

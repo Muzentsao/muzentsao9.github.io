@@ -279,7 +279,7 @@
             {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
             {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
             {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-            {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D11", "cat": "dessert", "name": "焦 caramel 海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
             {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
             {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
             {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
@@ -484,18 +484,19 @@
                 return;
             }
 
+            const mainBtn = document.getElementById('main-submit-btn');
             const btnText = document.getElementById('btn-text');
             const btnSpinner = document.getElementById('btn-spinner');
-            const mainBtn = document.getElementById('main-submit-btn');
 
-            // 1. UI 禁用與狀態切換
+            // 1. UI 狀態控管：禁用按鈕並顯示處理中
             mainBtn.disabled = true;
             btnText.innerText = "處理中...";
             btnSpinner.classList.remove('hidden');
 
             const orderId = document.getElementById('order-id').innerText;
+            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
 
-            // 2. 準備 Stage 2 發送資料 (含完整財務細節)
+            // 2. 資料封裝邏輯 (stage2Data)
             const stage2Data = {
                 action: "stage2",
                 orderId: orderId,
@@ -512,13 +513,19 @@
                     tax: parseToNumber(document.getElementById('tax-total').innerText),
                     grandTotal: parseToNumber(document.getElementById('grand-total').innerText),
                     deposit: parseToNumber(document.getElementById('deposit-total').innerText)
+                },
+                customerInfo: {
+                    contact: document.getElementById('contact-name').value,
+                    company: document.getElementById('company-name').value,
+                    phone: document.getElementById('phone-number').value,
+                    deliveryDate: document.getElementById('delivery-date').value,
+                    deliveryTime: document.getElementById('delivery-time').value,
+                    deliveryAddress: document.getElementById('delivery-address').value
                 }
             };
 
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwZnseXCB0XLdYj3rZcixiBSZz86QSsKFyJjp3tu4t0G3IdfVQFY6TnFrFIF9sgDq7Nbw/exec";
-            
             try {
-                // 3. 發送後端通知
+                // 3. 非同步發送資料至 GAS
                 await fetch(gasUrl, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -526,24 +533,24 @@
                     body: JSON.stringify(stage2Data)
                 });
 
-                // 4. 檔名優化：修改網頁標題以影響列印檔名
+                // 4. 動態修改網頁標題以控管 PDF/列印預設檔名
                 const originalTitle = document.title;
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
 
-                // 5. 觸發原生列印
+                // 5. 調用瀏覽器原生列印功能
                 window.print();
 
-                // 6. 還原網頁標題
+                // 6. 列印後恢復網頁標題
                 document.title = originalTitle;
 
-                // 7. 最終提示
-                alert("報價單已產出，完整明細已發送至您的電子信箱！");
+                // 7. 體驗優化：彈出完成提示
+                alert("報價單已產出，完整明細已同步發送至您的電子信箱！");
 
             } catch (error) {
-                console.error("Stage 2 Error:", error);
-                alert("發送過程中發生異常，但您仍可手動儲存列印畫面。");
+                console.error("Stage 2 Automation Error:", error);
+                alert("資料備份發送失敗，但您仍可進行手動列印。");
             } finally {
-                // 還原按鈕狀態
+                // 恢復 UI 狀態
                 mainBtn.disabled = false;
                 btnText.innerText = "產出報價單 (開啟列印與發送)";
                 btnSpinner.classList.add('hidden');

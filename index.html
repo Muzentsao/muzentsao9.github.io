@@ -190,8 +190,8 @@
                 <table class="w-full pdf-table">
                     <thead><tr class="header-bg text-center text-xs"><th>服務名稱</th><th>規格說明</th><th>小計</th><th>備註</th></tr></thead>
                     <tbody id="service-detail-body">
-                        <tr><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (訂單須滿$6,000以上)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
-                        <tr><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
+                        <tr id="row-prop-rental"><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (訂單須滿$6,000以上)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
+                        <tr id="row-transport-fee"><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
                         <tr id="manual-stairs-row">
                             <td class="text-center font-medium text-orange-700">人工爬梯搬運</td>
                             <td>
@@ -205,7 +205,7 @@
                             <td class="text-right font-bold text-orange-600" id="val-stair">$0</td>
                             <td class="text-xs">按條件計費</td>
                         </tr>
-                        <tr><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
+                        <tr id="row-utensils"><td class="text-center font-medium">餐具提供</td><td class="flex justify-between items-center italic text-gray-500"><span>免費一次性餐具</span><span id="utensil-info">100 組</span></td><td class="text-center text-gray-400">贈送</td><td class="text-xs">依人數</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -346,7 +346,7 @@
                 </td>
             `;
 
-            // 4. 移除不需要的整列 (隱藏而不刪除以保持代碼引用穩定)
+            // 4. 移除不需要的整列
             document.getElementById('row-6-remarks').style.display = 'none';
             document.getElementById('row-7-parking').style.display = 'none';
 
@@ -408,7 +408,48 @@
             document.getElementById('delivery-time').addEventListener('change', calculateTotal);
             // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION END ---
 
+            // --- 服務明細順序重構與停車場移入邏輯 ---
+            reorderServiceDetails();
+
             calculateTotal();
+        }
+
+        function reorderServiceDetails() {
+            const serviceBody = document.getElementById('service-detail-body');
+            
+            // 建立「地下停車場」列
+            const parkingRow = document.createElement('tr');
+            parkingRow.id = 'service-parking-row';
+            parkingRow.innerHTML = `
+                <td class="text-center font-medium">地下停車場</td>
+                <td colspan="2">
+                    <div class="flex items-center gap-6 px-2 py-1">
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking-service" value="yes"> 有</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking-service" value="no" checked> 無</label>
+                    </div>
+                </td>
+                <td class="text-xs">供物流判定</td>
+            `;
+
+            // 獲取所有現有與動態注入的列節點
+            const propRow = document.getElementById('row-prop-rental');
+            const utensilsRow = document.getElementById('row-utensils');
+            const transportRow = document.getElementById('row-transport-fee');
+            const envRow = document.getElementById('delivery-env-row');
+            const carryUpRow = document.getElementById('carry-up-row');
+            const stairsRow = document.getElementById('manual-stairs-row');
+            const rampRow = document.getElementById('ramp-row');
+
+            // 依照目標順序重新附加節點 (1.人造花, 2.餐具, 3.交通費, 4.停車場, 5.配送環境, 6.送上樓/爬梯)
+            serviceBody.innerHTML = ""; // 清空
+            serviceBody.appendChild(propRow);
+            serviceBody.appendChild(utensilsRow);
+            serviceBody.appendChild(transportRow);
+            serviceBody.appendChild(parkingRow);
+            serviceBody.appendChild(envRow);
+            serviceBody.appendChild(carryUpRow);
+            serviceBody.appendChild(stairsRow);
+            serviceBody.appendChild(rampRow);
         }
 
         function toggleTaxInput() {
@@ -608,7 +649,6 @@
         }
 
         async function nextToStage2() {
-            // 排除已移除或隱藏的欄位 (Company Name, Parking, Remarks)
             const stage1Inputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
@@ -630,7 +670,6 @@
                 }
             });
 
-            // 統編條件檢查
             const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
             const taxIdInput = document.getElementById('tax-id');
             if (taxToggle === 'yes' && (!taxIdInput.value || taxIdInput.value.length < 8)) {
@@ -716,6 +755,7 @@
             btnSpinner.classList.remove('hidden');
 
             const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
+            const parkingValue = document.querySelector('input[name="parking-service"]:checked').value; // 從新位置抓取
 
             const payload = {
                 action: "stage2",
@@ -730,7 +770,8 @@
                     deliveryTime: document.getElementById('delivery-time').value,
                     address: document.getElementById('delivery-address').value,
                     floor: document.getElementById('floor').value,
-                    activityMode: document.getElementById('activity-mode').value
+                    activityMode: document.getElementById('activity-mode').value,
+                    parking: parkingValue // 同步停車場資訊
                 },
                 items: Object.values(cart).map(item => ({
                     name: item.name,

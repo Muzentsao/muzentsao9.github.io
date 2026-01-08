@@ -224,7 +224,7 @@
                 </div>
                 <div class="w-full md:w-96">
                     <table class="w-full pdf-table">
-                        <tr><td class="header-bg w-32">餐點小計</td><td class="text-right font-bold" id="food-total">$0</td></tr>
+                        <tr id="food-total-row"><td class="header-bg w-32">餐點小計</td><td class="text-right font-bold" id="food-total">$0</td></tr>
                         <tr><td class="header-bg">服務小計</td><td class="text-right font-bold" id="service-total">$500</td></tr>
                         <tr><td class="header-bg">營業稅 (5%)</td><td class="text-right font-bold" id="tax-total">$0</td></tr>
                         <tr class="text-xl"><td class="header-bg text-red-700">總計</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
@@ -342,6 +342,22 @@
             });
             
             injectDeliveryUI();
+            
+            // --- STAGE 2: DYNAMIC UI INJECTION START ---
+            // 注入早晨加成顯示列於總計區域
+            const foodTotalRow = document.getElementById('food-total-row');
+            const surchargeRowHtml = `
+                <tr id="morning-surcharge-row" class="hidden">
+                    <td class="header-bg">早晨加成</td>
+                    <td class="text-right font-bold text-red-600" id="morning-surcharge-total">$0</td>
+                </tr>
+            `;
+            foodTotalRow.insertAdjacentHTML('afterend', surchargeRowHtml);
+
+            // 監聽時間變動
+            document.getElementById('delivery-time').addEventListener('change', calculateTotal);
+            // --- STAGE 2: DYNAMIC UI INJECTION END ---
+
             calculateTotal();
         }
 
@@ -442,13 +458,10 @@
             let carryUpFee = 0;
             let stairFee = 0;
 
-            // 互斥顯示與核心計費邏輯
             if (env === 'elevator') {
                 document.getElementById('manual-stairs-row').classList.add('hidden');
                 document.getElementById('carry-up-row').classList.remove('hidden');
                 stairSelect.value = "0"; 
-                
-                // 路徑 A：有電梯
                 if (foodSub >= 15000) {
                     carryUpCheck.checked = true;
                     carryUpCheck.disabled = true;
@@ -460,11 +473,9 @@
                     carryUpFee = carryUpCheck.checked ? 200 : 0;
                 }
             } else {
-                // 路徑 B：無電梯
                 document.getElementById('manual-stairs-row').classList.remove('hidden');
                 document.getElementById('carry-up-row').classList.add('hidden');
                 carryUpCheck.checked = false;
-
                 if (floor >= 2) {
                     stairFee = 3500;
                     if (stairSelect.value === "0") stairSelect.value = "1";
@@ -476,7 +487,22 @@
             document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
 
-            // 特殊情況判定 (B01-04 或 租賃)
+            // --- STAGE 2: MORNING SURCHARGE CALCULATION START ---
+            const timeVal = document.getElementById('delivery-time').value;
+            const deliveryHour = parseInt(timeVal.split(':')[0]);
+            let morningSurcharge = 0;
+            const surchargeRow = document.getElementById('morning-surcharge-row');
+
+            if (deliveryHour < 9) {
+                // 邏輯：(9 - 小時) * 3500。例：07:30 算 9-7=2小時。
+                morningSurcharge = (9 - deliveryHour) * 3500;
+                surchargeRow.classList.remove('hidden');
+            } else {
+                surchargeRow.classList.add('hidden');
+            }
+            document.getElementById('morning-surcharge-total').innerText = `$${morningSurcharge.toLocaleString()}`;
+            // --- STAGE 2: MORNING SURCHARGE CALCULATION END ---
+
             const hasHeavyItems = Object.keys(cart).some(id => 
                 id.startsWith('B01') || id.startsWith('B02') || id.startsWith('B03') || id.startsWith('B04')
             );
@@ -496,7 +522,6 @@
                 if (existNotice) existNotice.remove();
             }
 
-            // 交通費與總計
             const hasBucket = Object.values(cart).some(item => item.requiresCollection);
             const isRoundTrip = foodSub >= 20000 || hasBucket || hasRental;
             const transportFee = isRoundTrip ? 1500 : 500;
@@ -507,8 +532,11 @@
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
             
-            const tax = Math.round((foodSub + serviceSub) * 0.05);
-            const grand = foodSub + serviceSub + tax;
+            // 財務總計更新（包含早晨加成）
+            const subtotalPreTax = foodSub + serviceSub + morningSurcharge;
+            const tax = Math.round(subtotalPreTax * 0.05);
+            const grand = subtotalPreTax + tax;
+
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
             document.getElementById('grand-total').innerText = `$${grand.toLocaleString()}`;
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
@@ -636,12 +664,14 @@
                 financials: {
                     foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
                     serviceSub: parsePriceToNumber(document.getElementById('service-total').innerText),
+                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText), // 新增早晨加成同步
                     tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
                     grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
                     deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
                 },
                 envInfo: {
                     deliveryEnv: document.querySelector('input[name="delivery-env"]:checked').value,
+                    deliveryTime: document.getElementById('delivery-time').value, // 同送餐時間同步
                     floor: document.getElementById('floor').value,
                     ramp: document.querySelector('input[name="ramp-status"]:checked')?.value || "N/A"
                 }
@@ -653,7 +683,7 @@
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
                 window.print();
                 document.title = originalTitle;
-                alert("報價單已產出，完整明細已同步備份！");
+                alert("報價單已產出，完整明細與早晨加成已同步備份！");
             } catch (error) {
                 alert("發送失敗，請聯繫客服。");
             } finally {

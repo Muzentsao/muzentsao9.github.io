@@ -41,8 +41,9 @@
 
         @media print {
             body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; }
-            .no-print { display: none !important; }
-            .hidden-stage { display: block !important; }
+            .no-print, button, #next-stage-btn, .mb-4.no-print { display: none !important; }
+            .hidden-stage { display: block !important; opacity: 1 !important; transform: none !important; }
+            #stage-1-section, #stage-2-section { display: block !important; }
             .pdf-container { 
                 border: none !important; 
                 box-shadow: none !important; 
@@ -51,6 +52,7 @@
                 width: 100% !important; 
                 max-width: none !important;
             }
+            tr { page-break-inside: avoid; }
             .header-bg { background-color: #fcf4d9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .category-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .badge-vege { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
@@ -58,7 +60,8 @@
             .badge-gray { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
             .text-blue-800 { color: #1e40af !important; -webkit-print-color-adjust: exact; }
             .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
-            input, select { background: transparent !important; appearance: none; -webkit-appearance: none; border: none !important; }
+            input, select { background: transparent !important; appearance: none; -webkit-appearance: none; border: none !important; color: #000 !important; }
+            input::placeholder { color: transparent !important; }
         }
     </style>
 </head>
@@ -343,8 +346,6 @@
             
             injectDeliveryUI();
             
-            // --- STAGE 2: DYNAMIC UI INJECTION START ---
-            // 注入早晨加成顯示列於總計區域
             const foodTotalRow = document.getElementById('food-total-row');
             const surchargeRowHtml = `
                 <tr id="morning-surcharge-row" class="hidden">
@@ -354,9 +355,7 @@
             `;
             foodTotalRow.insertAdjacentHTML('afterend', surchargeRowHtml);
 
-            // 監聽時間變動
             document.getElementById('delivery-time').addEventListener('change', calculateTotal);
-            // --- STAGE 2: DYNAMIC UI INJECTION END ---
 
             calculateTotal();
         }
@@ -487,21 +486,18 @@
             document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
 
-            // --- STAGE 2: MORNING SURCHARGE CALCULATION START ---
             const timeVal = document.getElementById('delivery-time').value;
             const deliveryHour = parseInt(timeVal.split(':')[0]);
             let morningSurcharge = 0;
             const surchargeRow = document.getElementById('morning-surcharge-row');
 
             if (deliveryHour < 9) {
-                // 邏輯：(9 - 小時) * 3500。例：07:30 算 9-7=2小時。
                 morningSurcharge = (9 - deliveryHour) * 3500;
                 surchargeRow.classList.remove('hidden');
             } else {
                 surchargeRow.classList.add('hidden');
             }
             document.getElementById('morning-surcharge-total').innerText = `$${morningSurcharge.toLocaleString()}`;
-            // --- STAGE 2: MORNING SURCHARGE CALCULATION END ---
 
             const hasHeavyItems = Object.keys(cart).some(id => 
                 id.startsWith('B01') || id.startsWith('B02') || id.startsWith('B03') || id.startsWith('B04')
@@ -532,7 +528,6 @@
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
             
-            // 財務總計更新（包含早晨加成）
             const subtotalPreTax = foodSub + serviceSub + morningSurcharge;
             const tax = Math.round(subtotalPreTax * 0.05);
             const grand = subtotalPreTax + tax;
@@ -664,14 +659,14 @@
                 financials: {
                     foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
                     serviceSub: parsePriceToNumber(document.getElementById('service-total').innerText),
-                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText), // 新增早晨加成同步
+                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText),
                     tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
                     grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
                     deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
                 },
                 envInfo: {
                     deliveryEnv: document.querySelector('input[name="delivery-env"]:checked').value,
-                    deliveryTime: document.getElementById('delivery-time').value, // 同送餐時間同步
+                    deliveryTime: document.getElementById('delivery-time').value,
                     floor: document.getElementById('floor').value,
                     ramp: document.querySelector('input[name="ramp-status"]:checked')?.value || "N/A"
                 }
@@ -679,8 +674,22 @@
 
             try {
                 await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                
+                // 執行全階段整合列印
                 const originalTitle = document.title;
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
+                
+                // 在列印前確保所有 input 的值在 DOM 屬性中可見 (針對部分瀏覽器相容性)
+                const inputs = document.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.type === 'radio' || input.type === 'checkbox') {
+                        if (input.checked) input.setAttribute('checked', 'checked');
+                        else input.removeAttribute('checked');
+                    } else {
+                        input.setAttribute('value', input.value);
+                    }
+                });
+
                 window.print();
                 document.title = originalTitle;
                 alert("報價單已產出，完整明細與早晨加成已同步備份！");

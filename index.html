@@ -241,7 +241,7 @@
                     <span id="btn-text">產出報價單 (開啟列印與發送)</span>
                     <span id="btn-spinner" class="hidden spinner"></span>
                 </button>
-                <p class="text-xs text-gray-400 font-medium">※ 點擊後將發送電子信箱備份，並自動開啟瀏覽器列印視窗。</p>
+                <p class="text-xs text-gray-400 font-medium">※ 此為模擬報價，非正式訂單<br>請透過官方Line聯繫，經業務人員確認並提供正式報價單後為準</p>
             </div>
         </div>
     </div>
@@ -698,7 +698,7 @@
 
                 window.print();
                 document.title = originalTitle;
-                alert("報價單已產出，完整明細與早晨加成已同步備份！");
+                alert("報價單已產出，請透過官方 Line 聯繫，經業務人員確認並提供正式報價單後為準!");
             } catch (error) {
                 alert("發送失敗，請聯繫客服。");
             } finally {

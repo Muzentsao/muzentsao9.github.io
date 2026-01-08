@@ -44,24 +44,10 @@
             .no-print, button, #next-stage-btn, .mb-4.no-print { display: none !important; }
             .hidden-stage { display: block !important; opacity: 1 !important; transform: none !important; }
             #stage-1-section, #stage-2-section { display: block !important; }
-            .pdf-container { 
-                border: none !important; 
-                box-shadow: none !important; 
-                padding: 0 !important; 
-                margin: 0 !important; 
-                width: 100% !important; 
-                max-width: none !important;
-            }
+            .pdf-container { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
             tr { page-break-inside: avoid; }
             .header-bg { background-color: #fcf4d9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .category-header { background-color: #f3f4f6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .badge-vege { background-color: #e8f5e9 !important; -webkit-print-color-adjust: exact; }
-            .badge-meat { background-color: #fff3e0 !important; -webkit-print-color-adjust: exact; }
-            .badge-gray { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
-            .text-blue-800 { color: #1e40af !important; -webkit-print-color-adjust: exact; }
-            .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
-            input, select { background: transparent !important; appearance: none; -webkit-appearance: none; border: none !important; color: #000 !important; }
-            input::placeholder { color: transparent !important; }
+            input, select, textarea { background: transparent !important; appearance: none; border: none !important; color: #000 !important; resize: none; overflow: hidden; }
         }
     </style>
 </head>
@@ -129,12 +115,7 @@
                     </tr>
                     <tr id="row-6-remarks">
                         <td class="header-bg">場地需求備註</td>
-                        <td colspan="7" class="bg-white">
-                            <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input">
-                            <div class="mt-1 px-2 py-1 bg-blue-50 border-l-4 border-blue-400 no-print">
-                                <p class="text-xs text-blue-800 leading-relaxed"><span class="font-bold">建議：</span>現場需有基本的水電供應（以符合衛生安全）</p>
-                            </div>
-                        </td>
+                        <td colspan="7" class="bg-white"><input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input"></td>
                     </tr>
                     <tr id="row-7-parking">
                         <td class="header-bg req">地下停車場</td>
@@ -142,7 +123,6 @@
                             <div class="flex items-center gap-6 px-2 py-1" id="parking-container">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="yes"> 有</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking" value="no"> 無</label>
-                                <span class="text-xs text-gray-400 font-normal no-print">(供物流判斷)</span>
                             </div>
                         </td>
                     </tr>
@@ -158,11 +138,8 @@
         </div>
 
         <div id="stage-2-section" class="stage-transition hidden-stage">
-            
             <div class="mb-4 no-print">
-                <button onclick="backToStage1()" class="text-blue-600 font-medium flex items-center gap-1 hover:underline">
-                    ← 返回修改基本資料
-                </button>
+                <button onclick="backToStage1()" class="text-blue-600 font-medium flex items-center gap-1 hover:underline">← 返回修改基本資料</button>
             </div>
 
             <h3 class="text-center font-bold mb-3 tracking-widest border-b border-black pb-1 uppercase">訂購餐點明細</h3>
@@ -187,8 +164,15 @@
 
             <h3 class="text-center font-bold mb-3 tracking-widest border-b border-black pb-1 uppercase">服務明細</h3>
             <div class="table-responsive mb-8">
-                <table class="w-full pdf-table">
-                    <thead><tr class="header-bg text-center text-xs"><th>服務名稱</th><th>規格說明</th><th>小計</th><th>備註</th></tr></thead>
+                <table class="w-full pdf-table" id="service-table">
+                    <thead>
+                        <tr class="header-bg text-center text-xs">
+                            <th>服務名稱</th>
+                            <th>規格說明</th>
+                            <th id="col-subtotal-header">小計</th>
+                            <th>備註</th>
+                        </tr>
+                    </thead>
                     <tbody id="service-detail-body">
                         <tr id="row-prop-rental"><td class="text-center">人造花租賃陳列</td><td><select id="prop-rental" class="no-border-input font-bold" onchange="calculateTotal()"><option value="no">無租賃需求</option><option value="yes">租賃道具 (訂單須滿$6,000以上)</option></select></td><td class="text-center">免費商借</td><td class="text-xs">一日內歸還</td></tr>
                         <tr id="row-transport-fee"><td class="text-center font-medium">交通費</td><td id="transport-desc">自動判定</td><td class="text-right font-bold" id="val-transport">$500</td><td class="text-xs text-blue-600 font-medium" id="transport-logic">金額未滿2萬且無回收</td></tr>
@@ -217,12 +201,6 @@
                         <p class="text-red-700 font-bold">1. 預訂期限：需於出餐前 5 個工作天預訂（系統不開放 7 日內訂單）。</p>
                         <p>2. 定金支付：需於餐會前兩週支付七成定金。</p>
                         <p class="text-orange-700 font-medium">3. 爬梯需求：現場若有人工搬運需求，酌收 3,500 元（不累計/特殊梯形另議）。</p>
-                        <div class="pt-2 border-t border-gray-300">
-                            <p class="text-amber-700 font-bold">
-                                <span class="inline-block bg-amber-100 px-2 py-0.5 rounded text-[10px] mr-1">品質建議</span>
-                                建議勿於室溫下放置超過 2 小時，夏天時(室溫超過 32℃)勿放置超過 1 小時。並請盡快食用完畢。
-                            </p>
-                        </div>
                     </div>
                 </div>
                 <div class="w-full md:w-96">
@@ -241,56 +219,15 @@
                     <span id="btn-text">產出正式報價單 (開啟列印與發送)</span>
                     <span id="btn-spinner" class="hidden spinner"></span>
                 </button>
-                <p class="text-xs text-gray-400 font-medium text-center">
-  ※ 此為模擬報價，非正式訂單，<br>
-  請透過官方Line聯繫，經業務人員確認並提供正式報價單後為準。
-</p>
             </div>
         </div>
     </div>
 
     <script>
         const products = [
-            {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}, {"label": "小盒 (9)", "price": 765}]},
-            {"id": "S02", "cat": "appetizer", "name": "照燒風味迷你漢堡(雞肉)", "tags": ["雞肉"], "img": "2.迷你照燒雞腿漢堡（正常）.jpg", "specs": [{"label": "中盒 (15入)", "price": 1275}, {"label": "小盒 (9)", "price": 765}]},
-            {"id": "S03", "cat": "appetizer", "name": "鹽麴雞肉墨西哥捲餅", "tags": ["雞肉"], "img": "18.鹽麴雞肉墨西哥捲餅.jpg", "specs": [{"label": "中盒 (22入)", "price": 1650}, {"label": "小盒 (10)", "price": 750}]},
-            {"id": "S04", "cat": "appetizer", "name": "迷你花生時蔬三明治", "tags": ["蛋奶素"], "img": "迷你花生時蔬三明治(蛋奶素)_工作區域 1.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-            {"id": "S05", "cat": "appetizer", "name": "迷你燻雞時蔬三明治", "tags": ["雞肉"], "img": "5.迷你燻雞吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-            {"id": "S06", "cat": "appetizer", "name": "迷你火腿起司三明治", "tags": [], "img": "4.迷你火腿起司吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
-            {"id": "S07", "cat": "appetizer", "name": "復刻版迷你營養三明治", "tags": [], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-            {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-            {"id": "S09", "cat": "appetizer", "name": "綜合花壽司", "tags": [], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
-            {"id": "S10", "cat": "appetizer", "name": "綜合花壽司(全素)", "tags": ["全素"], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
-            {"id": "S11", "cat": "appetizer", "name": "豆皮壽司(素)", "tags": ["全素"], "img": "11.豆皮壽司(素).jpg", "specs": [{"label": "中盒 (40入)", "price": 800}, {"label": "小盒 (25)", "price": 500}]},
-            {"id": "S12", "cat": "appetizer", "name": "日式壽司細捲", "tags": [], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
-            {"id": "S13", "cat": "appetizer", "name": "日式壽司細捲(全素)", "tags": ["全素"], "img": "日式壽司細捲_工作區域 1.jpg", "specs": [{"label": "中盒 (96入)", "price": 1440}, {"label": "小盒 (56)", "price": 840}]},
-            {"id": "S14", "cat": "appetizer", "name": "法式起司瑪德蓮", "tags": [], "img": "法式起司瑪德蓮_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1800}, {"label": "小盒 (25)", "price": 500}]},
-            {"id": "S15", "cat": "appetizer", "name": "生態野菜鹹派", "tags": ["蛋奶素"], "img": "生態野菜鹹派.png", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (15)", "price": 900}]},
-            {"id": "S16", "cat": "appetizer", "name": "法式千層波菜蚌", "tags": [], "img": "法式千層波菜蚌_工作區域 1.jpg", "specs": [{"label": "中盒 (24入)", "price": 1200}, {"label": "小盒 (15)", "price": 750}]},
-            {"id": "S17", "cat": "appetizer", "name": "迷你番茄披薩卷", "tags": [], "img": "迷你番茄披薩卷.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
-            {"id": "S18", "cat": "appetizer", "name": "番茄莎莎玉米脆片", "tags": ["五辛素"], "img": "19.番茄莎莎玉米脆片(五辛素).jpg", "specs": [{"label": "中盒", "price": 1000}, {"label": "小盒 (1)", "price": 450}]},
-            {"id": "S19", "cat": "appetizer", "name": "美式炸物組合", "tags": [], "img": "21.美式炸物組合.jpg", "specs": [{"label": "中盒", "price": 1050}, {"label": "小盒 (1)", "price": 800}]},
-            {"id": "S20", "cat": "appetizer", "name": "檸檬酸辣翅小腿", "tags": ["雞肉"], "img": "22.檸檬酸辣翅小腿.jpg", "specs": [{"label": "中盒", "price": 1600}, {"label": "小盒 (30)", "price": 870}]},
-            {"id": "D01", "cat": "dessert", "name": "冰心葡式蛋塔", "tags": [], "img": "冰心葡式蛋塔.png", "specs": [{"label": "評中盒 (24入)", "price": 1200}]},
-            {"id": "D02", "cat": "dessert", "name": "迷你棉花糖檸檬塔", "tags": ["蛋奶素"], "img": "25.迷你棉花糖酸甜檸檬塔（蛋奶素）.jpg", "specs": [{"label": "中盒 (24入)", "price": 1440}, {"label": "小盒 (16)", "price": 960}]},
-            {"id": "D03", "cat": "dessert", "name": "小倉月燒(紅豆)", "tags": ["蛋奶素"], "img": "26.小倉月燒.jpg", "specs": [{"label": "中盒 (24入)", "price": 720}, {"label": "小盒 (12)", "price": 360}]},
-            {"id": "D04", "cat": "dessert", "name": "覆盆子巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "28.覆盆子杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
-            {"id": "D05", "cat": "dessert", "name": "抹茶巧克力杯子蛋糕", "tags": ["蛋奶素"], "img": "27.抹茶杯子蛋糕.jpg", "specs": [{"label": "中盒 (35入)", "price": 2275}, {"label": "小盒 (25)", "price": 1625}]},
-            {"id": "D06", "cat": "dessert", "name": "迷你烏龍茶蛋糕捲", "tags": ["蛋奶素"], "img": "29.烏龍茶生凍蛋糕捲.jpg", "specs": [{"label": "中盒 (30入)", "price": 1500}, {"label": "小盒 (20)", "price": 1000}]},
-            {"id": "D07", "cat": "dessert", "name": "迷你小甜球", "tags": [], "img": "迷你小甜球(覆盆子)_工作區域 1.jpg", "specs": [{"label": "中盒 (40入)", "price": 1200}]},
-            {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
-            {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
-            {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-            {"id": "D11", "cat": "dessert", "name": "焦 caramel海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
-            {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
-            {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
-            {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
-            {"id": "D15", "cat": "dessert", "name": "日式抹茶蕨餅", "tags": ["蛋奶素"], "img": "43.抹茶蕨餅杯 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1680}, {"label": "小盒 (9)", "price": 630}]},
-            {"id": "D16", "cat": "dessert", "name": "黑糖桂花釀粉粿", "tags": ["全素"], "img": "44.黑糖桂花釀梔子粉粿 (全素).jpg", "specs": [{"label": "中盒 (24入)", "price": 1920}, {"label": "小盒 (9)", "price": 720}]},
+            {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}]},
+            {"id": "D01", "cat": "dessert", "name": "冰心葡式蛋塔", "tags": [], "img": "冰心葡式蛋塔.png", "specs": [{"label": "中盒 (24入)", "price": 1200}]},
             {"id": "B01-T", "cat": "beverage", "name": "有機蜜香紅茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
-            {"id": "B01-C", "cat": "beverage", "name": "公平貿易咖啡(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1500}], "requiresCollection": true},
-            {"id": "B02-A", "cat": "beverage", "name": "百香蘋果味南非國寶茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
-            {"id": "B02-P", "cat": "beverage", "name": "正福清香烏龍茶(桶)", "tags": [""], "img": "飲料桶_工作區域 1.jpg", "specs": [{"label": "8公升/桶", "price": 1000}], "requiresCollection": true},
         ];
 
         let cart = {};
@@ -298,16 +235,11 @@
         function generateOrderID() {
             const now = new Date();
             const dateStr = now.getFullYear().toString() + (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
-            const timePart = now.getTime().toString().slice(-3);
-            const randomPart = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            return `${dateStr}-${timePart}${randomPart}`;
+            return `${dateStr}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
         }
 
         function init() {
-            // --- UI 佈局重構：精簡欄位與統編條件化 ---
-            const customerTable = document.getElementById('customer-info-table');
-            
-            // 1. 重構第一列：活動模式 | 派單日期 | 訂單編號
+            // --- UI 佈局重構：精簡第一階段 ---
             const firstRow = document.getElementById('row-0-header');
             const activityModeValue = document.getElementById('activity-mode').value;
             firstRow.innerHTML = `
@@ -319,152 +251,131 @@
                 <td colspan="2" class="font-mono font-bold text-blue-800" id="order-id">產生中...</td>
             `;
 
-            // 2. 修改聯絡人列：移除公司名稱，讓聯絡人佔滿整行
-            const contactRow = document.getElementById('row-2-contact');
-            contactRow.innerHTML = `
+            document.getElementById('row-2-contact').innerHTML = `
                 <td class="header-bg req">聯絡人</td>
                 <td colspan="7"><input type="text" id="contact-name" class="no-border-input" placeholder="姓名" required></td>
             `;
 
-            // 3. 重構統編列：改為勾選 有/無 邏輯
-            const taxRow = document.getElementById('row-activity-tax');
-            taxRow.innerHTML = `
+            document.getElementById('row-activity-tax').innerHTML = `
                 <td class="header-bg">公司統編</td>
                 <td colspan="7">
                     <div class="flex items-center gap-6 px-2">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="tax-toggle" value="no" checked onchange="toggleTaxInput()"> 無
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="tax-toggle" value="yes" onchange="toggleTaxInput()"> 有
-                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="tax-toggle" value="no" checked onchange="toggleTaxInput()"> 無</label>
+                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="tax-toggle" value="yes" onchange="toggleTaxInput()"> 有</label>
                         <div id="tax-input-wrapper" class="hidden flex items-center gap-2 border-l pl-4 ml-2">
-                            <span class="text-xs text-gray-400">請填寫統編：</span>
-                            <input type="text" id="tax-id" class="border-b border-black w-32 text-center font-mono" placeholder="8碼數字" maxlength="8">
+                            <input type="text" id="tax-id" class="border-b border-black w-32 text-center" placeholder="8碼數字" maxlength="8">
                         </div>
                     </div>
                 </td>
             `;
 
-            // 4. 移除不需要的整列
             document.getElementById('row-6-remarks').style.display = 'none';
             document.getElementById('row-7-parking').style.display = 'none';
 
-            // 基本初始化
             const now = new Date();
-            document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             document.getElementById('order-id').innerText = generateOrderID();
-            const minDate = new Date();
-            minDate.setDate(now.getDate() + 7); 
-            const minDateString = minDate.toISOString().split("T")[0];
-            document.getElementById('delivery-date').min = minDateString;
 
             products.forEach(p => {
                 const body = document.getElementById(`menu-${p.cat}`);
+                if (!body) return;
                 const tr = document.createElement('tr');
                 tr.id = `row-${p.id}`;
-                let tagsHtml = p.tags.map(tag => {
-                    let className = 'badge-gray';
-                    if (['蛋奶素', '全素', '五辛素'].includes(tag)) className = 'badge-vege';
-                    if (['牛肉', '雞肉'].includes(tag)) className = 'badge-meat';
-                    return `<span class="badge ${className}">${tag}</span>`;
-                }).join(' ');
-                let specOptions = p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('');
-                
-                let tempHtml = '';
-                if (p.cat === 'beverage') {
-                    const isCoffee = p.name.includes('咖啡');
-                    tempHtml = `
-                        <select id="temp-${p.id}" class="no-border-input bg-blue-50 text-[11px] rounded ml-1 w-12 font-bold text-blue-600" onchange="updateQty('${p.id}', document.querySelector('#row-${p.id} input[type=number]').value)">
-                            <option value="冰" ${!isCoffee ? 'selected' : ''}>冰</option>
-                            <option value="熱" ${isCoffee ? 'selected' : ''}>熱</option>
-                        </select>
-                    `;
-                }
-
                 tr.innerHTML = `
-                    <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
+                    <td class="text-center no-print"><img src="${p.img}" class="img-preview"></td>
                     <td class="font-bold">${p.name}</td>
-                    <td><div class="flex items-center"><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select>${tempHtml}</div></td>
+                    <td><select class="no-border-input bg-gray-50 text-xs rounded">${p.specs.map((s, idx) => `<option value="${idx}">${s.label}</option>`).join('')}</select></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>
-                    <td class="text-right font-medium" id="price-${p.id}">$${p.specs[0].price.toLocaleString()}</td>
+                    <td class="text-right">$${p.specs[0].price.toLocaleString()}</td>
                     <td class="text-right font-bold text-blue-800" id="sub-${p.id}">$0</td>
-                    <td class="text-xs"><div class="flex flex-wrap gap-1">${tagsHtml}</div><div class="text-gray-400 mt-1">內含包材</div></td>
+                    <td class="text-xs">內含包材</td>
                 `;
                 body.appendChild(tr);
             });
-            
+
             injectDeliveryUI();
             
-            // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION START ---
+            // --- STAGE 2: QUOTE & PRINT LOGIC START ---
+            // 1. 注入早晨加成列
             const foodTotalRow = document.getElementById('food-total-row');
-            const surchargeRowHtml = `
+            foodTotalRow.insertAdjacentHTML('afterend', `
                 <tr id="morning-surcharge-row" class="hidden">
                     <td class="header-bg">早晨加成</td>
                     <td class="text-right font-bold text-red-600" id="morning-surcharge-total">$0</td>
                 </tr>
-            `;
-            foodTotalRow.insertAdjacentHTML('afterend', surchargeRowHtml);
-            document.getElementById('delivery-time').addEventListener('change', calculateTotal);
-            // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION END ---
-
-            // --- 服務明細順序重構與停車場移入邏輯 ---
-            reorderServiceDetails();
+            `);
+            
+            // 2. 服務明細優化：調整寬度、重點強化、注入備註
+            reorderAndOptimizeService();
+            // --- STAGE 2: QUOTE & PRINT LOGIC END ---
 
             calculateTotal();
         }
 
-        function reorderServiceDetails() {
+        function toggleTaxInput() {
+            const hasTax = document.querySelector('input[name="tax-toggle"]:checked').value === 'yes';
+            document.getElementById('tax-input-wrapper').classList.toggle('hidden', !hasTax);
+        }
+
+        function reorderAndOptimizeService() {
             const serviceBody = document.getElementById('service-detail-body');
             
-            // 建立「地下停車場」列
+            // 鎖定「小計」欄位寬度
+            document.getElementById('col-subtotal-header').style.width = "100px";
+
+            // 建立「地下停車場」與「服務備註」
             const parkingRow = document.createElement('tr');
             parkingRow.id = 'service-parking-row';
             parkingRow.innerHTML = `
                 <td class="text-center font-medium">地下停車場</td>
                 <td colspan="2">
-                    <div class="flex items-center gap-6 px-2 py-1">
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking-service" value="yes"> 有</label>
-                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="parking-service" value="no" checked> 無</label>
+                    <div class="flex items-center gap-6 px-2">
+                        <label class="flex items-center gap-2"><input type="radio" name="parking-service" value="yes"> 有</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="parking-service" value="no" checked> 無</label>
                     </div>
                 </td>
-                <td class="text-xs">供物流判定</td>
+                <td class="text-xs">物流判定</td>
             `;
 
-            // 獲取所有現有與動態注入的列節點
-            const propRow = document.getElementById('row-prop-rental');
-            const utensilsRow = document.getElementById('row-utensils');
-            const transportRow = document.getElementById('row-transport-fee');
-            const envRow = document.getElementById('delivery-env-row');
-            const carryUpRow = document.getElementById('carry-up-row');
-            const stairsRow = document.getElementById('manual-stairs-row');
-            const rampRow = document.getElementById('ramp-row');
+            const remarksRow = document.createElement('tr');
+            remarksRow.id = 'service-remarks-row';
+            remarksRow.innerHTML = `
+                <td class="header-bg text-center">服務備註</td>
+                <td colspan="3" class="p-0">
+                    <textarea id="service-remarks" class="w-full h-16 p-2 text-xs no-border-input bg-blue-50/30" placeholder="請填寫配送細節（如警衛室換證、卸貨碼頭限高、特殊動線補述...）"></textarea>
+                </td>
+            `;
 
-            // 依照目標順序重新附加節點 (1.人造花, 2.餐具, 3.交通費, 4.停車場, 5.配送環境, 6.送上樓/爬梯)
-            serviceBody.innerHTML = ""; // 清空
-            serviceBody.appendChild(propRow);
-            serviceBody.appendChild(utensilsRow);
-            serviceBody.appendChild(transportRow);
+            // 重構順序與強化視覺重點
+            const rows = {
+                prop: document.getElementById('row-prop-rental'),
+                utensils: document.getElementById('row-utensils'),
+                transport: document.getElementById('row-transport-fee'),
+                env: document.getElementById('delivery-env-row'),
+                carry: document.getElementById('carry-up-row'),
+                stairs: document.getElementById('manual-stairs-row'),
+                ramp: document.getElementById('ramp-row')
+            };
+
+            // 視覺強化重點項目
+            [rows.transport, rows.carry, rows.stairs].forEach(row => {
+                if (row) {
+                    row.cells[0].style.fontWeight = "800";
+                    row.cells[0].style.fontSize = "14px";
+                    row.cells[2].style.width = "100px";
+                }
+            });
+
+            serviceBody.innerHTML = "";
+            serviceBody.appendChild(rows.prop);
+            serviceBody.appendChild(rows.utensils);
+            serviceBody.appendChild(rows.transport);
             serviceBody.appendChild(parkingRow);
-            serviceBody.appendChild(envRow);
-            serviceBody.appendChild(carryUpRow);
-            serviceBody.appendChild(stairsRow);
-            serviceBody.appendChild(rampRow);
-        }
-
-        function toggleTaxInput() {
-            const hasTax = document.querySelector('input[name="tax-toggle"]:checked').value === 'yes';
-            const wrapper = document.getElementById('tax-input-wrapper');
-            const taxInput = document.getElementById('tax-id');
-            if (hasTax) {
-                wrapper.classList.remove('hidden');
-                taxInput.required = true;
-            } else {
-                wrapper.classList.add('hidden');
-                taxInput.required = false;
-                taxInput.value = "";
-                taxInput.classList.remove('input-error');
-            }
+            serviceBody.appendChild(rows.env);
+            serviceBody.appendChild(rows.carry);
+            serviceBody.appendChild(rows.stairs);
+            serviceBody.appendChild(rows.ramp);
+            serviceBody.appendChild(remarksRow); // 最下方備註
         }
 
         function injectDeliveryUI() {
@@ -474,81 +385,33 @@
                     <td class="text-center font-medium">配送環境確認</td>
                     <td colspan="2">
                         <div class="flex items-center gap-6 px-2">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="delivery-env" value="elevator" checked onchange="calculateTotal()"> 有電梯
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="delivery-env" value="no-elevator" onchange="calculateTotal()"> 無電梯
-                            </label>
+                            <label><input type="radio" name="delivery-env" value="elevator" checked onchange="calculateTotal()"> 有電梯</label>
+                            <label><input type="radio" name="delivery-env" value="no-elevator" onchange="calculateTotal()"> 無電梯</label>
                         </div>
                     </td>
-                    <td class="text-xs text-gray-400">系統自動判定費率</td>
+                    <td class="text-xs">系統判定</td>
                 </tr>
                 <tr id="carry-up-row">
                     <td class="text-center font-medium text-blue-700">送上樓服務</td>
-                    <td>
-                        <div class="flex items-center gap-2 px-2">
-                            <input type="checkbox" id="check-carry-up" onchange="calculateTotal()">
-                            <label for="check-carry-up" class="cursor-pointer font-bold" id="carry-up-label">需送上樓 (+$200)</label>
-                        </div>
-                    </td>
+                    <td><input type="checkbox" id="check-carry-up" onchange="calculateTotal()"> <label for="check-carry-up">需搬運 (+$200)</label></td>
                     <td class="text-right font-bold text-blue-600" id="val-carry-up">$0</td>
-                    <td class="text-xs" id="carry-up-note">滿 $15,000 免費</td>
+                    <td class="text-xs">滿 $15,000 免費</td>
                 </tr>
                 <tr id="ramp-row" class="hidden">
-                    <td class="text-center font-medium text-purple-700">無障礙坡道</td>
-                    <td colspan="2">
-                        <div class="flex items-center gap-6 px-2">
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ramp-status" value="yes" checked> 有</label>
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="ramp-status" value="no"> 無</label>
-                        </div>
-                    </td>
-                    <td class="text-xs text-purple-600">重物配送環境確認</td>
+                    <td class="text-center">無障礙坡道</td>
+                    <td colspan="3" class="text-xs text-purple-600 px-2">有重物配送需求時需確認</td>
                 </tr>
             `;
             stairRow.insertAdjacentHTML('beforebegin', envHtml);
         }
 
-        function openLightbox(url) {
-            document.getElementById('lightbox-img').src = url;
-            document.getElementById('lightbox').style.display = 'flex';
-        }
-
-        function updateRow(id, specIdx) {
-            const p = products.find(i => i.id === id);
-            document.getElementById(`price-${id}`).innerText = `$${p.specs[specIdx].price.toLocaleString()}`;
-            const qty = document.querySelector(`#row-${id} input[type=number]`).value;
-            updateQty(id, qty);
-        }
-
         function updateQty(id, qty) {
             qty = Math.max(0, parseInt(qty) || 0);
             const p = products.find(i => i.id === id);
-            const specIdx = document.querySelector(`#row-${id} select`).value;
-            const price = p.specs[specIdx].price;
-            const sub = qty * price;
+            const sub = qty * p.specs[0].price;
             document.getElementById(`sub-${id}`).innerText = `$${sub.toLocaleString()}`;
-            
-            let temp = null;
-            if (p.cat === 'beverage') {
-                temp = document.getElementById(`temp-${id}`).value;
-            }
-
-            if (qty > 0) {
-                cart[id] = { 
-                    id: p.id, 
-                    name: p.name, 
-                    spec: p.specs[specIdx].label, 
-                    temperature: temp,
-                    qty, 
-                    price, 
-                    sub, 
-                    requiresCollection: p.requiresCollection || false 
-                };
-            } else {
-                delete cart[id];
-            }
-            
+            if (qty > 0) cart[id] = { name: p.name, qty, price: p.specs[0].price, sub };
+            else delete cart[id];
             calculateTotal();
         }
 
@@ -556,270 +419,93 @@
             let foodSub = Object.values(cart).reduce((a, b) => a + b.sub, 0);
             document.getElementById('food-total').innerText = `$${foodSub.toLocaleString()}`;
             
-            const floor = parseInt(document.getElementById('floor').value) || 1;
-            const env = document.querySelector('input[name="delivery-env"]:checked').value;
-            const carryUpCheck = document.getElementById('check-carry-up');
-            const stairSelect = document.getElementById('stair-count');
-            
-            let carryUpFee = 0;
-            let stairFee = 0;
-
-            if (env === 'elevator') {
-                document.getElementById('manual-stairs-row').classList.add('hidden');
-                document.getElementById('carry-up-row').classList.remove('hidden');
-                stairSelect.value = "0"; 
-                if (foodSub >= 15000) {
-                    carryUpCheck.checked = true;
-                    carryUpCheck.disabled = true;
-                    document.getElementById('carry-up-note').innerText = "滿額贈送";
-                    carryUpFee = 0;
-                } else {
-                    carryUpCheck.disabled = false;
-                    document.getElementById('carry-up-note').innerText = "總額門檻外加";
-                    carryUpFee = carryUpCheck.checked ? 200 : 0;
-                }
-            } else {
-                document.getElementById('manual-stairs-row').classList.remove('hidden');
-                document.getElementById('carry-up-row').classList.add('hidden');
-                carryUpCheck.checked = false;
-                if (floor >= 2) {
-                    stairFee = 3500;
-                    if (stairSelect.value === "0") stairSelect.value = "1";
-                } else {
-                    stairFee = parseInt(stairSelect.value) * 3500;
-                }
-            }
-
-            document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
-            document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
-
-            // --- STAGE 2: MORNING SURCHARGE CALCULATION START ---
             const timeVal = document.getElementById('delivery-time').value;
-            const deliveryHour = parseInt(timeVal.split(':')[0]);
-            let morningSurcharge = 0;
-            const surchargeRow = document.getElementById('morning-surcharge-row');
-
-            if (deliveryHour < 9) {
-                morningSurcharge = (9 - deliveryHour) * 3500;
-                surchargeRow.classList.remove('hidden');
-            } else {
-                surchargeRow.classList.add('hidden');
-            }
+            const hour = parseInt(timeVal.split(':')[0]);
+            let morningSurcharge = (hour < 9) ? (9 - hour) * 3500 : 0;
+            document.getElementById('morning-surcharge-row').classList.toggle('hidden', morningSurcharge === 0);
             document.getElementById('morning-surcharge-total').innerText = `$${morningSurcharge.toLocaleString()}`;
-            // --- STAGE 2: MORNING SURCHARGE CALCULATION END ---
 
-            const hasHeavyItems = Object.keys(cart).some(id => 
-                id.startsWith('B01') || id.startsWith('B02') || id.startsWith('B03') || id.startsWith('B04')
-            );
-            const hasRental = document.getElementById('prop-rental').value === 'yes';
-            const noticeContainer = document.getElementById('order-notice-container');
-            const rampRow = document.getElementById('ramp-row');
+            const env = document.querySelector('input[name="delivery-env"]:checked').value;
+            let stairFee = (env === 'no-elevator') ? parseInt(document.getElementById('stair-count').value) * 3500 : 0;
+            let carryFee = (env === 'elevator' && foodSub < 15000 && document.getElementById('check-carry-up').checked) ? 200 : 0;
+            
+            document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
+            document.getElementById('val-carry-up').innerText = `$${carryFee.toLocaleString()}`;
+            document.getElementById('manual-stairs-row').classList.toggle('hidden', env === 'elevator');
+            document.getElementById('carry-up-row').classList.toggle('hidden', env === 'no-elevator');
 
-            if (hasHeavyItems || hasRental) {
-                rampRow.classList.remove('hidden');
-                if (!document.getElementById('heavy-load-notice')) {
-                    const noticeHtml = `<p id="heavy-load-notice" class="text-blue-700 font-bold border-t pt-2">● 視現場狀況可能產生 $3,500 環境評估押金</p>`;
-                    noticeContainer.insertAdjacentHTML('beforeend', noticeHtml);
-                }
-            } else {
-                rampRow.classList.add('hidden');
-                const existNotice = document.getElementById('heavy-load-notice');
-                if (existNotice) existNotice.remove();
-            }
-
-            const hasBucket = Object.values(cart).some(item => item.requiresCollection);
-            const isRoundTrip = foodSub >= 20000 || hasBucket || hasRental;
-            const transportFee = isRoundTrip ? 1500 : 500;
+            const transportFee = (foodSub >= 20000) ? 1500 : 500;
             document.getElementById('val-transport').innerText = `$${transportFee.toLocaleString()}`;
-            document.getElementById('transport-logic').innerText = isRoundTrip ? "含回收/滿額" : "單程配送";
             
-            const serviceSub = transportFee + stairFee + carryUpFee;
+            const serviceSub = transportFee + stairFee + carryFee;
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
-            document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
             
-            // --- STAGE 2: FINANCIAL SYNC START ---
-            const subtotalBeforeTax = foodSub + serviceSub + morningSurcharge;
-            const tax = Math.round(subtotalBeforeTax * 0.05);
-            const grand = subtotalBeforeTax + tax;
-
+            const total = foodSub + serviceSub + morningSurcharge;
+            const tax = Math.round(total * 0.05);
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
-            document.getElementById('grand-total').innerText = `$${grand.toLocaleString()}`;
-            document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
-            // --- STAGE 2: FINANCIAL SYNC END ---
+            document.getElementById('grand-total').innerText = `$${(total + tax).toLocaleString()}`;
+            document.getElementById('deposit-total').innerText = `$${Math.round((total + tax) * 0.7).toLocaleString()}`;
         }
 
         async function nextToStage2() {
-            const stage1Inputs = [
-                { id: 'delivery-date', label: '送餐日期' },
-                { id: 'delivery-time', label: '送餐時間' },
-                { id: 'contact-name', label: '聯絡人' },
-                { id: 'guest-count', label: '用餐人數' },
-                { id: 'phone-number', label: '手機號碼' },
-                { id: 'delivery-address', label: '送餐地址' },
-                { id: 'floor', label: '樓層' }
-            ];
-
-            let stage1Errors = [];
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
-            stage1Inputs.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (!el.value || el.value.trim() === "") {
-                    stage1Errors.push(item.label);
-                    el.classList.add('input-error');
-                }
-            });
-
-            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
-            const taxIdInput = document.getElementById('tax-id');
-            if (taxToggle === 'yes' && (!taxIdInput.value || taxIdInput.value.length < 8)) {
-                stage1Errors.push('有效統編(8碼)');
-                taxIdInput.classList.add('input-error');
-            }
-
-            if (stage1Errors.length > 0) {
-                alert("請完整填寫基本資料：" + stage1Errors.join(', '));
-                return;
-            }
-
             const btn = document.getElementById('next-stage-btn');
-            const btnText = document.getElementById('next-btn-text');
-            const spinner = document.getElementById('next-spinner');
-            
             btn.disabled = true;
-            btnText.innerText = "處理中...";
-            spinner.classList.remove('hidden');
-
             try {
                 await sendStage1Notification();
                 document.getElementById('stage-1-section').classList.add('hidden-stage');
                 document.getElementById('stage-2-section').classList.remove('hidden-stage');
-                document.getElementById('stage-2-section').classList.add('fade-in');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (error) {
-                alert("通訊失敗，請稍後再試。");
-            } finally {
-                btn.disabled = false;
-                btnText.innerText = "下一步：選擇餐點";
-                spinner.classList.add('hidden');
-            }
+            } catch (e) { alert("通訊錯誤"); }
+            finally { btn.disabled = false; }
         }
 
         async function sendStage1Notification() {
             const gasUrl = "https://script.google.com/macros/s/AKfycbymFx6otYw_eg2nT9ddrH51E2CzdgbawDRpmjKJc-1h7rtuTriIeQKnxvnXPtxo3xfBEg/exec";
-            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
-            
-            const stage1Data = {
+            const payload = {
                 action: "stage1",
                 orderId: document.getElementById('order-id').innerText,
                 contact: document.getElementById('contact-name').value,
-                taxId: taxToggle === 'yes' ? document.getElementById('tax-id').value : "無統編",
-                phone: document.getElementById('phone-number').value,
-                guestCount: document.getElementById('guest-count').value,
                 deliveryDate: document.getElementById('delivery-date').value,
                 deliveryTime: document.getElementById('delivery-time').value,
                 address: document.getElementById('delivery-address').value,
                 floor: document.getElementById('floor').value,
                 activityMode: document.getElementById('activity-mode').value
             };
-            return fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(stage1Data) });
+            return fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
         }
 
         function backToStage1() {
             document.getElementById('stage-2-section').classList.add('hidden-stage');
             document.getElementById('stage-1-section').classList.remove('hidden-stage');
-            document.getElementById('stage-1-section').classList.add('fade-in');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // --- STAGE 2: QUOTE & PRINT LOGIC START ---
-        
-        function parsePriceToNumber(priceStr) {
-            return parseInt(priceStr.replace(/[^0-9.-]+/g, "")) || 0;
-        }
-
         async function processOrder() {
-            const orderId = document.getElementById('order-id').innerText;
             const btn = document.getElementById('main-submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnSpinner = document.getElementById('btn-spinner');
             const gasUrl = "https://script.google.com/macros/s/AKfycbymFx6otYw_eg2nT9ddrH51E2CzdgbawDRpmjKJc-1h7rtuTriIeQKnxvnXPtxo3xfBEg/exec";
-
-            if (Object.keys(cart).length === 0) {
-                alert("請先選擇至少一項餐點。");
-                return;
-            }
-
+            
             btn.disabled = true;
-            btnText.innerText = "發送中...";
-            btnSpinner.classList.remove('hidden');
-
-            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
-            const parkingValue = document.querySelector('input[name="parking-service"]:checked').value; // 從新位置抓取
-
             const payload = {
                 action: "stage2",
                 customerInfo: {
-                    orderId: orderId,
-                    orderDate: document.getElementById('order-date').value,
+                    orderId: document.getElementById('order-id').innerText,
                     contact: document.getElementById('contact-name').value,
-                    taxId: taxToggle === 'yes' ? document.getElementById('tax-id').value : "無統編",
-                    phone: document.getElementById('phone-number').value,
-                    guestCount: document.getElementById('guest-count').value,
-                    deliveryDate: document.getElementById('delivery-date').value,
-                    deliveryTime: document.getElementById('delivery-time').value,
-                    address: document.getElementById('delivery-address').value,
-                    floor: document.getElementById('floor').value,
-                    activityMode: document.getElementById('activity-mode').value,
-                    parking: parkingValue // 同步停車場資訊
+                    parking: document.querySelector('input[name="parking-service"]:checked').value,
+                    remarks: document.getElementById('service-remarks').value // 抓取新備註
                 },
-                items: Object.values(cart).map(item => ({
-                    name: item.name,
-                    spec: item.temperature ? `${item.spec} (${item.temperature})` : item.spec,
-                    qty: item.qty,
-                    price: item.price,
-                    subtotal: item.sub
-                })),
                 financials: {
-                    foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
-                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText),
-                    serviceSub: parsePriceToNumber(document.getElementById('service-total').innerText),
-                    tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
-                    grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
-                    deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
-                },
-                envInfo: {
-                    deliveryEnv: document.querySelector('input[name="delivery-env"]:checked').value,
-                    ramp: document.querySelector('input[name="ramp-status"]:checked')?.value || "N/A"
+                    foodSub: document.getElementById('food-total').innerText,
+                    morningSurcharge: document.getElementById('morning-surcharge-total').innerText,
+                    serviceSub: document.getElementById('service-total').innerText,
+                    grandTotal: document.getElementById('grand-total').innerText
                 }
             };
 
             try {
                 await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                
-                const originalTitle = document.title;
-                document.title = `木人艸派對餐盒報價單_${orderId}`;
-                
-                const inputs = document.querySelectorAll('input, select');
-                inputs.forEach(input => {
-                    if (input.type === 'radio' || input.type === 'checkbox') {
-                        if (input.checked) input.setAttribute('checked', 'checked');
-                        else input.removeAttribute('checked');
-                    } else {
-                        input.setAttribute('value', input.value);
-                    }
-                });
-
                 window.print();
-                document.title = originalTitle;
-                alert("正式報價單已發送至您的信箱，請透過官方 Line 聯繫，經業務人員確認後為準!");
-            } catch (error) {
-                alert("發送失敗，請聯繫客服人員。");
-            } finally {
-                btn.disabled = false;
-                btnText.innerText = "產出正式報價單 (開啟列印與發送)";
-                btnSpinner.classList.add('hidden');
-            }
+                alert("正式報價單已發送！");
+            } catch (e) { alert("發送失敗"); }
+            finally { btn.disabled = false; }
         }
         // --- STAGE 2: QUOTE & PRINT LOGIC END ---
 

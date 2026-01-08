@@ -89,13 +89,13 @@
         <div id="stage-1-section" class="stage-transition">
             <div class="table-responsive mb-8">
                 <table class="w-full pdf-table" id="customer-info-table">
-                    <tr>
+                    <tr id="row-0-header">
                         <td class="header-bg w-24">派單日期</td>
                         <td colspan="3"><input type="text" id="order-date" class="no-border-input" readonly></td>
                         <td class="header-bg w-24">訂單編號</td>
                         <td colspan="3" class="font-mono font-bold text-blue-800" id="order-id">產生中...</td>
                     </tr>
-                    <tr>
+                    <tr id="row-1-delivery">
                         <td class="header-bg req">送餐日期</td>
                         <td colspan="3" class="text-center font-bold">
                             <div class="flex flex-col md:flex-row items-center justify-center gap-2">
@@ -110,24 +110,22 @@
                             ● 撤場規定：若撤場時間晚於 18:00，則另議隔日撤場或加價延遲撤場
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="row-2-contact">
                         <td class="header-bg req">聯絡人</td><td colspan="3"><input type="text" id="contact-name" class="no-border-input" placeholder="姓名" required></td>
                         <td class="header-bg w-20 req">公司名稱</td><td colspan="3"><input type="text" id="company-name" class="no-border-input" placeholder="抬頭" required></td>
                     </tr>
                     <tr id="row-activity-tax">
-                        <td class="header-bg">活動模式</td>
-                        <td class="font-bold px-2" colspan="3">派對餐盒<input type="hidden" id="activity-mode" value="派對餐盒"></td>
                         <td class="header-bg w-20 req">公司統編</td><td colspan="3"><input type="text" id="tax-id" class="no-border-input" placeholder="8碼數字" required maxlength="8"></td>
                     </tr>
-                    <tr>
+                    <tr id="row-4-guest">
                         <td class="header-bg req">用餐人數</td><td class="text-center" colspan="3"><input type="number" id="guest-count" class="no-border-input text-center font-bold" value="100" oninput="calculateTotal()" required min="1"> 人</td>
                         <td class="header-bg w-20 req">手機號碼</td><td colspan="3"><input type="text" id="phone-number" class="no-border-input" placeholder="09XX-XXX-XXX" required></td>
                     </tr>
-                    <tr>
+                    <tr id="row-5-address">
                         <td class="header-bg req">送餐地址</td><td colspan="5"><input type="text" id="delivery-address" placeholder="路名/門牌" class="no-border-input" required></td>
                         <td class="header-bg w-20 req">樓層</td><td><input type="text" id="floor" class="no-border-input text-center" placeholder="F" oninput="calculateTotal()" required></td>
                     </tr>
-                    <tr>
+                    <tr id="row-6-remarks">
                         <td class="header-bg">場地需求備註</td>
                         <td colspan="7" class="bg-white">
                             <input type="text" id="venue-remarks" placeholder="請填寫場地特殊要求" class="no-border-input">
@@ -136,7 +134,7 @@
                             </div>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="row-7-parking">
                         <td class="header-bg req">地下停車場</td>
                         <td colspan="7">
                             <div class="flex items-center gap-6 px-2 py-1" id="parking-container">
@@ -304,43 +302,12 @@
         }
 
         function init() {
-            // --- 介面過濾與移除邏輯 START ---
-            // 1. 隱藏公司名稱列
-            const companyNameInput = document.getElementById('company-name');
-            const companyLabel = companyNameInput.closest('td').previousElementSibling;
-            companyNameInput.closest('td').style.display = 'none';
-            companyLabel.style.display = 'none';
-            // 將聯絡人欄位撐滿一行
-            document.getElementById('contact-name').closest('td').colSpan = 7;
-
-            // 2. 隱藏場地需求備註整列
-            document.getElementById('venue-remarks').closest('tr').style.display = 'none';
-
-            // 3. 隱藏地下停車場整列
-            document.getElementById('parking-container').closest('tr').style.display = 'none';
-            // --- 介面過濾與移除邏輯 END ---
-
-            // --- 統編交互邏輯重構 START ---
-            const taxInput = document.getElementById('tax-id');
-            const taxTd = taxInput.closest('td');
-            taxTd.innerHTML = `
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-4">
-                        <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="tax-choice" value="no" checked onchange="toggleTaxField()"> 無</label>
-                        <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="tax-choice" value="yes" onchange="toggleTaxField()"> 有</label>
-                    </div>
-                    <div id="tax-input-wrapper" class="hidden">
-                        <input type="text" id="tax-id" class="no-border-input border-b border-gray-300 w-full" placeholder="請輸入 8 碼公司統編" maxlength="8">
-                    </div>
-                </div>
-            `;
-            // --- 統編交互邏輯重構 END ---
-
-            // --- UI 佈局重構：將活動模式移至第一行 ---
+            // --- UI 佈局重構：精簡欄位與統編條件化 ---
             const customerTable = document.getElementById('customer-info-table');
-            const firstRow = customerTable.rows[0];
-            const activityModeValue = document.getElementById('activity-mode').value;
             
+            // 1. 重構第一列：活動模式 | 派單日期 | 訂單編號
+            const firstRow = document.getElementById('row-0-header');
+            const activityModeValue = document.getElementById('activity-mode').value;
             firstRow.innerHTML = `
                 <td class="header-bg w-24">活動模式</td>
                 <td class="font-bold px-2 w-32">${activityModeValue}<input type="hidden" id="activity-mode" value="${activityModeValue}"></td>
@@ -349,7 +316,39 @@
                 <td class="header-bg w-20">訂單編號</td>
                 <td colspan="2" class="font-mono font-bold text-blue-800" id="order-id">產生中...</td>
             `;
-            
+
+            // 2. 修改聯絡人列：移除公司名稱，讓聯絡人佔滿整行
+            const contactRow = document.getElementById('row-2-contact');
+            contactRow.innerHTML = `
+                <td class="header-bg req">聯絡人</td>
+                <td colspan="7"><input type="text" id="contact-name" class="no-border-input" placeholder="姓名" required></td>
+            `;
+
+            // 3. 重構統編列：改為勾選 有/無 邏輯
+            const taxRow = document.getElementById('row-activity-tax');
+            taxRow.innerHTML = `
+                <td class="header-bg">公司統編</td>
+                <td colspan="7">
+                    <div class="flex items-center gap-6 px-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="tax-toggle" value="no" checked onchange="toggleTaxInput()"> 無
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="tax-toggle" value="yes" onchange="toggleTaxInput()"> 有
+                        </label>
+                        <div id="tax-input-wrapper" class="hidden flex items-center gap-2 border-l pl-4 ml-2">
+                            <span class="text-xs text-gray-400">請填寫統編：</span>
+                            <input type="text" id="tax-id" class="border-b border-black w-32 text-center font-mono" placeholder="8碼數字" maxlength="8">
+                        </div>
+                    </div>
+                </td>
+            `;
+
+            // 4. 移除不需要的整列 (隱藏而不刪除以保持代碼引用穩定)
+            document.getElementById('row-6-remarks').style.display = 'none';
+            document.getElementById('row-7-parking').style.display = 'none';
+
+            // 基本初始化
             const now = new Date();
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             document.getElementById('order-id').innerText = generateOrderID();
@@ -410,16 +409,18 @@
             calculateTotal();
         }
 
-        // 切換統編輸入框顯示
-        function toggleTaxField() {
-            const choice = document.querySelector('input[name="tax-choice"]:checked').value;
+        function toggleTaxInput() {
+            const hasTax = document.querySelector('input[name="tax-toggle"]:checked').value === 'yes';
             const wrapper = document.getElementById('tax-input-wrapper');
-            if (choice === 'yes') {
+            const taxInput = document.getElementById('tax-id');
+            if (hasTax) {
                 wrapper.classList.remove('hidden');
-                wrapper.classList.add('fade-in');
+                taxInput.required = true;
             } else {
                 wrapper.classList.add('hidden');
-                document.getElementById('tax-id').value = "";
+                taxInput.required = false;
+                taxInput.value = "";
+                taxInput.classList.remove('input-error');
             }
         }
 
@@ -605,7 +606,7 @@
         }
 
         async function nextToStage2() {
-            // 過濾並取得必要的驗證欄位（排除已移除項）
+            // 排除已移除或隱藏的欄位 (Company Name, Parking, Remarks)
             const stage1Inputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
@@ -627,14 +628,12 @@
                 }
             });
 
-            // 統編邏輯驗證
-            const taxChoice = document.querySelector('input[name="tax-choice"]:checked').value;
-            if (taxChoice === 'yes') {
-                const taxInput = document.getElementById('tax-id');
-                if (!taxInput.value || taxInput.value.length !== 8) {
-                    stage1Errors.push('8碼公司統編');
-                    taxInput.classList.add('input-error');
-                }
+            // 統編條件檢查
+            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
+            const taxIdInput = document.getElementById('tax-id');
+            if (taxToggle === 'yes' && (!taxIdInput.value || taxIdInput.value.length < 8)) {
+                stage1Errors.push('有效統編(8碼)');
+                taxIdInput.classList.add('input-error');
             }
 
             if (stage1Errors.length > 0) {
@@ -667,12 +666,13 @@
 
         async function sendStage1Notification() {
             const gasUrl = "https://script.google.com/macros/s/AKfycbx3WEkNrX75femN0LXuadao_e7q76ZgUlix3F7l8Y-SlBptQlC44MnwqynRNgaP2AtgDQ/exec";
-            const taxChoice = document.querySelector('input[name="tax-choice"]:checked').value;
+            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
+            
             const stage1Data = {
                 action: "stage1",
                 orderId: document.getElementById('order-id').innerText,
                 contact: document.getElementById('contact-name').value,
-                taxId: taxChoice === 'yes' ? document.getElementById('tax-id').value : "無統編需求",
+                taxId: taxToggle === 'yes' ? document.getElementById('tax-id').value : "無統編",
                 phone: document.getElementById('phone-number').value,
                 guestCount: document.getElementById('guest-count').value,
                 deliveryDate: document.getElementById('delivery-date').value,
@@ -713,14 +713,15 @@
             btnText.innerText = "發送中...";
             btnSpinner.classList.remove('hidden');
 
-            const taxChoice = document.querySelector('input[name="tax-choice"]:checked').value;
+            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
+
             const payload = {
                 action: "stage2",
                 customerInfo: {
                     orderId: orderId,
                     orderDate: document.getElementById('order-date').value,
                     contact: document.getElementById('contact-name').value,
-                    taxId: taxChoice === 'yes' ? document.getElementById('tax-id').value : "無統編需求",
+                    taxId: taxToggle === 'yes' ? document.getElementById('tax-id').value : "無統編",
                     phone: document.getElementById('phone-number').value,
                     guestCount: document.getElementById('guest-count').value,
                     deliveryDate: document.getElementById('delivery-date').value,

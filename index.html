@@ -304,12 +304,43 @@
         }
 
         function init() {
+            // --- 介面過濾與移除邏輯 START ---
+            // 1. 隱藏公司名稱列
+            const companyNameInput = document.getElementById('company-name');
+            const companyLabel = companyNameInput.closest('td').previousElementSibling;
+            companyNameInput.closest('td').style.display = 'none';
+            companyLabel.style.display = 'none';
+            // 將聯絡人欄位撐滿一行
+            document.getElementById('contact-name').closest('td').colSpan = 7;
+
+            // 2. 隱藏場地需求備註整列
+            document.getElementById('venue-remarks').closest('tr').style.display = 'none';
+
+            // 3. 隱藏地下停車場整列
+            document.getElementById('parking-container').closest('tr').style.display = 'none';
+            // --- 介面過濾與移除邏輯 END ---
+
+            // --- 統編交互邏輯重構 START ---
+            const taxInput = document.getElementById('tax-id');
+            const taxTd = taxInput.closest('td');
+            taxTd.innerHTML = `
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="tax-choice" value="no" checked onchange="toggleTaxField()"> 無</label>
+                        <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="tax-choice" value="yes" onchange="toggleTaxField()"> 有</label>
+                    </div>
+                    <div id="tax-input-wrapper" class="hidden">
+                        <input type="text" id="tax-id" class="no-border-input border-b border-gray-300 w-full" placeholder="請輸入 8 碼公司統編" maxlength="8">
+                    </div>
+                </div>
+            `;
+            // --- 統編交互邏輯重構 END ---
+
             // --- UI 佈局重構：將活動模式移至第一行 ---
             const customerTable = document.getElementById('customer-info-table');
             const firstRow = customerTable.rows[0];
             const activityModeValue = document.getElementById('activity-mode').value;
             
-            // 重構第一列 HTML 結構
             firstRow.innerHTML = `
                 <td class="header-bg w-24">活動模式</td>
                 <td class="font-bold px-2 w-32">${activityModeValue}<input type="hidden" id="activity-mode" value="${activityModeValue}"></td>
@@ -319,13 +350,6 @@
                 <td colspan="2" class="font-mono font-bold text-blue-800" id="order-id">產生中...</td>
             `;
             
-            // 處理原本第四列的剩餘部分 (保留公司統編)
-            const fourthRow = document.getElementById('row-activity-tax');
-            fourthRow.innerHTML = `
-                <td class="header-bg w-20 req">公司統編</td>
-                <td colspan="7"><input type="text" id="tax-id" class="no-border-input" placeholder="8碼數字" required maxlength="8"></td>
-            `;
-
             const now = new Date();
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             document.getElementById('order-id').innerText = generateOrderID();
@@ -384,6 +408,19 @@
             // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION END ---
 
             calculateTotal();
+        }
+
+        // 切換統編輸入框顯示
+        function toggleTaxField() {
+            const choice = document.querySelector('input[name="tax-choice"]:checked').value;
+            const wrapper = document.getElementById('tax-input-wrapper');
+            if (choice === 'yes') {
+                wrapper.classList.remove('hidden');
+                wrapper.classList.add('fade-in');
+            } else {
+                wrapper.classList.add('hidden');
+                document.getElementById('tax-id').value = "";
+            }
         }
 
         function injectDeliveryUI() {
@@ -568,12 +605,11 @@
         }
 
         async function nextToStage2() {
+            // 過濾並取得必要的驗證欄位（排除已移除項）
             const stage1Inputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
                 { id: 'contact-name', label: '聯絡人' },
-                { id: 'company-name', label: '公司名稱' },
-                { id: 'tax-id', label: '公司統編' },
                 { id: 'guest-count', label: '用餐人數' },
                 { id: 'phone-number', label: '手機號碼' },
                 { id: 'delivery-address', label: '送餐地址' },
@@ -591,12 +627,14 @@
                 }
             });
 
-            const parking = document.querySelector('input[name="parking"]:checked');
-            if (!parking) {
-                stage1Errors.push('地下停車場');
-                document.getElementById('parking-container').classList.add('bg-red-50');
-            } else {
-                document.getElementById('parking-container').classList.remove('bg-red-50');
+            // 統編邏輯驗證
+            const taxChoice = document.querySelector('input[name="tax-choice"]:checked').value;
+            if (taxChoice === 'yes') {
+                const taxInput = document.getElementById('tax-id');
+                if (!taxInput.value || taxInput.value.length !== 8) {
+                    stage1Errors.push('8碼公司統編');
+                    taxInput.classList.add('input-error');
+                }
             }
 
             if (stage1Errors.length > 0) {
@@ -629,20 +667,18 @@
 
         async function sendStage1Notification() {
             const gasUrl = "https://script.google.com/macros/s/AKfycbx3WEkNrX75femN0LXuadao_e7q76ZgUlix3F7l8Y-SlBptQlC44MnwqynRNgaP2AtgDQ/exec";
+            const taxChoice = document.querySelector('input[name="tax-choice"]:checked').value;
             const stage1Data = {
                 action: "stage1",
                 orderId: document.getElementById('order-id').innerText,
                 contact: document.getElementById('contact-name').value,
-                company: document.getElementById('company-name').value,
-                taxId: document.getElementById('tax-id').value,
+                taxId: taxChoice === 'yes' ? document.getElementById('tax-id').value : "無統編需求",
                 phone: document.getElementById('phone-number').value,
                 guestCount: document.getElementById('guest-count').value,
                 deliveryDate: document.getElementById('delivery-date').value,
                 deliveryTime: document.getElementById('delivery-time').value,
                 address: document.getElementById('delivery-address').value,
                 floor: document.getElementById('floor').value,
-                parking: document.querySelector('input[name="parking"]:checked').value,
-                remarks: document.getElementById('venue-remarks').value,
                 activityMode: document.getElementById('activity-mode').value
             };
             return fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(stage1Data) });
@@ -677,21 +713,20 @@
             btnText.innerText = "發送中...";
             btnSpinner.classList.remove('hidden');
 
+            const taxChoice = document.querySelector('input[name="tax-choice"]:checked').value;
             const payload = {
                 action: "stage2",
                 customerInfo: {
                     orderId: orderId,
                     orderDate: document.getElementById('order-date').value,
                     contact: document.getElementById('contact-name').value,
-                    company: document.getElementById('company-name').value,
-                    taxId: document.getElementById('tax-id').value,
+                    taxId: taxChoice === 'yes' ? document.getElementById('tax-id').value : "無統編需求",
                     phone: document.getElementById('phone-number').value,
                     guestCount: document.getElementById('guest-count').value,
                     deliveryDate: document.getElementById('delivery-date').value,
                     deliveryTime: document.getElementById('delivery-time').value,
                     address: document.getElementById('delivery-address').value,
                     floor: document.getElementById('floor').value,
-                    parking: document.querySelector('input[name="parking"]:checked')?.value,
                     activityMode: document.getElementById('activity-mode').value
                 },
                 items: Object.values(cart).map(item => ({
@@ -716,13 +751,11 @@
             };
 
             try {
-                // 發送完整資料至 GAS 後端
                 await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 
                 const originalTitle = document.title;
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
                 
-                // 固定 Radio 與 Checkbox 狀態以便列印
                 const inputs = document.querySelectorAll('input, select');
                 inputs.forEach(input => {
                     if (input.type === 'radio' || input.type === 'checkbox') {

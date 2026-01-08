@@ -346,6 +346,7 @@
             
             injectDeliveryUI();
             
+            // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION START ---
             const foodTotalRow = document.getElementById('food-total-row');
             const surchargeRowHtml = `
                 <tr id="morning-surcharge-row" class="hidden">
@@ -354,8 +355,10 @@
                 </tr>
             `;
             foodTotalRow.insertAdjacentHTML('afterend', surchargeRowHtml);
-
+            
+            // 監聽送餐時間變動以即時重算
             document.getElementById('delivery-time').addEventListener('change', calculateTotal);
+            // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION END ---
 
             calculateTotal();
         }
@@ -486,18 +489,21 @@
             document.getElementById('val-carry-up').innerText = `$${carryUpFee.toLocaleString()}`;
             document.getElementById('val-stair').innerText = `$${stairFee.toLocaleString()}`;
 
+            // --- STAGE 2: MORNING SURCHARGE CALCULATION START ---
             const timeVal = document.getElementById('delivery-time').value;
             const deliveryHour = parseInt(timeVal.split(':')[0]);
             let morningSurcharge = 0;
             const surchargeRow = document.getElementById('morning-surcharge-row');
 
             if (deliveryHour < 9) {
+                // 邏輯：(09 - 送餐小時) * 3500。例：07:30 為 9-7=2小時
                 morningSurcharge = (9 - deliveryHour) * 3500;
                 surchargeRow.classList.remove('hidden');
             } else {
                 surchargeRow.classList.add('hidden');
             }
             document.getElementById('morning-surcharge-total').innerText = `$${morningSurcharge.toLocaleString()}`;
+            // --- STAGE 2: MORNING SURCHARGE CALCULATION END ---
 
             const hasHeavyItems = Object.keys(cart).some(id => 
                 id.startsWith('B01') || id.startsWith('B02') || id.startsWith('B03') || id.startsWith('B04')
@@ -528,13 +534,15 @@
             document.getElementById('service-total').innerText = `$${serviceSub.toLocaleString()}`;
             document.getElementById('utensil-info').innerText = `${document.getElementById('guest-count').value} 組`;
             
-            const subtotalPreTax = foodSub + serviceSub + morningSurcharge;
-            const tax = Math.round(subtotalPreTax * 0.05);
-            const grand = subtotalPreTax + tax;
+            // --- STAGE 2: FINANCIAL SYNC START ---
+            const subtotalBeforeTax = foodSub + serviceSub + morningSurcharge;
+            const tax = Math.round(subtotalBeforeTax * 0.05);
+            const grand = subtotalBeforeTax + tax;
 
             document.getElementById('tax-total').innerText = `$${tax.toLocaleString()}`;
             document.getElementById('grand-total').innerText = `$${grand.toLocaleString()}`;
             document.getElementById('deposit-total').innerText = `$${Math.round(grand * 0.7).toLocaleString()}`;
+            // --- STAGE 2: FINANCIAL SYNC END ---
         }
 
         async function nextToStage2() {
@@ -659,7 +667,7 @@
                 financials: {
                     foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
                     serviceSub: parsePriceToNumber(document.getElementById('service-total').innerText),
-                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText),
+                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText), // 新增數據同步
                     tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
                     grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
                     deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
@@ -675,11 +683,9 @@
             try {
                 await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 
-                // 執行全階段整合列印
                 const originalTitle = document.title;
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
                 
-                // 在列印前確保所有 input 的值在 DOM 屬性中可見 (針對部分瀏覽器相容性)
                 const inputs = document.querySelectorAll('input, select');
                 inputs.forEach(input => {
                     if (input.type === 'radio' || input.type === 'checkbox') {

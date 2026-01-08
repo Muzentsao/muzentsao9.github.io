@@ -88,7 +88,7 @@
 
         <div id="stage-1-section" class="stage-transition">
             <div class="table-responsive mb-8">
-                <table class="w-full pdf-table">
+                <table class="w-full pdf-table" id="customer-info-table">
                     <tr>
                         <td class="header-bg w-24">派單日期</td>
                         <td colspan="3"><input type="text" id="order-date" class="no-border-input" readonly></td>
@@ -114,7 +114,7 @@
                         <td class="header-bg req">聯絡人</td><td colspan="3"><input type="text" id="contact-name" class="no-border-input" placeholder="姓名" required></td>
                         <td class="header-bg w-20 req">公司名稱</td><td colspan="3"><input type="text" id="company-name" class="no-border-input" placeholder="抬頭" required></td>
                     </tr>
-                    <tr>
+                    <tr id="row-activity-tax">
                         <td class="header-bg">活動模式</td>
                         <td class="font-bold px-2" colspan="3">派對餐盒<input type="hidden" id="activity-mode" value="派對餐盒"></td>
                         <td class="header-bg w-20 req">公司統編</td><td colspan="3"><input type="text" id="tax-id" class="no-border-input" placeholder="8碼數字" required maxlength="8"></td>
@@ -230,15 +230,15 @@
                         <tr id="food-total-row"><td class="header-bg w-32">餐點小計</td><td class="text-right font-bold" id="food-total">$0</td></tr>
                         <tr><td class="header-bg">服務小計</td><td class="text-right font-bold" id="service-total">$500</td></tr>
                         <tr><td class="header-bg">營業稅 (5%)</td><td class="text-right font-bold" id="tax-total">$0</td></tr>
-                        <tr class="text-xl"><td class="header-bg text-red-700">總計</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
-                        <tr class="text-sm"><td class="header-bg">應付定金 (70%)</td><td class="text-right font-bold text-gray-700" id="deposit-total">$0</td></tr>
+                        <tr class="text-xl"><td class="header-bg text-red-700">總計 (含稅)</td><td class="text-right font-bold text-red-600" id="grand-total">$0</td></tr>
+                        <tr class="text-sm"><td class="header-bg">預估應付定金 (70%)</td><td class="text-right font-bold text-gray-700" id="deposit-total">$0</td></tr>
                     </table>
                 </div>
             </div>
 
             <div class="mt-12 flex flex-col items-center gap-4 no-print">
                 <button id="main-submit-btn" onclick="processOrder()" class="bg-black text-white px-12 py-4 rounded-full font-bold hover:bg-gray-800 transition shadow-xl flex items-center gap-3">
-                    <span id="btn-text">產出報價單 (開啟列印與發送)</span>
+                    <span id="btn-text">產出正式報價單 (開啟列印與發送)</span>
                     <span id="btn-spinner" class="hidden spinner"></span>
                 </button>
                 <p class="text-xs text-gray-400 font-medium text-center">
@@ -281,7 +281,7 @@
             {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
             {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
             {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-            {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D11", "cat": "dessert", "name": "焦 caramel海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
             {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
             {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
             {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
@@ -304,6 +304,28 @@
         }
 
         function init() {
+            // --- UI 佈局重構：將活動模式移至第一行 ---
+            const customerTable = document.getElementById('customer-info-table');
+            const firstRow = customerTable.rows[0];
+            const activityModeValue = document.getElementById('activity-mode').value;
+            
+            // 重構第一列 HTML 結構
+            firstRow.innerHTML = `
+                <td class="header-bg w-24">活動模式</td>
+                <td class="font-bold px-2 w-32">${activityModeValue}<input type="hidden" id="activity-mode" value="${activityModeValue}"></td>
+                <td class="header-bg w-24">派單日期</td>
+                <td colspan="2"><input type="text" id="order-date" class="no-border-input" readonly></td>
+                <td class="header-bg w-20">訂單編號</td>
+                <td colspan="2" class="font-mono font-bold text-blue-800" id="order-id">產生中...</td>
+            `;
+            
+            // 處理原本第四列的剩餘部分 (保留公司統編)
+            const fourthRow = document.getElementById('row-activity-tax');
+            fourthRow.innerHTML = `
+                <td class="header-bg w-20 req">公司統編</td>
+                <td colspan="7"><input type="text" id="tax-id" class="no-border-input" placeholder="8碼數字" required maxlength="8"></td>
+            `;
+
             const now = new Date();
             document.getElementById('order-date').value = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
             document.getElementById('order-id').innerText = generateOrderID();
@@ -358,8 +380,6 @@
                 </tr>
             `;
             foodTotalRow.insertAdjacentHTML('afterend', surchargeRowHtml);
-            
-            // 監聽送餐時間變動以即時重算
             document.getElementById('delivery-time').addEventListener('change', calculateTotal);
             // --- STAGE 2: DYNAMIC SURCHARGE UI INJECTION END ---
 
@@ -499,7 +519,6 @@
             const surchargeRow = document.getElementById('morning-surcharge-row');
 
             if (deliveryHour < 9) {
-                // 邏輯：(09 - 送餐小時) * 3500。例：07:30 為 9-7=2小時
                 morningSurcharge = (9 - deliveryHour) * 3500;
                 surchargeRow.classList.remove('hidden');
             } else {
@@ -623,7 +642,8 @@
                 address: document.getElementById('delivery-address').value,
                 floor: document.getElementById('floor').value,
                 parking: document.querySelector('input[name="parking"]:checked').value,
-                remarks: document.getElementById('venue-remarks').value
+                remarks: document.getElementById('venue-remarks').value,
+                activityMode: document.getElementById('activity-mode').value
             };
             return fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(stage1Data) });
         }
@@ -654,12 +674,26 @@
             }
 
             btn.disabled = true;
-            btnText.innerText = "處理中...";
+            btnText.innerText = "發送中...";
             btnSpinner.classList.remove('hidden');
 
             const payload = {
                 action: "stage2",
-                orderId: orderId,
+                customerInfo: {
+                    orderId: orderId,
+                    orderDate: document.getElementById('order-date').value,
+                    contact: document.getElementById('contact-name').value,
+                    company: document.getElementById('company-name').value,
+                    taxId: document.getElementById('tax-id').value,
+                    phone: document.getElementById('phone-number').value,
+                    guestCount: document.getElementById('guest-count').value,
+                    deliveryDate: document.getElementById('delivery-date').value,
+                    deliveryTime: document.getElementById('delivery-time').value,
+                    address: document.getElementById('delivery-address').value,
+                    floor: document.getElementById('floor').value,
+                    parking: document.querySelector('input[name="parking"]:checked')?.value,
+                    activityMode: document.getElementById('activity-mode').value
+                },
                 items: Object.values(cart).map(item => ({
                     name: item.name,
                     spec: item.temperature ? `${item.spec} (${item.temperature})` : item.spec,
@@ -669,26 +703,26 @@
                 })),
                 financials: {
                     foodSub: parsePriceToNumber(document.getElementById('food-total').innerText),
+                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText),
                     serviceSub: parsePriceToNumber(document.getElementById('service-total').innerText),
-                    morningSurcharge: parsePriceToNumber(document.getElementById('morning-surcharge-total').innerText), // 新增數據同步
                     tax: parsePriceToNumber(document.getElementById('tax-total').innerText),
                     grandTotal: parsePriceToNumber(document.getElementById('grand-total').innerText),
                     deposit: parsePriceToNumber(document.getElementById('deposit-total').innerText)
                 },
                 envInfo: {
                     deliveryEnv: document.querySelector('input[name="delivery-env"]:checked').value,
-                    deliveryTime: document.getElementById('delivery-time').value,
-                    floor: document.getElementById('floor').value,
                     ramp: document.querySelector('input[name="ramp-status"]:checked')?.value || "N/A"
                 }
             };
 
             try {
+                // 發送完整資料至 GAS 後端
                 await fetch(gasUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 
                 const originalTitle = document.title;
                 document.title = `木人艸派對餐盒報價單_${orderId}`;
                 
+                // 固定 Radio 與 Checkbox 狀態以便列印
                 const inputs = document.querySelectorAll('input, select');
                 inputs.forEach(input => {
                     if (input.type === 'radio' || input.type === 'checkbox') {
@@ -701,12 +735,12 @@
 
                 window.print();
                 document.title = originalTitle;
-                alert("報價單已產出，請透過官方 Line 聯繫，經業務人員確認並提供正式報價單後為準!");
+                alert("正式報價單已發送至您的信箱，請透過官方 Line 聯繫，經業務人員確認後為準!");
             } catch (error) {
-                alert("發送失敗，請聯繫客服。");
+                alert("發送失敗，請聯繫客服人員。");
             } finally {
                 btn.disabled = false;
-                btnText.innerText = "產出報價單 (開啟列印與發送)";
+                btnText.innerText = "產出正式報價單 (開啟列印與發送)";
                 btnSpinner.classList.add('hidden');
             }
         }

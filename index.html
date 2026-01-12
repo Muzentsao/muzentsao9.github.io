@@ -348,7 +348,7 @@
             {"id": "D08", "cat": "dessert", "name": "放牧雞蛋肉桂布丁麵包", "tags": [], "img": "31.放牧雞蛋肉桂布丁麵包.jpg", "specs": [{"label": "中盒 (28入)", "price": 1400}]},
             {"id": "D09", "cat": "dessert", "name": "清香烏龍茶瑪德蓮", "tags": ["蛋奶素"], "img": "32.烏龍茶瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 800}]},
             {"id": "D10", "cat": "dessert", "name": "台東洛神花瑪德蓮", "tags": ["蛋奶素"], "img": "33.洛神花瑪德蓮（大）.jpg", "specs": [{"label": "中盒 (32入)", "price": 2400}, {"label": "小盒 (16)", "price": 1200}]},
-            {"id": "D11", "cat": "dessert", "name": "焦糖海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
+            {"id": "D11", "cat": "dessert", "name": "焦 caramel 海鹽磅蛋糕", "tags": ["蛋奶素"], "img": "37.焦糖海鹽磅蛋糕 (蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
             {"id": "D12", "cat": "dessert", "name": "椰絲鳳梨磅蛋糕", "tags": ["蛋奶素"], "img": "39.椰絲鳳梨磅蛋糕(蛋奶素).jpg", "specs": [{"label": "中盒 (49入)", "price": 2450}, {"label": "小盒 (28)", "price": 1400}]},
             {"id": "D13", "cat": "dessert", "name": "繽紛馬卡龍", "tags": ["蛋奶素"], "img": "41.繽紛馬卡龍.jpg", "specs": [{"label": "中盒 (28入)", "price": 840}, {"label": "小盒 (16)", "price": 480}]},
             {"id": "D14", "cat": "dessert", "name": "茶拉米蘇", "tags": ["蛋奶素"], "img": "45.茶拉米蘇 (蛋奶素).jpg", "specs": [{"label": "中盒 (24入)", "price": 2040}, {"label": "小盒 (9)", "price": 765}]},
@@ -756,6 +756,31 @@
                 alert("請完整填寫基本資料：" + stage1Errors.join(', '));
                 return;
             }
+
+            /* 地址欄位內容深度驗證 - 開始 */
+            const addressInput = document.getElementById('delivery-address');
+            // 自動去空格 (Trim)
+            const cleanAddress = addressInput.value.trim();
+            addressInput.value = cleanAddress; 
+
+            // 無效關鍵字掃描 (不分大小寫)
+            const invalidKeywords = ["測試", "test", "text", "abc", "123456", "asdf", "處"];
+            const hasInvalidKeyword = invalidKeywords.some(kw => cleanAddress.toLowerCase().includes(kw.toLowerCase()));
+            
+            // 長度檢查 (需大於 6 個字元)
+            const isTooShort = cleanAddress.length <= 6;
+            
+            // 字元多樣性判定 (禁止純數字、禁止僅由重複特殊符號組成)
+            const isPureNumbers = /^\d+$/.test(cleanAddress);
+            const isOnlySymbols = /^[^a-zA-Z0-9\u4e00-\u9fa5]+$/.test(cleanAddress);
+            const isRepetitive = /^(.+)\1+$/.test(cleanAddress); // 檢查重複字元如 ......
+
+            if (hasInvalidKeyword || isTooShort || isPureNumbers || isOnlySymbols || (isOnlySymbols && isRepetitive)) {
+                addressInput.classList.add('input-error');
+                alert("請填寫正確且完整的送餐地址。");
+                return; // 阻止進入 Stage 2 並停止後續發送邏輯
+            }
+            /* 地址欄位內容深度驗證 - 結束 */
 
             // 3. 手機號碼正規校驗 (09開頭且10位數)
             const phoneRegex = /^09\d{8}$/;

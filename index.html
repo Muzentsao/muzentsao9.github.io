@@ -62,6 +62,19 @@
             .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; }
             input, select { background: transparent !important; appearance: none; -webkit-appearance: none; border: none !important; color: #000 !important; }
             input::placeholder { color: transparent !important; }
+
+            /* 圖片列印優化 - 開始 */
+            .img-preview { 
+                width: 60px !important; 
+                height: 60px !important; 
+                border: 1px solid #000 !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            .pdf-table th, .pdf-table td { 
+                border: 1px solid #000 !important; 
+            }
+            /* 圖片列印優化 - 結束 */
         }
     </style>
 </head>
@@ -170,7 +183,7 @@
                 <table class="w-full pdf-table">
                     <thead>
                         <tr class="header-bg text-center text-xs">
-                            <th class="w-16 no-print">示意圖</th>
+                            <th class="w-16">示意圖</th>
                             <th>中文餐點名稱</th>
                             <th class="w-48">規格選擇</th>
                             <th class="w-16">盒數</th>
@@ -382,8 +395,9 @@
                     `;
                 }
 
+                // 圖片列印優化：移除 td 中的 no-print 類別
                 tr.innerHTML = `
-                    <td class="text-center no-print"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
+                    <td class="text-center"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
                     <td class="font-bold">${p.name}</td>
                     <td><div class="flex items-center"><select class="no-border-input bg-gray-50 text-xs rounded" onchange="updateRow('${p.id}', this.value)">${specOptions}</select>${tempHtml}</div></td>
                     <td class="text-center"><input type="number" value="0" min="0" oninput="updateQty('${p.id}', this.value)"></td>

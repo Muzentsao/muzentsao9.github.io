@@ -39,6 +39,31 @@
         .fade-in { animation: fadeIn 0.5s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- 新增：Chrome Time Picker 渲染修復開始 --- */
+        input[type="time"] {
+            /* 強制使用系統預設字體或 Arial，避免 Noto Sans TC 在部分 Chromium 版本產生的字元顯示異常 */
+            font-family: Arial, sans-serif !important;
+        }
+
+        /* 針對時間選取器內部的各個欄位進行字體一致化，防止「下午」顯示為「兀半」 */
+        input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+        input[type="time"]::-webkit-datetime-edit-ampm-field,
+        input[type="time"]::-webkit-datetime-edit-hour-field,
+        input[type="time"]::-webkit-datetime-edit-minute-field,
+        input[type="time"]::-webkit-datetime-edit-text {
+            font-family: Arial, sans-serif !important;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        /* 確保選取狀態下（Focus/Selection）文字不產生位移 */
+        input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
+            background-color: #556b2f;
+            color: #fff;
+            border-radius: 2px;
+        }
+        /* --- 新增：Chrome Time Picker 渲染修復結束 --- */
+
         @media print {
             body { background-color: #fff !important; padding: 0 !important; margin: 0 !important; }
             .no-print, button, #next-stage-btn, .mb-4.no-print { display: none !important; }
@@ -75,6 +100,13 @@
                 border: 1px solid #000 !important; 
             }
             /* 圖片列印優化 - 結束 */
+
+            /* --- 新增：列印模式下保持 Time Picker 字體一致性 --- */
+            input[type="time"] {
+                font-family: Arial, sans-serif !important;
+                -webkit-print-color-adjust: exact;
+            }
+            /* --- 結束 --- */
         }
     </style>
 </head>
@@ -293,7 +325,7 @@
             {"id": "S05", "cat": "appetizer", "name": "迷你燻雞時蔬三明治", "tags": ["雞肉"], "img": "5.迷你燻雞吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
             {"id": "S06", "cat": "appetizer", "name": "迷你火腿起司三明治", "tags": [], "img": "4.迷你火腿起司吐司三明治.jpg", "specs": [{"label": "中盒 (14入)", "price": 560}, {"label": "小盒 (6)", "price": 240}]},
             {"id": "S07", "cat": "appetizer", "name": "復刻版迷你營養三明治", "tags": [], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
-            {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "中盒 (12入)", "price": 720}, {"label": "小盒 (8)", "price": 480}]},
+            {"id": "S08", "cat": "appetizer", "name": "復刻版迷你營養三明治(素)", "tags": ["蛋奶素"], "img": "3.復刻版迷你營養三明治.jpg", "specs": [{"label": "指揮小盒 (8)", "price": 480}]},
             {"id": "S09", "cat": "appetizer", "name": "綜合花壽司", "tags": [], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
             {"id": "S10", "cat": "appetizer", "name": "綜合花壽司(全素)", "tags": ["全素"], "img": "10.綜合花壽司.jpg", "specs": [{"label": "中盒 (48入)", "price": 960}, {"label": "小盒 (24)", "price": 480}]},
             {"id": "S11", "cat": "appetizer", "name": "豆皮壽司(素)", "tags": ["全素"], "img": "11.豆皮壽司(素).jpg", "specs": [{"label": "中盒 (40入)", "price": 800}, {"label": "小盒 (25)", "price": 500}]},

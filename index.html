@@ -263,6 +263,28 @@
     </div>
 
     <script>
+        // 資料驗證與黑名單邏輯 - 開始
+        const BLACKLIST = {
+            names: ["測試", "test", "123", "測試員"],
+            phones: ["0912345678", "0900000000"]
+        };
+
+        function validateTaxId(taxId) {
+            if (!/^\d{8}$/.test(taxId)) return false;
+            const weights = [1, 2, 1, 2, 1, 2, 4, 1];
+            let sum = 0;
+            const calculate = (n) => Math.floor(n / 10) + (n % 10);
+            
+            for (let i = 0; i < 8; i++) {
+                sum += calculate(parseInt(taxId[i]) * weights[i]);
+            }
+            
+            if (sum % 5 === 0) return true;
+            if (taxId[6] === '7' && (sum + 1) % 5 === 0) return true;
+            return false;
+        }
+        // 資料驗證與黑名單邏輯 - 結束
+
         const products = [
             {"id": "S01", "cat": "appetizer", "name": "照燒風味迷你漢堡(牛肉)", "tags": ["牛肉"], "img": "1.照燒風味迷你漢堡(豬肉) (正常).jpg", "specs": [{"label": "中盒 (15入)", "price": 1350}, {"label": "小盒 (9)", "price": 765}]},
             {"id": "S02", "cat": "appetizer", "name": "照燒風味迷你漢堡(雞肉)", "tags": ["雞肉"], "img": "2.迷你照燒雞腿漢堡（正常）.jpg", "specs": [{"label": "中盒 (15入)", "price": 1275}, {"label": "小盒 (9)", "price": 765}]},
@@ -395,7 +417,6 @@
                     `;
                 }
 
-                // 圖片列印優化：移除 td 中的 no-print 類別
                 tr.innerHTML = `
                     <td class="text-center"><img src="${p.img}" class="img-preview" onclick="openLightbox('${p.img}')"></td>
                     <td class="font-bold">${p.name}</td>
@@ -663,6 +684,23 @@
         }
 
         async function nextToStage2() {
+            // 資料驗證與黑名單邏輯 - 開始
+            const contactName = document.getElementById('contact-name').value.trim();
+            const phoneNumber = document.getElementById('phone-number').value.trim();
+            const phoneInput = document.getElementById('phone-number');
+            const nameInput = document.getElementById('contact-name');
+            const taxIdInput = document.getElementById('tax-id');
+            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
+
+            // 1. 黑名單檢查
+            if (BLACKLIST.names.includes(contactName) || BLACKLIST.phones.includes(phoneNumber)) {
+                alert("系統忙碌中，請稍後再試。");
+                return;
+            }
+
+            // 2. 基本必填與樣式清除
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+            
             const stage1Inputs = [
                 { id: 'delivery-date', label: '送餐日期' },
                 { id: 'delivery-time', label: '送餐時間' },
@@ -674,8 +712,6 @@
             ];
 
             let stage1Errors = [];
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
             stage1Inputs.forEach(item => {
                 const el = document.getElementById(item.id);
                 if (!el.value || el.value.trim() === "") {
@@ -684,17 +720,28 @@
                 }
             });
 
-            const taxToggle = document.querySelector('input[name="tax-toggle"]:checked').value;
-            const taxIdInput = document.getElementById('tax-id');
-            if (taxToggle === 'yes' && (!taxIdInput.value || taxIdInput.value.length < 8)) {
-                stage1Errors.push('有效統編(8碼)');
-                taxIdInput.classList.add('input-error');
-            }
-
             if (stage1Errors.length > 0) {
                 alert("請完整填寫基本資料：" + stage1Errors.join(', '));
                 return;
             }
+
+            // 3. 手機號碼正規校驗 (09開頭且10位數)
+            const phoneRegex = /^09\d{8}$/;
+            if (!phoneRegex.test(phoneNumber)) {
+                phoneInput.classList.add('input-error');
+                alert("手機格式錯誤：請輸入正確的 10 位數手機號碼（如：0912345678）");
+                return;
+            }
+
+            // 4. 統編校驗演算法
+            if (taxToggle === 'yes') {
+                if (!validateTaxId(taxIdInput.value.trim())) {
+                    taxIdInput.classList.add('input-error');
+                    alert("統編號碼無效：請確認統一編號是否填寫正確。");
+                    return;
+                }
+            }
+            // 資料驗證與黑名單邏輯 - 結束
 
             const btn = document.getElementById('next-stage-btn');
             const btnText = document.getElementById('next-btn-text');
